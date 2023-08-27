@@ -1,74 +1,130 @@
-package net.blaxstar.io
-{
-import flash.net.URLLoader;
-import flash.net.URLRequest;
+package net.blaxstar.io {
+  import flash.net.URLLoader;
+  import thirdparty.org.osflash.signals.natives.NativeSignal;
+  import net.blaxstar.networking.Connection;
+  import debug.DebugDaemon;
 
-/**
-	 * ...
-	 * @author Deron D. (SnaiLegacy)
-	 */
-	public class URL extends URLLoader
-	{
-		public static const BINARY : String = "binary";
-		static public const GRAPHICS:String = 'graphics';
-		public static const TEXT : String = "text";
-		public static const VARIABLES : String = "variables";
-		
-		private var _id:uint;
-		private var _name:String;
-		private var _url:String;
-		private var _type:String;
-		private var _request:URLRequest;
-		
-		public function URL(id:uint, name:String, type:String=BINARY, url:String=null)
-		{
-			_id = id;
-			_name = name;
-			_url = url;
-			_type = type;
-			_request = new URLRequest(url);
-			
-			super();
-		}
-		
-		public function start():void 
-		{
-			load(_request);
-		}
-		
-		public function get id():uint {
-			return _id;
-		}
-		
-		public function set id(value:uint):void {
-			_id = value;
-		}
-		
-		public function get name():String {
-			return _name;
-		}
-		
-		public function set name(value:String):void {
-			_name = value;
-		}
-		
-		public function get url():String
-		{
-			return _url;
-		}
-		
-		public function set url(val:String):void
-		{
-			_url = val;
-		}
-		
-		public function get type():String {
-			return _type;
-		}
-		
-		public function set type(value:String):void {
-			_type = value;
-		}
-	}
-	
+  /**
+   * TODO: documentation
+   * @author Deron D. (SnaiLegacy)
+   */
+  public class URL extends URLLoader {
+    public static const BINARY:String = "binary";
+    static public const GRAPHICS:String = 'graphics';
+    public static const TEXT:String = "text";
+    public static const VARIABLES:String = "variables";
+
+    /**
+     * Specifies that the URLRequest object is a POST.
+     *
+     * Note: For content running in Adobe AIR, when  using the
+     * navigateToURL() function, the runtime treats a URLRequest that uses
+     * the POST method (one that has its method property set to
+     * URLRequestMethod.POST) as using the GET method.
+     */
+    public static const REQUEST_METHOD_POST:String = "POST";
+
+    /**
+     * Specifies that the URLRequest object is a GET.
+     */
+    public static const REQUEST_METHOD_GET:String = "GET";
+
+    /**
+     * Specifies that the URLRequest object is a PUT.
+     */
+    public static const REQUEST_METHOD_PUT:String = "PUT";
+
+    /**
+     * Specifies that the URLRequest object is a DELETE.
+     */
+    public static const REQUEST_METHOD_DELETE:String = "DELETE";
+
+    /**
+     * Specifies that the URLRequest object is a HEAD.
+     */
+    public static const REQUEST_METHOD_HEAD:String = "HEAD";
+
+    /**
+     * Specifies that the URLRequest object is OPTIONS.
+     */
+    public static const REQUEST_METHOD_OPTIONS:String = "OPTIONS";
+
+    private var _name:String;
+    private var _path:String;
+    private var _port:uint;
+    private var _connection:Connection;
+
+    public function URL(url_path:String = null, port:uint = 80) {
+      _path = url_path;
+      _port = port;
+      _connection = new Connection(this);
+
+      super();
+    }
+
+    public function connect(async:Boolean=true):void {
+      if (async) {
+        _connection.connect_async();
+      } else {
+        _connection.connect();
+      }
+    }
+
+    public function add_request_variable(key:Object, val:Object):void {
+      if (dataFormat !== VARIABLES) {
+        DebugDaemon.write_log("request vars added to request without data" +
+        "Format being set", DebugDaemon.WARN);
+      }
+      _connection.async_request_vars[key] = val;
+    }
+
+    public function get on_request_complete():NativeSignal {
+      return _connection.async_response_signal;
+    }
+
+    public function get connection():Connection {
+      return _connection;
+    }
+
+    public function get name():String {
+      return _name;
+    }
+
+    public function set name(value:String):void {
+      _name = value;
+    }
+
+    public function get host():String {
+      return _path;
+    }
+
+    public function set host(val:String):void {
+      _path = val;
+    }
+
+    public function get port():uint {
+      return _port;
+    }
+
+    public function set port(val:uint):void {
+      _port = val;
+    }
+
+    public function get http_method():String {
+      return _connection.async_request.method;
+    }
+
+    public function set http_method(value:String):void {
+      _connection.async_request.method = value;
+    }
+
+    public function get expected_data_type():String {
+      return dataFormat;
+    }
+
+    public function set expected_data_type(value:String):void {
+      dataFormat = expected_data_type;
+    }
+  }
+
 }
