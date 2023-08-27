@@ -15,7 +15,8 @@ import flash.utils.ByteArray;
 	 */
 	public class IOUtil {
 		static public const SUCCESS:uint = 0;
-		
+		static public const FAILURE:uint = 1;
+
 		/**
 		 * Loads an external DisplayObject (such as `SWF`, `JPEG`, `GIF`, or `PNG` files) using the `flash.display.Loader` class.
 		 * @param	url URL of the DisplayObject to load.
@@ -51,6 +52,7 @@ import flash.utils.ByteArray;
 			stream.writeBytes(packedBytes);
 			stream.close();
 			if (onComplete !== null) onComplete(SUCCESS);
+			else onComplete(FAILURE);
 		}
 		
 		/**
