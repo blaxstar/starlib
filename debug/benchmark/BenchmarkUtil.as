@@ -1,4 +1,5 @@
 package net.blaxstar.debug.benchmark {
+  // TODO: documentation
   public class BenchmarkUtil {
 
     static private var timers:Vector.<Timer> = new Vector.<Timer>();
