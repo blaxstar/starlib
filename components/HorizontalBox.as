@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
@@ -24,7 +24,7 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children

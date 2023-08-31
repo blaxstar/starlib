@@ -1,4 +1,4 @@
-package net.blaxstar.utils {
+package net.blaxstar.starlib.utils {
   public class ObjectUtil {
     static public function getObjectClass(obj:*):Class {
         return getDefinitionByName(getQualifiedClassName(obj)) as Class;

@@ -1,6 +1,6 @@
-package net.blaxstar.debug.console {
+package net.blaxstar.starlib.debug.console {
   import flash.utils.Dictionary;
-  import net.blaxstar.debug.console.commands.ConsoleCommand;
+  import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
 
   /**
    * ...

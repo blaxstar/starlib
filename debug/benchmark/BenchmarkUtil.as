@@ -1,4 +1,4 @@
-package net.blaxstar.debug.benchmark {
+package net.blaxstar.starlib.debug.benchmark {
   // TODO: documentation
   public class BenchmarkUtil {
 

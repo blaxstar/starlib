@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
 
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
@@ -9,8 +9,8 @@ package net.blaxstar.components {
   import flash.text.TextFieldType;
   import flash.text.TextFormat;
 
-  import net.blaxstar.style.Font;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Font;
+  import net.blaxstar.starlib.style.Style;
 
   /**
    * A simple component for displaying text information.
@@ -30,7 +30,7 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children

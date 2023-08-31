@@ -1,10 +1,10 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.display.Graphics;
   import flash.events.Event;
   import flash.events.MouseEvent;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
   import flash.display.Stage;
   import flash.display.Shape;
   import flash.display.Sprite;
@@ -29,7 +29,7 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children and committing the visual changes to be written on the next frame. created to be overridden.

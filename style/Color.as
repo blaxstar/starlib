@@ -1,4 +1,4 @@
-package net.blaxstar.style
+package net.blaxstar.starlib.style
 {
 	/**
 	 * ...

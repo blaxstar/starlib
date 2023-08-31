@@ -1,15 +1,16 @@
-package net.blaxstar.networking {
+package net.blaxstar.starlib.networking {
   import flash.utils.Timer;
   import flash.events.TimerEvent;
   import flash.net.SecureSocket;
   import debug.DebugDaemon;
   import flash.events.Event;
   import flash.events.IOErrorEvent;
-  import net.blaxstar.io.URL;
+  import net.blaxstar.starlib.io.URL;
   import flash.net.URLRequest;
   import flash.net.URLVariables;
   import thirdparty.org.osflash.signals.natives.NativeSignal;
   import thirdparty.org.osflash.signals.Signal;
+  import net.blaxstar.starlib.utils.StringUtil;
 
   /**
    * TODO: documentation
@@ -77,26 +78,40 @@ package net.blaxstar.networking {
     }
 
     public function connect_async():void {
+      // first off, we need to confirm that we are actually expecting something
+      if (!_url_request_data.expected_data_type || StringUtil.trim(_url_request_data.expected_data_type) == "") {
+        DebugDaemon.write_log("cannot make async request: the connection does not expect a data type!", DebugDaemon.ERROR_IO);
+        return;
+      }
+
+      // make sure some request-related properties are not null when trying to connect
+      if (!_async_request) {
+        config_async();
+      }
+
+      // set the timeout for either kind of connection
       var current_timeout:uint =
       (_async_request.method == _POST ? _REQUEST_TIMEOUT : _RESPONSE_TIMEOUT);
 
-      if (!_async_request) {
-        set_async_vars();
-      }
-
+      // only send variables if that's the expected data type
       if (_url_request_data.dataFormat == URL.VARIABLES) {
         _async_request.data = _async_request_vars;
       }
 
-      _async_response_signal.add(on_async_request_complete);
-
+      // setup the timeout timer and wait for a response to the request
       _timeout_timer = new Timer(current_timeout, _TIMEOUT_REPS);
       _timeout_timer.addEventListener(TimerEvent.TIMER, on_timer_tick);
       _timeout_timer.addEventListener(TimerEvent.TIMER_COMPLETE, on_timer_complete);
+      _async_response_signal.add(on_async_request_complete);
       _timeout_timer.start();
 
+      // set the connection to busy, in case we need other objects to know
       busy = true;
+
+      // comply with security...
       NetUtil.load_policy_file(_host, _port);
+
+      // then load the data!
       _async_on_io_error_signal.add(on_io_error);
       _url_request_data.load(_async_request);
     }
@@ -108,8 +123,9 @@ package net.blaxstar.networking {
       busy = false;
     }
 
-    public function set_async_vars():void {
-      _async_request = new URLRequest(_host + ":" + _port);
+    public function config_async():void {
+      _async_request = new URLRequest(_host + (_url_request_data.use_port ? ":" + _port : ""));
+
       _async_request_vars = new URLVariables();
       _async_response_signal = new NativeSignal(_url_request_data, Event.COMPLETE, Event);
       _async_on_io_error_signal = new NativeSignal(_url_request_data, IOErrorEvent.IO_ERROR, IOErrorEvent);
@@ -117,7 +133,7 @@ package net.blaxstar.networking {
 
     public function get async_request():URLRequest {
       if (!_async_request) {
-        set_async_vars();
+        config_async();
       }
       return _async_request;
     }

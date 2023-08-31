@@ -1,11 +1,11 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.display.Graphics;
   import flash.display.Sprite;
   import flash.events.Event;
   import flash.events.MouseEvent;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   public class Chip extends Component {
     private const MIN_WIDTH:uint = 50;

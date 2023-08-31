@@ -1,4 +1,4 @@
-package net.blaxstar.utils {
+package net.blaxstar.starlib.utils {
   public class DisplayObjectUtil {
     static public function setRegistrationPoint(s:Sprite, regx:Number, regy:Number, showRegistration:Boolean):void {
       s.transform.matrix = new Matrix(1, 0, 0, 1, -regx, -regy);

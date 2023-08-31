@@ -1,8 +1,8 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
   import flash.display.Graphics;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   public class Divider extends Component {
     private const HORIZONTAL:uint = 0;

@@ -1,4 +1,4 @@
-package net.blaxstar.math {
+package net.blaxstar.starlib.math {
   import flash.display.DisplayObject;
   import flash.geom.Point;
   import flash.geom.Rectangle;

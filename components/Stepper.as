@@ -1,10 +1,10 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
   import flash.events.MouseEvent;
   import thirdparty.com.lorentz.processing.ProcessExecutor;
-  import net.blaxstar.style.Color;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Color;
+  import net.blaxstar.starlib.style.Style;
 
   public class Stepper extends Component {
 

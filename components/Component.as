@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.display.Graphics;
   import flash.display.Sprite;
@@ -9,11 +9,11 @@ package net.blaxstar.components {
   import flash.events.IEventDispatcher;
   import flash.filters.DropShadowFilter;
 
-  import net.blaxstar.math.Arithmetic;
+  import net.blaxstar.starlib.math.Arithmetic;
 
   import thirdparty.org.osflash.signals.Signal;
   import thirdparty.org.osflash.signals.natives.NativeSignal;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   /**
    * Base Component Class.
@@ -38,10 +38,10 @@ package net.blaxstar.components {
     protected var _enabled_:Boolean;
     protected var _isShowingBounds_:Boolean;
 
-    public var onEnterFrame:NativeSignal;
+    public var on_enter_frame_signal:NativeSignal;
     public var onResize:NativeSignal;
     public var onDraw:Signal;
-    public var onAdded:NativeSignal;
+    public var on_added_signal:NativeSignal;
 
     /**
      * creates a base Component.
@@ -69,7 +69,7 @@ package net.blaxstar.components {
       }
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children and committing the visual changes to be written on the next frame. created to be overridden.
@@ -77,10 +77,10 @@ package net.blaxstar.components {
     public function init():void {
       _functionQueue = new Vector.<Function>();
       _paramQueue = new Vector.<Array>();
-      if (!onEnterFrame)
-        onEnterFrame = new NativeSignal(this, Event.ENTER_FRAME, Event);
-      if (!onAdded)
-        onAdded = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
+      if (!on_enter_frame_signal)
+        on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
+      if (!on_added_signal)
+        on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
       if (!onResize) {
         _resizeEvent_ = new Event(Event.RESIZE);
         onResize = new NativeSignal(this, Event.RESIZE, Event);
@@ -88,9 +88,10 @@ package net.blaxstar.components {
       if (!onDraw)
         onDraw = new Signal();
       addChildren();
-      onAdded.addOnce(on_added);
-      onEnterFrame.add(checkQueue);
-      Style.ON_THEME_UPDATE.add(draw);
+      on_added_signal.addOnce(on_added);
+      on_enter_frame_signal.add(check_queue);
+      // TODO: update theme on all components when theme is changed.
+      // Style.ON_THEME_UPDATE.add(draw);
     }
 
     protected function on_added(e:Event):void {
@@ -115,7 +116,7 @@ package net.blaxstar.components {
      * checks if there are any queued functions available, and attempts to execute them.
      * @param e event param, typically an ENTER_FRAME event.
      */
-    protected function checkQueue(e:Event):void {
+    protected function check_queue(e:Event):void {
       if (!_functionQueue.length || !_paramQueue.length)
         return;
       for (var i:uint = 0; i < _functionQueue.length; i++) {
@@ -155,7 +156,7 @@ package net.blaxstar.components {
      * this minimizes the processing load per frame, improving performance.
      */
     public function commit():void {
-      onEnterFrame.addOnce(draw);
+      on_enter_frame_signal.addOnce(draw);
     }
 
     /**

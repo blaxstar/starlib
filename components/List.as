@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
   import flash.display.Sprite;
@@ -6,7 +6,7 @@ package net.blaxstar.components {
   import flash.events.MouseEvent;
   import flash.utils.Dictionary;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   /**
    * ...

@@ -1,7 +1,7 @@
-package net.blaxstar.input.gamepad.controls {
+package net.blaxstar.starlib.input.gamepad.controls {
 import flash.ui.GameInputControl;
 
-import net.blaxstar.input.gamepad.types.Gamepad;
+import net.blaxstar.starlib.input.gamepad.types.Gamepad;
 
 public class GamepadJoystick extends GamepadButton {
 		private static const JOYSTICK_THRESHOLD:Number = 0.5;

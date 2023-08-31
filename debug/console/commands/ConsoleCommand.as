@@ -1,4 +1,4 @@
-package net.blaxstar.debug.console.commands {
+package net.blaxstar.starlib.debug.console.commands {
   public class ConsoleCommand {
     protected var _name:String;
     protected var _delegateFunction:Function;

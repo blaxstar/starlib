@@ -1,13 +1,13 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.display.Sprite;
   import flash.events.Event;
   import flash.events.MouseEvent;
   import flash.text.TextFormat;
 
-  import net.blaxstar.style.Font;
+  import net.blaxstar.starlib.style.Font;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   import thirdparty.org.osflash.signals.natives.NativeSignal;
   import flash.display.Graphics;
@@ -44,7 +44,7 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children

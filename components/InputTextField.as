@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
 
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
@@ -14,9 +14,9 @@ package net.blaxstar.components {
   import flash.text.TextFieldType;
   import flash.text.TextFormat;
 
-  import net.blaxstar.input.InputEngine;
-  import net.blaxstar.style.Font;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.input.InputEngine;
+  import net.blaxstar.starlib.style.Font;
+  import net.blaxstar.starlib.style.Style;
 
 
 import thirdparty.org.osflash.signals.natives.NativeSignal;

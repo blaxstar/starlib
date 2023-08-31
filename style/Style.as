@@ -1,4 +1,4 @@
-package net.blaxstar.style
+package net.blaxstar.starlib.style
 {
 import flash.display.DisplayObjectContainer;
 import flash.display.StageAlign;
@@ -9,13 +9,13 @@ import flash.display.StageScaleMode;
 	 * @author Deron D. (SnaiLegacy)
 	 * decamp.deron@gmail.com
 	 */
-	public class Style 
+	public class Style
 	{
 		// static
-		
+
 		static public const LIGHT:uint = 0;
 		static public const DARK:uint = 1;
-		
+
 		static public var CURRENT_THEME:uint = LIGHT;
 		/*
 		 * Color that appears most frequently across app screens and components.
@@ -30,12 +30,12 @@ import flash.display.StageScaleMode;
 		 */
 		static public var PRIMARY_DARK:RGBA;
 		/**
-		 * Optional color that appears sparingly across app screens and components. 
-		 * Best used for components like floating action buttons, sliders, switches, 
+		 * Optional color that appears sparingly across app screens and components.
+		 * Best used for components like floating action buttons, sliders, switches,
 		 * highlighting selected text, progress bars, links, and headlines.
 		 */
 		static public var SECONDARY:RGBA;
-		
+
 		/**
 		 * Used for contrast between UI elements (secondary).
 		 */
@@ -44,7 +44,7 @@ import flash.display.StageScaleMode;
 		 * Used for contrast between UI elements (secondary).
 		 */
 		static public var SECONDARY_DARK:RGBA;
-		
+
 		/**
 		 * Color that shows behind scrollable content.
 		 */
@@ -65,10 +65,10 @@ import flash.display.StageScaleMode;
 		 * Affects plain text.
 		 */
 		static public var TEXT:RGBA;
-		
-		static public function init(theme:uint, main:DisplayObjectContainer):void
+
+		static public function init(main:DisplayObjectContainer):void
 		{
-			setTheme(theme);
+			setTheme(DARK);
 			main.stage.color = BACKGROUND.value;
 			main.stage.align = StageAlign.TOP_LEFT;
 			main.stage.scaleMode = StageScaleMode.NO_SCALE;

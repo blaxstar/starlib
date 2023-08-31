@@ -1,4 +1,4 @@
-package net.blaxstar.input.gamepad.types {
+package net.blaxstar.starlib.input.gamepad.types {
 import flash.ui.GameInputDevice;
 
 /**

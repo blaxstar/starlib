@@ -1,7 +1,7 @@
-package net.blaxstar.networking {
+package net.blaxstar.starlib.networking {
 
   import thirdparty.org.osflash.signals.Signal;
-  import net.blaxstar.io.URL;
+  import net.blaxstar.starlib.io.URL;
   import flash.events.Event;
 
   /**
@@ -29,7 +29,6 @@ package net.blaxstar.networking {
 
       _api_endpoint = new URL(endpoint_path, port);
       _api_endpoint.name = "server";
-      _api_endpoint.expected_data_type = URL.TEXT;
       _backlog = new Vector.<String>();
     }
 

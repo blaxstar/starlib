@@ -1,4 +1,4 @@
-package net.blaxstar.utils {
+package net.blaxstar.starlib.utils {
   public class ArrayUtil {
 
     static public function merge(overwrite:Boolean, ...rest):Array {

@@ -1,7 +1,7 @@
-package net.blaxstar.io {
+package net.blaxstar.starlib.io {
   import flash.net.URLLoader;
   import thirdparty.org.osflash.signals.natives.NativeSignal;
-  import net.blaxstar.networking.Connection;
+  import net.blaxstar.starlib.networking.Connection;
   import debug.DebugDaemon;
 
   /**
@@ -9,11 +9,13 @@ package net.blaxstar.io {
    * @author Deron D. (SnaiLegacy)
    */
   public class URL extends URLLoader {
+    / * URL DATA FORMATS */
     public static const BINARY:String = "binary";
     static public const GRAPHICS:String = 'graphics';
     public static const TEXT:String = "text";
     public static const VARIABLES:String = "variables";
 
+    / * HTTP REQUEST METHODS * /
     /**
      * Specifies that the URLRequest object is a POST.
      *
@@ -22,6 +24,7 @@ package net.blaxstar.io {
      * the POST method (one that has its method property set to
      * URLRequestMethod.POST) as using the GET method.
      */
+
     public static const REQUEST_METHOD_POST:String = "POST";
 
     /**
@@ -51,7 +54,9 @@ package net.blaxstar.io {
 
     private var _name:String;
     private var _path:String;
+    private var _expected_data_type:String;
     private var _port:uint;
+    private var _using_port:Boolean;
     private var _connection:Connection;
 
     public function URL(url_path:String = null, port:uint = 80) {
@@ -110,6 +115,14 @@ package net.blaxstar.io {
       _port = val;
     }
 
+    public function get use_port():Boolean {
+      return _using_port;
+    }
+
+    public function set use_port(val:Boolean):void {
+      _using_port = val;
+    }
+
     public function get http_method():String {
       return _connection.async_request.method;
     }
@@ -119,11 +132,16 @@ package net.blaxstar.io {
     }
 
     public function get expected_data_type():String {
-      return dataFormat;
+      return _expected_data_type;
     }
 
     public function set expected_data_type(value:String):void {
-      dataFormat = expected_data_type;
+      _expected_data_type = value;
+      if (_expected_data_type !== GRAPHICS) {
+        dataFormat = _expected_data_type;
+      } else {
+        dataFormat = BINARY;
+      }
     }
   }
 

@@ -1,8 +1,8 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
 
-  import net.blaxstar.utils.StringUtil;
+  import net.blaxstar.starlib.utils.StringUtil;
 
   import thirdparty.com.lorentz.SVG.data.style.StyleDeclaration;
   import thirdparty.com.lorentz.SVG.display.SVGDocument;
@@ -77,15 +77,15 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children and committing the visual changes to be written on the next
      * frame. created to be overridden.
      */
     override public function init():void {
-      onEnterFrame = new NativeSignal(this, Event.ENTER_FRAME, Event);
-      onAdded = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
+      on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
+      on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
       _resizeEvent_ = new Event(Event.RESIZE);
       onResize = new NativeSignal(this, Event.RESIZE, Event);
       onDraw = new Signal();
@@ -103,7 +103,7 @@ package net.blaxstar.components {
       dispatchEvent(new Event('iconLoaded'));
       _isRendered = true;
       addChildren();
-      onAdded.addOnce(draw);
+      on_added.addOnce(draw);
       _width_ = _doc.width;
       _height_ = _doc.height;
       _whRatio = _height_ / _width_;

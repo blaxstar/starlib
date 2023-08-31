@@ -1,6 +1,6 @@
-package net.blaxstar.style
+package net.blaxstar.starlib.style
 {
-import net.blaxstar.math.Arithmetic;
+import net.blaxstar.starlib.math.Arithmetic;
 
 /**
 	 * ...

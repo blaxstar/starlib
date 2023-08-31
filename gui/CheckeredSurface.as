@@ -1,10 +1,10 @@
-package net.blaxstar.gui {
+package net.blaxstar.starlib.gui {
   import flash.display.DisplayObjectContainer;
   import flash.display.Graphics;
   import flash.display.Shape;
   import flash.display.Sprite;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
   import flash.events.NativeWindowBoundsEvent;
 
   /**

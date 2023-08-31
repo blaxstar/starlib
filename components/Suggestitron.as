@@ -1,9 +1,9 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
 
   import flash.filesystem.File;
   import flash.utils.ByteArray;
 
-  import net.blaxstar.io.URL;
+  import net.blaxstar.starlib.io.URL;
 
   /**
    * ...

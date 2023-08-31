@@ -1,4 +1,6 @@
-package net.blaxstar.utils {
+package net.blaxstar.starlib.utils {
+  import avmplus.getQualifiedClassName;
+
   /**
    * ...
    * @author Deron D.
@@ -77,14 +79,14 @@ package net.blaxstar.utils {
         var finalString:String = "{&quot}";
         var i:uint = 0;
 
-        for (var o:Object in array) {
+        for (var array_item:Object in array) {
             ++i;
-            if (o is Array)
-                finalString = finalString + arrayToString(array[o] as Array) + "{&quot}";
-            else if (getQualifiedClassName(array[o]) == "Object")
-                finalString = finalString + JSON.stringify(array[o]) + "{&quot}";
+            if (array_item is Array)
+                finalString = finalString + from_array(array_item as Array) + "{&quot}";
+            else if (getQualifiedClassName(array_item) == "Object")
+                finalString = finalString + JSON.stringify(array[array_item]) + "{&quot}";
             else
-                (i == array.length) ? finalString = finalString + array[o] + "{&quot}" : finalString = finalString + array[o] + "|";
+                (i == array.length) ? finalString = finalString + array[array_item] + "{&quot}" : finalString = finalString + array[array_item] + "|";
         }
 
         return finalString.replace("{&quot}", "\"");

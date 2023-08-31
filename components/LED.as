@@ -1,6 +1,6 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
-  import net.blaxstar.style.Color;
+  import net.blaxstar.starlib.style.Color;
   import flash.display.Graphics;
   import flash.utils.clearInterval;
   import flash.utils.setInterval;

@@ -1,4 +1,4 @@
-package net.blaxstar.input {
+package net.blaxstar.starlib.input {
 	/**
 	 * ...
 	 * @author Deron Decamp

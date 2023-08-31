@@ -1,4 +1,4 @@
-package net.blaxstar.input.gamepad {
+package net.blaxstar.starlib.input.gamepad {
 import flash.display.DisplayObject;
 import flash.events.Event;
 import flash.events.GameInputEvent;
@@ -8,9 +8,9 @@ import flash.ui.GameInputDevice;
 import flash.ui.Keyboard;
 import flash.utils.getTimer;
 
-import net.blaxstar.input.gamepad.types.Gamepad;
-import net.blaxstar.input.gamepad.types.OuyaGamepad;
-import net.blaxstar.input.gamepad.types.Xbox360Gamepad;
+import net.blaxstar.starlib.input.gamepad.types.Gamepad;
+import net.blaxstar.starlib.input.gamepad.types.OuyaGamepad;
+import net.blaxstar.starlib.input.gamepad.types.Xbox360Gamepad;
 
 /**
 	 * A class for reading input from controllers. Allows you to pull ready controllers from a queue of controllers that have been initialized, to allow input from as many controllers as you need.

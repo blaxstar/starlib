@@ -1,4 +1,4 @@
-﻿package net.blaxstar.input {
+﻿package net.blaxstar.starlib.input {
   import flash.display.Sprite;
   import flash.events.Event;
   import flash.events.IEventDispatcher;
@@ -7,11 +7,11 @@
   import flash.utils.clearInterval;
   import flash.utils.setInterval;
 
-  import net.blaxstar.input.gamepad.GamepadBus;
-  import net.blaxstar.input.gamepad.types.Gamepad;
-  import net.blaxstar.input.gamepad.types.GamepadType;
-  import net.blaxstar.input.gamepad.types.OuyaGamepad;
-  import net.blaxstar.input.gamepad.types.Xbox360Gamepad;
+  import net.blaxstar.starlib.input.gamepad.GamepadBus;
+  import net.blaxstar.starlib.input.gamepad.types.Gamepad;
+  import net.blaxstar.starlib.input.gamepad.types.GamepadType;
+  import net.blaxstar.starlib.input.gamepad.types.OuyaGamepad;
+  import net.blaxstar.starlib.input.gamepad.types.Xbox360Gamepad;
   import flash.display.Stage;
   import debug.DebugDaemon;
 

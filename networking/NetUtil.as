@@ -1,4 +1,4 @@
-package net.blaxstar.networking
+package net.blaxstar.starlib.networking
 {
 import flash.system.Security;
 import debug.DebugDaemon;

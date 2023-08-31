@@ -1,4 +1,4 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
   import flash.display.Sprite;
@@ -7,7 +7,7 @@ package net.blaxstar.components {
   import flash.geom.Point;
   import flash.geom.Rectangle;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   import thirdparty.org.osflash.signals.Signal;
 

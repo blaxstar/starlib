@@ -1,4 +1,4 @@
-package net.blaxstar.debug.console {
+package net.blaxstar.starlib.debug.console {
   import flash.display.Graphics;
   import flash.display.Sprite;
   import flash.display.Stage;
@@ -8,13 +8,13 @@ package net.blaxstar.debug.console {
   import flash.filesystem.File;
   import flash.utils.Dictionary;
 
-  import net.blaxstar.components.InputTextField;
-  import net.blaxstar.components.PlainText;
-  import net.blaxstar.debug.console.commands.ConsoleCommand;
-  import net.blaxstar.input.InputEngine;
-  import net.blaxstar.io.IOUtil;
-  import net.blaxstar.style.Color;
-  import net.blaxstar.utils.StringUtil;
+  import net.blaxstar.starlib.components.InputTextField;
+  import net.blaxstar.starlib.components.PlainText;
+  import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
+  import net.blaxstar.starlib.input.InputEngine;
+  import net.blaxstar.starlib.io.IOUtil;
+  import net.blaxstar.starlib.style.Color;
+  import net.blaxstar.starlib.utils.StringUtil;
 
   public class DebugConsole extends Sprite {
     static private var _data:Dictionary;

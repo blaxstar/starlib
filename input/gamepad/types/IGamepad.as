@@ -1,4 +1,4 @@
-package net.blaxstar.input.gamepad.types {
+package net.blaxstar.starlib.input.gamepad.types {
 	
 	/**
 	 * An enumerated class of controller types.

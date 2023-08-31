@@ -1,11 +1,11 @@
-package net.blaxstar.input.gamepad.types {
+package net.blaxstar.starlib.input.gamepad.types {
 import flash.ui.GameInputControl;
 import flash.ui.GameInputDevice;
 
-import net.blaxstar.input.gamepad.controls.GamepadButton;
-import net.blaxstar.input.gamepad.controls.GamepadDPadButton;
-import net.blaxstar.input.gamepad.controls.GamepadJoystick;
-import net.blaxstar.input.gamepad.controls.GamepadTrigger;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadButton;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadDPadButton;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadJoystick;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 
 /**
 	 * A class containing the bindings for a single Ouya controller.

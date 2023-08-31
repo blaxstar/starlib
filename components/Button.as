@@ -1,12 +1,12 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
 
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
   import flash.events.MouseEvent;
 
-  import net.blaxstar.style.Font;
-  import net.blaxstar.style.RGBA;
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Font;
+  import net.blaxstar.starlib.style.RGBA;
+  import net.blaxstar.starlib.style.Style;
 
   import thirdparty.com.greensock.TweenLite;
   import thirdparty.com.greensock.plugins.TintPlugin;
@@ -49,7 +49,7 @@ package net.blaxstar.components {
       super(parent, xpos, ypos);
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children

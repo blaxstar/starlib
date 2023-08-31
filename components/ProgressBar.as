@@ -1,9 +1,9 @@
-package net.blaxstar.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.display.Sprite;
   import flash.events.Event;
 
-  import net.blaxstar.style.Style;
+  import net.blaxstar.starlib.style.Style;
 
   /**
    * ...
@@ -23,7 +23,7 @@ package net.blaxstar.components {
 
     }
 
-    /** INTERFACE net.blaxstar.components.IComponent ===================== */
+    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
 
     /**
      * initializes the component by adding all the children

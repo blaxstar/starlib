@@ -1,9 +1,9 @@
-package net.blaxstar.input.gamepad.controls {
+package net.blaxstar.starlib.input.gamepad.controls {
 import flash.events.Event;
 import flash.ui.GameInputControl;
 
-import net.blaxstar.input.gamepad.GamepadBus;
-import net.blaxstar.input.gamepad.types.Gamepad;
+import net.blaxstar.starlib.input.gamepad.GamepadBus;
+import net.blaxstar.starlib.input.gamepad.types.Gamepad;
 
 public class GamepadButton extends GameControl {
 		private var changed:Boolean = false;

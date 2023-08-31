@@ -1,12 +1,12 @@
-package net.blaxstar.input.gamepad.types {
+package net.blaxstar.starlib.input.gamepad.types {
 import flash.ui.GameInputControl;
 import flash.ui.GameInputDevice;
 import flash.utils.Dictionary;
 
-import net.blaxstar.input.gamepad.controls.GamepadButton;
-import net.blaxstar.input.gamepad.controls.GamepadDPadButton;
-import net.blaxstar.input.gamepad.controls.GamepadJoystick;
-import net.blaxstar.input.gamepad.controls.GamepadTrigger;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadButton;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadDPadButton;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadJoystick;
+import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 
 /** a class containing the bindings for a single Xbox 360 controller. */
 	public class Xbox360Gamepad extends Gamepad {
