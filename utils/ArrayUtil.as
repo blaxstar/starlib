@@ -11,7 +11,10 @@ package net.blaxstar.starlib.utils {
         }
         return arr;
     }
-
+    static public function from_vector(vector:Vector):Array {
+      // TODO: convert vector to array
+      return [];
+    }
      static public function from_object(obj:Object):Array {
         if (!obj)
             return null;

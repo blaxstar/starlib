@@ -76,7 +76,7 @@ package net.blaxstar.starlib.components {
           }
         }
       }
-      onResize.dispatch(_resizeEvent_);
+      on_resize_signal.dispatch(_resizeEvent_);
     }
 
     /**
@@ -85,7 +85,7 @@ package net.blaxstar.starlib.components {
     override public function addChild(child:DisplayObject):DisplayObject {
       super.addChild(child);
       if (child is Component)
-        (child as Component).onResize.add(onComponentResize);
+        (child as Component).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
       draw();
@@ -98,7 +98,7 @@ package net.blaxstar.starlib.components {
     override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
       super.addChildAt(child, index);
       if (child is Component)
-        Component(child).onResize.add(onComponentResize);
+        Component(child).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
       draw();
@@ -111,7 +111,7 @@ package net.blaxstar.starlib.components {
     override public function removeChild(child:DisplayObject):DisplayObject {
       super.removeChild(child);
       if (child is Component)
-        Component(child).onResize.remove(onComponentResize);
+        Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
       draw();
@@ -124,7 +124,7 @@ package net.blaxstar.starlib.components {
     override public function removeChildAt(index:int):DisplayObject {
       var child:DisplayObject = super.removeChildAt(index);
       if (child is Component)
-        Component(child).onResize.remove(onComponentResize);
+        Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
       draw();
@@ -187,7 +187,7 @@ package net.blaxstar.starlib.components {
       for (var i:uint = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);
         if (child is Component)
-          Component(child).onResize.remove(onComponentResize);
+          Component(child).on_resize_signal.remove(onComponentResize);
         else
           child.removeEventListener(Event.RESIZE, onComponentResize);
       }

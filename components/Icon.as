@@ -87,8 +87,8 @@ package net.blaxstar.starlib.components {
       on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
       on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
       _resizeEvent_ = new Event(Event.RESIZE);
-      onResize = new NativeSignal(this, Event.RESIZE, Event);
-      onDraw = new Signal();
+      on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
+      on_draw_signal = new Signal();
       _width_ = _height_ = 16;
 
       _doc = new SVGDocument();
@@ -102,7 +102,7 @@ package net.blaxstar.starlib.components {
       _doc.removeEventListener(SVGEvent.RENDERED, init2);
       dispatchEvent(new Event('iconLoaded'));
       _isRendered = true;
-      addChildren();
+      add_children();
       on_added.addOnce(draw);
       _width_ = _doc.width;
       _height_ = _doc.height;
@@ -112,9 +112,9 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       addChild(_doc);
-      super.addChildren();
+      super.add_children();
     }
 
     /**

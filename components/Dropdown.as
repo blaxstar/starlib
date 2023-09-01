@@ -44,7 +44,7 @@ package net.blaxstar.starlib.components {
     /**
      * base method for initializing and adding children of the component. created to be overridden.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       _displayLabel = new PlainText(this, 0, 0, _labelText);
       _displayLabel.width = _width_;
 
@@ -59,9 +59,9 @@ package net.blaxstar.starlib.components {
       _dropdownList ||= new List(null, 0, _displayLabel.height - 2);
       _dropdownList.visible = false;
       _dropdownList.width = _displayLabel.width;
-      _dropdownList.addClickDelegate(onListItemClick);
+      _dropdownList.add_delegate_to_all(onListItemClick);
 
-      super.addChildren();
+      super.add_children();
     }
 
     private function onListItemClick(e:MouseEvent):void {
@@ -92,8 +92,8 @@ package net.blaxstar.starlib.components {
 
       drawBorder();
 
-      if (_dropdownList.numItems == 1) {
-        _selectedItem = _dropdownList.getItemAt(0);
+      if (_dropdownList.num_items == 1) {
+        _selectedItem = _dropdownList.get_item_at(0);
       }
 
       _displayLabel.text = _labelText;
@@ -120,11 +120,11 @@ package net.blaxstar.starlib.components {
     // public
 
     public function addListItem(item:ListItem):void {
-      _dropdownList.addItem(item);
+      _dropdownList.add_item(item);
     }
     public function multiAddListItemByString(...rest):void {
 
-      _dropdownList.multiAddByStringArray(rest);
+      _dropdownList.multi_add_static_items(rest);
     }
 
     // private

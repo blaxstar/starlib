@@ -24,23 +24,24 @@ package net.blaxstar.starlib.components {
     static private var _procid:uint = 0;
 
     // public
-    public var linkageid:uint;
+    public var linkage_id:uint;
     // private
     private var _label:PlainText;
-    private var _labelString:String;
-    private var _textFormat:TextFormat;
+    private var _label_string:String;
+    private var _text_format:TextFormat;
     private var _background:Sprite;
-    private var _fillColor:uint;
-    private var _targetList:List;
-    private var _onClick:NativeSignal;
-    private var _onRollOver:NativeSignal;
-    private var _onRollOut:NativeSignal;
+    private var _fill_color:uint;
+    private var _target_list:List;
+    private var _in_cache:Boolean;
+    private var _on_click_signal:NativeSignal;
+    private var _on_rollover_signal:NativeSignal;
+    private var _on_rollout_signal:NativeSignal;
 
     public var data:Object;
 
     public function ListItem(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = "New Item") {
-      linkageid = _procid++;
-      _labelString = label;
+      linkage_id = _procid++;
+      _label_string = label;
       super(parent, xpos, ypos);
     }
 
@@ -54,7 +55,7 @@ package net.blaxstar.starlib.components {
     override public function init():void {
       _width_ = MIN_WIDTH;
       _height_ = MIN_HEIGHT;
-      _textFormat = Font.BUTTON;
+      _text_format = Font.BUTTON;
       mouseChildren = false;
       buttonMode = useHandCursor = true;
       super.init();
@@ -63,16 +64,16 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       _background = new Sprite();
-      _label = new PlainText(this, 0, 0, _labelString);
+      _label = new PlainText(this, 0, 0, _label_string);
       _label.mouseChildren = false;
       _label.mouseEnabled = _label.doubleClickEnabled = true;
-      _label.format(_textFormat);
+      _label.format(_text_format);
 
       addChildAt(_background, 0);
 
-      super.addChildren();
+      super.add_children();
     }
 
     /**
@@ -80,53 +81,53 @@ package net.blaxstar.starlib.components {
      */
     override public function draw(e:Event = null):void {
       var g:Graphics = _background.graphics;
-      g.beginFill(_fillColor,1);
+      g.beginFill(_fill_color,1);
       g.drawRect(0,0,_width_,_height_);
       g.endFill();
 
-      _label.text = _labelString;
+      _label.text = _label_string;
       _label.move((_width_ / 2) - (_label.width / 2), (_height_ / 2) - (_label.height / 2));
     }
 
     /** END INTERFACE ===================== */
 
-    public function get labelComponent():PlainText {
+    public function get label_component():PlainText {
       return _label;
     }
 
-    public function get fillColor():uint {
-      return _fillColor;
+    public function get fill_color():uint {
+      return _fill_color;
     }
 
-    public function set fillColor(val:uint):void {
-      _fillColor = val;
+    public function set fill_color(val:uint):void {
+      _fill_color = val;
       commit();
     }
 
-    public function get onClick():NativeSignal {
-      if (!_onClick)
-        _onClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
-      return _onClick;
+    public function get on_click():NativeSignal {
+      if (!_on_click_signal)
+        _on_click_signal = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
+      return _on_click_signal;
     }
 
-    public function get onRollOver():NativeSignal {
-      if (!_onRollOver)
-        _onRollOver = new NativeSignal(this, MouseEvent.ROLL_OVER, MouseEvent);
-      return _onRollOver;
+    public function get on_rollover():NativeSignal {
+      if (!_on_rollover_signal)
+        _on_rollover_signal = new NativeSignal(this, MouseEvent.ROLL_OVER, MouseEvent);
+      return _on_rollover_signal;
     }
 
-    public function get onRollOut():NativeSignal {
-      if (!_onRollOut)
-        _onRollOut = new NativeSignal(this, MouseEvent.ROLL_OUT, MouseEvent);
-      return _onRollOut;
+    public function get on_rollout():NativeSignal {
+      if (!_on_rollout_signal)
+        _on_rollout_signal = new NativeSignal(this, MouseEvent.ROLL_OUT, MouseEvent);
+      return _on_rollout_signal;
     }
 
-    private function set associatedList(list:List):void {
-      _targetList = list;
+    private function set associated_list(list:List):void {
+      _target_list = list;
     }
 
     public function set label(val:String):void {
-      this.name = _labelString = val;
+      this.name = _label_string = val;
       commit();
     }
 
@@ -134,9 +135,17 @@ package net.blaxstar.starlib.components {
       return _label.text;
     }
 
+    public function get in_cache():Boolean {
+      return _in_cache;
+    }
+
+    public function set in_cache(value:Boolean):void {
+      _in_cache = value;
+    }
+
     override public function destroy(e:Event = null):void {
       super.destroy(e);
-      _onClick.removeAll();
+      _on_click_signal.removeAll();
     }
   }
 

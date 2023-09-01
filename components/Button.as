@@ -76,7 +76,7 @@ package net.blaxstar.starlib.components {
      * initializes and adds all required children of the component.
      * created to be overridden.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       _background = new Component(this);
       _backgroundOutline = new Component(this);
       _label = new PlainText(this, 0, 0, _labelString);
@@ -115,7 +115,7 @@ package net.blaxstar.starlib.components {
     /** END INTERFACE ===================== */
 
     // public
-    override public function updateSkin():void {
+    override public function update_skin():void {
       drawBG();
       drawBGOutline();
     }

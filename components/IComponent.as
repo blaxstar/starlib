@@ -10,7 +10,7 @@ package net.blaxstar.starlib.components {
 
     function init():void;
 
-    function addChildren():void;
+    function add_children():void;
 
     function draw(e:Event = null):void;
   }

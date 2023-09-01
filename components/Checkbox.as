@@ -36,13 +36,13 @@ package net.blaxstar.starlib.components {
       super.init();
     }
 
-    override public function addChildren():void {
+    override public function add_children():void {
       _checkSquare = new Shape();
       _checkOutline = new Shape();
       addChild(_checkSquare);
       addChild(_checkOutline);
 
-      super.addChildren();
+      super.add_children();
       _onClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
       _onClick.add(onClick);
     }

@@ -19,7 +19,7 @@ package net.blaxstar.starlib.components {
       super(parent, xpos, ypos);
     }
 
-    override public function addChildren():void {
+    override public function add_children():void {
       _value = 0;
 
       _box = new HorizontalBox(this, 0, 0);
@@ -31,10 +31,10 @@ package net.blaxstar.starlib.components {
       _upButton.icon = Icon.PLUS_CIRCLED;
       _downButton.style = _upButton.style = Button.DEPRESSED;
 
-      updateSkin();
+      update_skin();
       _downButton.on_click.add(stepDown);
       _upButton.on_click.add(stepUp);
-      super.addChildren();
+      super.add_children();
     }
 
     override public function draw(e:Event = null):void {
@@ -45,7 +45,7 @@ package net.blaxstar.starlib.components {
       super.draw();
     }
 
-    override public function updateSkin():void {
+    override public function update_skin():void {
       _downButton.getIcon().setColor(Style.SECONDARY.value.toString());
       _upButton.getIcon().setColor(Style.SECONDARY.value.toString());
     }

@@ -48,7 +48,7 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       _textField = new TextField();
       _textField.embedFonts = Font.embedFonts;
       _textField.type = TextFieldType.DYNAMIC;
@@ -63,7 +63,7 @@ package net.blaxstar.starlib.components {
       _textField.textColor = Style.TEXT.value;
       addChild(_textField);
 
-      super.addChildren();
+      super.add_children();
     }
 
     override protected function on_added(e:Event):void {
@@ -84,13 +84,13 @@ package net.blaxstar.starlib.components {
         _height_ = _textField.height;
       }
 
-      onResize.dispatch(_resizeEvent_);
+      on_resize_signal.dispatch(_resizeEvent_);
       super.draw();
     }
 
     /** END INTERFACE ===================== */
 
-    override public function updateSkin():void {
+    override public function update_skin():void {
         if (!_colorOverwritten) color = Style.TEXT.value;
     }
 

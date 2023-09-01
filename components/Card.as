@@ -52,7 +52,7 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       _componentContainer = new VerticalBox();
       _optionContainer = new HorizontalBox();
       _cardBG = new Sprite();
@@ -70,7 +70,7 @@ package net.blaxstar.starlib.components {
       super.addChild(_optionContainer);
       applyShadow();
 
-      super.addChildren();
+      super.add_children();
     }
 
     /**
@@ -97,7 +97,7 @@ package net.blaxstar.starlib.components {
     }
 
     /** END INTERFACE ===================== */
-    override public function updateSkin():void {
+    override public function update_skin():void {
       drawBG();
     }
 
@@ -124,7 +124,7 @@ package net.blaxstar.starlib.components {
     }
 
     public function set viewableItems(val:Number):void {
-      _componentContainer.viewableItems = val;
+      _componentContainer.max_visible = val;
     }
 
     public function set maskThreshold(val:Number):void {

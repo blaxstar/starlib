@@ -56,7 +56,7 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
 
       _dialogCard = new Card(this, 0, 0, false);
       _textContainer = new VerticalBox(null, PADDING, PADDING);
@@ -64,7 +64,7 @@ package net.blaxstar.starlib.components {
       _titlePT = new PlainText(_textContainer, 0, 0, _titleString);
       _titlePT.enabled = false;
       _messagePT = new PlainText(_textContainer, 0, 0, _messageString);
-      _dialogCard.onResize.add(draw);
+      _dialogCard.on_resize_signal.add(draw);
       _dialogCard.draggable = true;
     }
 

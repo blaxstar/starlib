@@ -37,10 +37,10 @@ package net.blaxstar.starlib.components {
       super.init();
     }
 
-    override public function addChildren():void {
+    override public function add_children():void {
       draw();
       _isOn = true;
-      super.addChildren();
+      super.add_children();
     }
 
     override public function draw(e:Event = null):void {

@@ -45,11 +45,11 @@ package net.blaxstar.starlib.components {
     /**
      * initializes and adds all required children of the component.
      */
-    override public function addChildren():void {
+    override public function add_children():void {
       addChildAt(_track, 0);
       addChildAt(_trackFill, 1);
 
-      super.addChildren();
+      super.add_children();
     }
 
     /**

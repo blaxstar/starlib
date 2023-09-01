@@ -42,7 +42,7 @@ import debug.DebugDaemon;
     private var _suggestionLimit:uint;
     private var _suggestionGenerator:Suggestitron;
     private var _suggestionIteratorIndex:uint;
-    private var _inputCache:String;
+    private var _input_cache:String;
     private var _suggestionCache:Vector.<Suggestion>;
     private var _selectedSuggestion:Suggestion;
     private var _suggestionsAvailable:Boolean;
@@ -69,7 +69,7 @@ import debug.DebugDaemon;
       super.init();
     }
 
-    override public function addChildren():void {
+    override public function add_children():void {
       _textField = new TextField();
       _textField.type = TextFieldType.INPUT;
       _textField.autoSize = TextFieldAutoSize.NONE;
@@ -101,7 +101,7 @@ import debug.DebugDaemon;
       _onFocus.add(onFocus);
       _onTextChange.add(onTextChange);
 
-      super.addChildren();
+      super.add_children();
 
     }
 
@@ -128,7 +128,7 @@ import debug.DebugDaemon;
         _width_ = _textField.width;
         _height_ = _textField.height;
       }
-      onDraw.dispatch();
+      on_draw_signal.dispatch();
     }
 
     override public function addChild(child:DisplayObject):DisplayObject {
@@ -169,11 +169,10 @@ import debug.DebugDaemon;
     }
 
     private function showSuggestions():void {
-      if (_inputCache == _textField.text) {
+      if (_input_cache == _textField.text) {
         if (!_suggestionList.parent)
           addChild(_suggestionList);
-      }
-      else {
+      } else {
         _suggestionList.clear();
         _suggestionCache = _suggestionGenerator.generateSuggestions(_textField.text, _suggestionLimit);
 
@@ -185,15 +184,15 @@ import debug.DebugDaemon;
         else {
           for (var i:uint = 0; i < _suggestionCache.length; i++) {
             var currentSuggestion:Suggestion = _suggestionCache[i];
-            var item:ListItem = _suggestionList.getCachedItemByID(currentSuggestion.linkageid);
+            var item:ListItem = _suggestionList.get_cached_item(currentSuggestion.linkageid);
             if (item) {
-              _suggestionList.addItem(item);
+              _suggestionList.add_item(item);
             }
             else {
               item = new ListItem(_suggestionList, 0, 0, currentSuggestion.label);
-              item.linkageid = currentSuggestion.linkageid;
+              item.linkage_id = currentSuggestion.linkageid;
               item.label = currentSuggestion.label;
-              item.onClick.add(onSuggestionSelect);
+              item.on_click.add(onSuggestionSelect);
             }
           }
         }
@@ -210,7 +209,7 @@ import debug.DebugDaemon;
       _selectedSuggestion.data = (item.data as Suggestion).data;
       _textField.text = _selectedSuggestion.label;
       _textField.setTextFormat(_textField.defaultTextFormat);
-      _inputCache = item.label;
+      _input_cache = item.label;
       _typedChars = item.label.length;
 
     }
@@ -341,7 +340,7 @@ import debug.DebugDaemon;
       }
       else if (pressedKey == _input_engine.keys.BACKSPACE) {
         if (_textField.text == '') {
-          _suggestionList.hideList();
+          _suggestionList.hide_items();
         }
       }
     }
@@ -412,7 +411,7 @@ import debug.DebugDaemon;
       }
       _textFieldString = _textField.text;
       commit();
-      onResize.dispatch(_resizeEvent_);
+      on_resize_signal.dispatch(_resizeEvent_);
     }
 
     override public function destroy(e:Event = null):void {

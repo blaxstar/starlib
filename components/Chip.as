@@ -33,7 +33,7 @@ package net.blaxstar.starlib.components {
       super.init();
     }
 
-    override public function addChildren():void {
+    override public function add_children():void {
       drawSurface();
       _layoutBox = new HorizontalBox(this);
       _layoutBox.spacing = 10;
@@ -43,7 +43,7 @@ package net.blaxstar.starlib.components {
 
       applyShadow();
       setChildIndex(_chipSurface, 0);
-      super.addChildren();
+      super.add_children();
     }
 
     private function drawIcon():void {
