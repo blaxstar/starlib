@@ -21,15 +21,16 @@ package net.blaxstar.starlib.components {
 
         override public function init():void {
             _card = new Card(this);
-            _list = new List(this);
+            _list = new List(_card);
             _context_directory = new Dictionary();
-
+            _current_context = "default";
             _card.setSize(50, PADDING);
             super.init();
         }
 
         override public function draw(e:Event = null):void {
-            _card.draw();
+            _list.draw();
+            _card.setSize(_list.width, _list.height);
         }
 
         public function add_context_item(label:String, action:Function, context:String = 'default'):void {
@@ -46,38 +47,43 @@ package net.blaxstar.starlib.components {
         }
 
         public function add_context(context_id:String):void {
-          if (has_context(context_id)) {
-            DebugDaemon.write_log("cannot add context: the context name already exists in this object!", DebugDaemon.ERROR_GENERIC);
-            return;
-          } else {
-            _context_directory[context_id] = [];
-          }
+            if (has_context(context_id)) {
+                DebugDaemon.write_log("cannot add context: the context name already exists in this object!", DebugDaemon.ERROR_GENERIC);
+                return;
+            } else {
+                _context_directory[context_id] = [];
+            }
         }
 
         public function has_context(context_id:String):Boolean {
-          return _context_directory[context_id];
+            return _context_directory[context_id];
         }
 
         public function set_context(context_id:String):void {
-          if (has_context(context_id)) {
-            _current_context = context_id;
+            if (has_context(context_id)) {
+                _current_context = context_id;
 
-            if (_list.has_cached_group(context_id)) {
-              _list.set_from_cache(context_id);
+                if (_list.has_cached_group(context_id)) {
+                    _list.set_from_cache(context_id);
+                } else {
+                    DebugDaemon.write_log("failed to set context: the context was not registered to this menu! got: %s", DebugDaemon.WARN, context_id);
+                }
             } else {
-              DebugDaemon.write_log("failed to set context: the context was not registered to this menu! got: %s", DebugDaemon.WARN, context_id);
+                DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", DebugDaemon.ERROR_GENERIC, context_id);
             }
-          } else {
-            DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! got: %s", DebugDaemon.ERROR_GENERIC, context_id);
-          }
         }
 
         public function show():void {
-          visible = true;
+            _card.visible = true;
+            _list.show_items();
         }
 
-        public function hide():void {
-          visible = false;
+        public function hide(cache_list_to_context:Boolean = false):void {
+            if (cache_list_to_context) {
+                _list.cache_current_list(_current_context);
+            }
+            _list.hide_items();
+            _card.visible = false;
         }
 
     }

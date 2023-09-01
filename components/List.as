@@ -148,7 +148,7 @@ package net.blaxstar.starlib.components {
                 if (!(items[i] is Array)) {
                     DebugDaemon.write_log("cannot multi add items to list: an item is of an invalid type!", DebugDaemon.ERROR_MISUSE);
                     return;
-                } else if (!((items[i] as Array).length !== 2)) {
+                } else if (((items[i] as Array).length !== 2)) {
                     DebugDaemon.write_log("cannot multi add items to list: one of the parameters are invalid! got: %s", DebugDaemon.ERROR_MISUSE, StringUtil.from_array(items[i]));
                     return;
                 }
@@ -160,7 +160,9 @@ package net.blaxstar.starlib.components {
                     return;
                 }
 
-                var list_item:ListItem = new ListItem(current_item[0], current_item[1]);
+                var list_item:ListItem = new ListItem();
+                list_item.label = current_item[0];
+                list_item.on_click.add(current_item[1]);
                 add_item(list_item);
             }
         }
@@ -192,7 +194,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function cache_current_list(group_name:String):void {
-            if (!(_group_cache[group_name])) {
+            if (!has_cached_group(group_name)) {
                 _group_cache[group_name] = [];
             }
 
@@ -205,10 +207,11 @@ package net.blaxstar.starlib.components {
         public function set_from_cache(group_name:String):void {
             if (has_cached_group(group_name)) {
                 clear();
-                var group:Vector.<ListItem> = _group_cache[group_name] as Vector.<ListItem>;
+                var group:Array = _group_cache[group_name] as Array;
 
                 for (var i:uint = 0; i < group.length; i++) {
-                    add_item(group[i]);
+                    _items.push(group[i]);
+                    _item_container.addChild(group[i]);
                 }
             }
             draw();
@@ -242,6 +245,7 @@ package net.blaxstar.starlib.components {
 
         public function clear():void {
             _items.length = 0;
+            _item_container.removeChildren();
             draw();
         }
 
