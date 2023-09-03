@@ -60,7 +60,7 @@ package net.blaxstar.starlib.components {
 
       _dialogCard = new Card(this, 0, 0, false);
       _textContainer = new VerticalBox(null, PADDING, PADDING);
-      _dialogCard.addChildNative(_textContainer);
+      _dialogCard.add_child_native(_textContainer);
       _titlePT = new PlainText(_textContainer, 0, 0, _titleString);
       _titlePT.enabled = false;
       _messagePT = new PlainText(_textContainer, 0, 0, _messageString);
@@ -84,15 +84,15 @@ package net.blaxstar.starlib.components {
       super.draw(e);
     }
 
-    override public function setSize(w:Number, h:Number):void {
-      _dialogCard.setSize(w, h);
-      super.setSize(w,h);
+    override public function set_size(w:Number, h:Number):void {
+      _dialogCard.set_size(w, h);
+      super.set_size(w,h);
     }
 
     /** END INTERFACE ===================== */
 
     public function addComponent(val:DisplayObject):DisplayObject {
-      return _dialogCard.addChildToContainer(val);
+      return _dialogCard.add_child_to_container(val);
     }
 
     public function set title(val:String):void {
@@ -118,11 +118,11 @@ package net.blaxstar.starlib.components {
     }
 
     public function set viewableItems(val:uint):void {
-      _dialogCard.viewableItems = val;
+      _dialogCard.viewable_items = val;
     }
 
     public function set maskThreshold(val:Number):void {
-      _dialogCard.maskThreshold = val;
+      _dialogCard.mask_threshold = val;
     }
 
     public function get draggable():Boolean {
@@ -134,7 +134,7 @@ package net.blaxstar.starlib.components {
     }
 
     public function addOption(name:String, action:Function = null, emphasis:uint = OPTION_EMPHASIS_LOW):Button {
-      var b:Button = new Button(_dialogCard.optionContainer, 0, 0, name);
+      var b:Button = new Button(_dialogCard.option_container, 0, 0, name);
       if (action != null)
         b.addClickListener(action);
       if (emphasis == OPTION_EMPHASIS_LOW) {
@@ -162,7 +162,7 @@ package net.blaxstar.starlib.components {
     }
 
     public function removeOptions():void {
-      _dialogCard.optionContainer.removeChildren();
+      _dialogCard.option_container.removeChildren();
     }
 
     public function get active():Boolean {
@@ -170,11 +170,11 @@ package net.blaxstar.starlib.components {
     }
 
     public function get componentContainer():VerticalBox {
-      return _dialogCard.componentContainer;
+      return _dialogCard.component_container;
     }
 
     public function get optionContainer():HorizontalBox {
-      return _dialogCard.optionContainer;
+      return _dialogCard.option_container;
     }
 
     private function onAddedToStage(e:Event):void {

@@ -145,11 +145,11 @@ package net.blaxstar.starlib.components {
       _doc.parse(svgString);
     }
 
-    override public function setSize(w:Number, h:Number):void {
+    override public function set_size(w:Number, h:Number):void {
       if (!_isRendered) {
-        queueFunction(arguments.callee, w, h);
+        queue_function(arguments.callee, w, h);
       }
-      super.setSize(w, h);
+      super.set_size(w, h);
     }
 
     public function get document():SVGDocument {

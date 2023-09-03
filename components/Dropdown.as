@@ -50,7 +50,7 @@ package net.blaxstar.starlib.components {
 
       _dropdownButton = new Button(this, _displayLabel.width, 0);
       _dropdownButton.icon = Icon.EXPAND_DOWN;
-      _dropdownButton.setSize(MIN_HEIGHT, MIN_HEIGHT);
+      _dropdownButton.set_size(MIN_HEIGHT, MIN_HEIGHT);
 
       var buttonIcon:Icon = _dropdownButton.getIcon();
       buttonIcon.setColor(Style.TEXT.value.toString(16));

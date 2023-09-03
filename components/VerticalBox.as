@@ -144,7 +144,7 @@
         scrollRect = new Rectangle(0, 0, _width_, value);
       }
       else
-        queueFunction(arguments.callee, value);
+        queue_function(arguments.callee, value);
     }
 
     /**
@@ -154,7 +154,7 @@
      */
     public function set max_visible(value:Number):void {
       if (value > numChildren) {
-        queueFunction(arguments.callee, value);
+        queue_function(arguments.callee, value);
         return;
       }
       var lastChild:DisplayObject = getChildAt(value - 1);

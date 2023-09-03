@@ -20,17 +20,17 @@ package net.blaxstar.starlib.components {
         }
 
         override public function init():void {
-            _card = new Card(this);
-            _list = new List(_card);
+            //_card = new Card(this);
+            _list = new List(this);
             _context_directory = new Dictionary();
             _current_context = "default";
-            _card.setSize(50, PADDING);
+            //_card.width = 50;
+            //_card.height = PADDING;
             super.init();
         }
 
         override public function draw(e:Event = null):void {
-            _list.draw();
-            _card.setSize(_list.width, _list.height);
+            //_card.set_size(_list.width, _list.height);
         }
 
         public function add_context_item(label:String, action:Function, context:String = 'default'):void {
@@ -44,6 +44,7 @@ package net.blaxstar.starlib.components {
             } else {
                 (_context_directory[context] as Array).push(item);
             }
+            draw();
         }
 
         public function add_context(context_id:String):void {
@@ -74,16 +75,19 @@ package net.blaxstar.starlib.components {
         }
 
         public function show():void {
-            _card.visible = true;
             _list.show_items();
         }
 
         public function hide(cache_list_to_context:Boolean = false):void {
-            if (cache_list_to_context) {
+            if (cache_list_to_context && !_list.has_cached_group(_current_context)) {
                 _list.cache_current_list(_current_context);
             }
+
             _list.hide_items();
-            _card.visible = false;
+        }
+
+        public function clear_selection():void {
+          _list.deselect_all_items();
         }
 
     }

@@ -41,7 +41,7 @@ package net.blaxstar.starlib.components {
       drawIcon();
       drawLabel();
 
-      applyShadow();
+      apply_shadow();
       setChildIndex(_chipSurface, 0);
       super.add_children();
     }
@@ -50,7 +50,7 @@ package net.blaxstar.starlib.components {
       _closeButton ||= new Button(_layoutBox, 0, 0);
       _closeButton.icon = Icon.CLOSE;
       _closeButton.getIcon().setColor('#' + Style.TEXT.value.toString(16));
-      _closeButton.setSize(16, 16);
+      _closeButton.set_size(16, 16);
       _closeButton.on_click.add(removeChip);
     }
 

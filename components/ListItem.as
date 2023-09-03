@@ -21,7 +21,7 @@ package net.blaxstar.starlib.components {
         private const MIN_WIDTH:uint = 100;
 
         private const PADDING:uint = 7;
-        static private var _procid:uint = 0;
+        static private var _proc_id:uint = 0;
 
         // public
         public var linkage_id:uint;
@@ -40,7 +40,7 @@ package net.blaxstar.starlib.components {
         public var data:Object;
 
         public function ListItem(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = "New Item") {
-            linkage_id = _procid++;
+            linkage_id = _proc_id++;
             _label_string = label;
             super(parent, xpos, ypos);
         }
@@ -55,7 +55,7 @@ package net.blaxstar.starlib.components {
         override public function init():void {
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
-            _text_format = Font.BUTTON;
+            _text_format = Font.SUBTITLE_1;
             mouseChildren = false;
             buttonMode = useHandCursor = true;
             super.init();
@@ -81,7 +81,8 @@ package net.blaxstar.starlib.components {
          */
         override public function draw(e:Event = null):void {
             var g:Graphics = _background.graphics;
-            g.beginFill(_fill_color, 0);
+            g.clear();
+            g.beginFill(0, 0);
             g.drawRect(0, 0, _width_, _height_);
             g.endFill();
 
@@ -93,15 +94,6 @@ package net.blaxstar.starlib.components {
 
         public function get label_component():PlainText {
             return _label;
-        }
-
-        public function get fill_color():uint {
-            return _fill_color;
-        }
-
-        public function set fill_color(val:uint):void {
-            _fill_color = val;
-            commit();
         }
 
         public function get on_click():NativeSignal {

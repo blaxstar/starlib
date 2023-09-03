@@ -50,6 +50,7 @@ package net.blaxstar.starlib.components {
          * @param ypos  y position of the new component.
          */
         public function Component(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
+          super();
             // component tracking
             if (lscmp == null) {
                 lscmp = new Vector.<Component>();
@@ -105,7 +106,7 @@ package net.blaxstar.starlib.components {
          * @param func  function to be queued.
          * @param ...rest an array of parameters required by the function.
          */
-        protected function queueFunction(func:Function, ... rest):void {
+        protected function queue_function(func:Function, ... rest):void {
             _function_queue.push(func);
             if (!rest || !rest.length) {
                 _param_queue.push([]);
@@ -176,7 +177,7 @@ package net.blaxstar.starlib.components {
          * @param    w    new width of the component.
          * @param    h    new height of the component.
          */
-        public function setSize(w:Number, h:Number):void {
+        public function set_size(w:Number, h:Number):void {
             _width_ = w;
             _height_ = h;
             draw();
@@ -186,7 +187,7 @@ package net.blaxstar.starlib.components {
         /**
          * apply a pre-created dropshadow filter effect on the component.
          */
-        public function applyShadow():void {
+        public function apply_shadow():void {
             filters = [new DropShadowFilter(4, 90, 0, 0.3, 7, 7, .6)];
         }
 

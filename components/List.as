@@ -1,7 +1,6 @@
 package net.blaxstar.starlib.components {
     import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
-    import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.utils.Dictionary;
@@ -9,7 +8,8 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.Style;
     import debug.DebugDaemon;
     import net.blaxstar.starlib.utils.StringUtil;
-    import net.blaxstar.starlib.utils.ArrayUtil;
+    import net.blaxstar.starlib.style.Color;
+    import thirdparty.com.greensock.TweenLite;
 
     /**
      * ...
@@ -25,7 +25,8 @@ package net.blaxstar.starlib.components {
         private var _items_cache:Dictionary;
         private var _item_container:VerticalBox;
         private var _max_visible:uint;
-        private var _selection_indicator:Sprite;
+        private var _selection_indicator:LED;
+        private var _background_card:Card;
         private var _selected_item:ListItem;
         private var _use_selection_indicator:Boolean;
         private var _alternating_colors:Boolean;
@@ -51,8 +52,11 @@ package net.blaxstar.starlib.components {
         override public function add_children():void {
             _item_container = new VerticalBox();
             _item_container.spacing = 0;
+            _background_card = new Card(this, 0, 0, false);
+            _background_card.width = _list_width;
             super.addChild(_item_container);
             super.add_children();
+            _item_container.addEventListener(MouseEvent.RELEASE_OUTSIDE, on_item_rollout);
         }
 
         /**
@@ -65,35 +69,16 @@ package net.blaxstar.starlib.components {
 
             for (var i:uint; i < _items.length; i++) {
                 _item_container.addChild(_items[i]);
-                if (_alternating_colors) {
-                    if (i % 2 == 0)
-                        _items[i].fill_color = Style.SURFACE.tint().value;
-                }
-                _width_ = Math.max(_list_width, _items[i].label_component.width + 10);
-
+                _width_ = Math.max(_list_width, _items[i].label_component.width + PADDING);
             }
-            _height_ = _item_container.height;
+
+            _height_ = _background_card.height = _item_container.height;
             deselect_all_items();
             super.draw();
         }
 
         override public function update_skin():void {
             _default_fill = Style.SURFACE.value;
-        }
-
-
-        override public function addChild(child:DisplayObject):DisplayObject {
-            if (child is ListItem) {
-                add_item(child as ListItem);
-            }
-            return child;
-        }
-
-        override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
-            if (child is ListItem) {
-                add_item_at(child as ListItem, index);
-            }
-            return child;
         }
 
         public function add_item(list_item:ListItem):List {
@@ -104,7 +89,7 @@ package net.blaxstar.starlib.components {
             if (list_item != null) {
 
                 _items.push(list_item);
-                list_item.setSize(_list_width, _item_height + PADDING);
+                list_item.set_size(_list_width, _item_height + PADDING);
                 list_item.on_resize_signal.add(on_item_resize);
                 list_item.on_rollover.add(on_item_rollover);
                 list_item.on_rollout.add(on_item_rollout);
@@ -263,19 +248,15 @@ package net.blaxstar.starlib.components {
             return _items[itemIndex];
         }
 
-        / * PRIVATE METHODS * /
-
-        private function deselect_all_items():void {
-            for (var i:uint = 0; i < _items.length; i++) {
-                _items[i].fill_color = _default_fill;
-            }
-            applyShadow();
+        public function deselect_all_items():void {
+            _background_card.clear_highlight();
         }
 
+        / * PRIVATE METHODS * /
 
-        private function select_item(li:ListItem):void {
-            li.fill_color = (Style.CURRENT_THEME == Style.DARK) ? Style.GLOW.value : Style.GLOW.tint().value;
-            applyShadow();
+        private function select_item(list_item:ListItem):void {
+            _background_card.mouseChildren = false;
+            _background_card.highlight_region(list_item.x, list_item.y, list_item.width, list_item.height);
         }
 
         / * GETTERS, SETTERS * /
@@ -290,8 +271,10 @@ package net.blaxstar.starlib.components {
         }
 
         public function set item_height(val:Number):void {
-            if (val > 0)
+            if (val > 0) {
                 _item_height = val;
+                _background_card.height = _item_height;
+            }
             draw();
         }
 
@@ -315,9 +298,9 @@ package net.blaxstar.starlib.components {
         }
 
         private function on_item_rollover(e:MouseEvent = null):void {
-            var li:ListItem = (e.currentTarget as ListItem);
+            var list_item:ListItem = (e.currentTarget as ListItem);
             deselect_all_items();
-            select_item(li);
+            select_item(list_item);
         }
 
         private function on_item_click(e:MouseEvent):void {
