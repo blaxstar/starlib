@@ -43,6 +43,8 @@ package net.blaxstar.starlib.components {
             _width_ = _list_width = 200;
             _height_ = _item_height = 35;
             _items = new Vector.<ListItem>();
+            _group_cache = new Dictionary();
+            _items_cache = new Dictionary();
             super.init();
         }
 
@@ -82,10 +84,6 @@ package net.blaxstar.starlib.components {
         }
 
         public function add_item(list_item:ListItem):List {
-            if (!_group_cache) {
-                _group_cache = new Dictionary();
-            }
-
             if (list_item != null) {
 
                 _items.push(list_item);

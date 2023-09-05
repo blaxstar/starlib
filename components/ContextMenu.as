@@ -15,7 +15,7 @@ package net.blaxstar.starlib.components {
         private var _current_context:String;
         private var _context_directory:Dictionary;
 
-        public function ContextMenu(parent:DisplayObjectContainer, xpos:uint = 0, ypos:uint = 0) {
+        public function ContextMenu(parent:DisplayObjectContainer = null, xpos:uint = 0, ypos:uint = 0) {
             super(parent, xpos, ypos);
         }
 
@@ -34,17 +34,31 @@ package net.blaxstar.starlib.components {
         }
 
         public function add_context_item(label:String, action:Function, context:String = 'default'):void {
+
             var item:ListItem = new ListItem();
             item.label = label;
             item.on_click.add(action);
-            _list.multi_add([[label, action]]);
 
             if (!has_context(context)) {
                 _context_directory[context] = [item];
             } else {
                 (_context_directory[context] as Array).push(item);
             }
+
+            if (_list.num_items > 0 && _current_context !== context) {
+                _list.cache_current_list(_current_context);
+                _list.clear();
+            }
+
+            _list.add_item(item);
+            _current_context = context;
             draw();
+        }
+
+        public function add_context_array(context_items:Array, context:String, on_click:Function):void {
+            for (var i:uint = 0; i < context_items.length; i++) {
+                add_context_item(context_items[i], on_click, context);
+            }
         }
 
         public function add_context(context_id:String):void {
@@ -57,7 +71,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function has_context(context_id:String):Boolean {
-            return _context_directory[context_id];
+            return _context_directory[context_id] != null;
         }
 
         public function set_context(context_id:String):void {
@@ -68,6 +82,7 @@ package net.blaxstar.starlib.components {
                     _list.set_from_cache(context_id);
                 } else {
                     DebugDaemon.write_log("failed to set context: the context was not registered to this menu! got: %s", DebugDaemon.WARN, context_id);
+
                 }
             } else {
                 DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", DebugDaemon.ERROR_GENERIC, context_id);
@@ -75,6 +90,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function show():void {
+            _list.set_from_cache(_current_context);
             _list.show_items();
         }
 
@@ -82,12 +98,11 @@ package net.blaxstar.starlib.components {
             if (cache_list_to_context && !_list.has_cached_group(_current_context)) {
                 _list.cache_current_list(_current_context);
             }
-
             _list.hide_items();
         }
 
         public function clear_selection():void {
-          _list.deselect_all_items();
+            _list.deselect_all_items();
         }
 
     }
