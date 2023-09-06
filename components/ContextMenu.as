@@ -7,6 +7,7 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.components.ListItem;
     import flash.utils.Dictionary;
     import debug.DebugDaemon;
+    import geom.Point;
 
     public class ContextMenu extends Component {
 
@@ -20,12 +21,9 @@ package net.blaxstar.starlib.components {
         }
 
         override public function init():void {
-            //_card = new Card(this);
             _list = new List(this);
             _context_directory = new Dictionary();
             _current_context = "default";
-            //_card.width = 50;
-            //_card.height = PADDING;
             super.init();
         }
 
@@ -104,6 +102,5 @@ package net.blaxstar.starlib.components {
         public function clear_selection():void {
             _list.deselect_all_items();
         }
-
     }
 }
