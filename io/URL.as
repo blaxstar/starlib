@@ -1,8 +1,11 @@
 package net.blaxstar.starlib.io {
-    import flash.net.URLLoader;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import net.blaxstar.starlib.networking.Connection;
     import debug.DebugDaemon;
+
+    import flash.net.URLLoader;
+
+    import net.blaxstar.starlib.networking.Connection;
+
+    import thirdparty.org.osflash.signals.natives.NativeSignal;
 
     /**
      * TODO: documentation
