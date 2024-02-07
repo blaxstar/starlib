@@ -9,7 +9,6 @@ package net.blaxstar.starlib.components {
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import net.blaxstar.starlib.style.RGBA;
-    import net.blaxstar.starlib.math.Arithmetic;
     import flash.geom.Rectangle;
     import flash.display.Graphics;
 
@@ -18,8 +17,8 @@ package net.blaxstar.starlib.components {
      * @author SnaiLegacy
      */
     public class Card extends Component {
-        static private const MIN_WIDTH:uint = 600;
-        static private const MIN_HEIGHT:uint = 600;
+        static private const MIN_WIDTH:uint = 200;
+        static private const MIN_HEIGHT:uint = 200;
 
         private var _card_background:Sprite;
         private var _component_container:VerticalBox;
@@ -55,6 +54,7 @@ package net.blaxstar.starlib.components {
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
             _color_overriden = false;
+
             _component_container = new VerticalBox();
             _option_container = new HorizontalBox();
             _card_background = new Sprite();
@@ -90,8 +90,8 @@ package net.blaxstar.starlib.components {
             // auto resize if enabled, and there are children present
 
             if (_auto_resize) {
-                var totalW:Number = (PADDING * 2) + Math.max(_component_container.width, _option_container.width);
-                var totalH:Number = (PADDING * 2) + _component_container.height + _option_container.height;
+                var totalW:Number = (PADDING * 4) + Math.max(_component_container.width, _option_container.width);
+                var totalH:Number = (PADDING * 4) + _component_container.height + _option_container.height;
 
                 if (totalW > MIN_WIDTH) {
                     _width_ = totalW;
@@ -102,7 +102,7 @@ package net.blaxstar.starlib.components {
             }
 
             draw_background();
-            _option_container.move(PADDING, _height_ - PADDING - _option_container.height);
+            _option_container.move(PADDING, _height_ - PADDING - _option_container.height - PADDING);
 
             super.draw();
         }
@@ -154,7 +154,11 @@ package net.blaxstar.starlib.components {
 
         public function highlight_region(x: uint, y:uint, width:uint, height:uint):void {
             _region_highlighted = true;
-            _highlight_region = new Rectangle(x,y,width,height);
+            _highlight_region ||= new Rectangle();
+            _highlight_region.x = x;
+            _highlight_region.y = y;
+            _highlight_region.width = width;
+            _highlight_region.height = height;
             draw_background();
         }
 
@@ -189,6 +193,7 @@ package net.blaxstar.starlib.components {
 
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
+            draw();
         }
 
         public function set draggable(val:Boolean):void {
@@ -245,8 +250,7 @@ package net.blaxstar.starlib.components {
             _on_mouse_down_signal.add(on_mouse_down);
         }
 
-        override public function destroy(e:Event = null):void {
-            super.destroy(e);
+        override public function destroy():void {
             if (_on_mouse_down_signal) {
                 _on_mouse_down_signal.removeAll();
             }

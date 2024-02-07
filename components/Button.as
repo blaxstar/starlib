@@ -176,7 +176,7 @@ package net.blaxstar.starlib.components {
       _displayIcon.move(((_width_ / 2) - (_displayIcon.width / 2)), ((_height_ / 2) - (_displayIcon.height / 2)));
     }
 
-    public function getIcon():Icon {
+    public function get_icon():Icon {
       return _displayIcon;
     }
 
@@ -243,7 +243,7 @@ package net.blaxstar.starlib.components {
       TweenLite.to(_background, 0.3, {alpha: 0});
     }
 
-    override public function destroy(e:Event = null):void {
+    override public function destroy():void {
       _onRollOver.removeAll();
       _onRollOut.removeAll();
       _onMouseDown.removeAll();

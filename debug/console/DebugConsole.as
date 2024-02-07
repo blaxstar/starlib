@@ -15,55 +15,61 @@ package net.blaxstar.starlib.debug.console {
   import net.blaxstar.starlib.io.IOUtil;
   import net.blaxstar.starlib.style.Color;
   import net.blaxstar.starlib.utils.StringUtil;
+  import net.blaxstar.starlib.io.XLoader;
+  import net.blaxstar.starlib.io.URL;
 
   public class DebugConsole extends Sprite {
     static private var _data:Dictionary;
-    private var _saveFile:File;
+    private var _save_file:URL;
     private var _filePath:String;
 
-    private var _inputField:InputTextField;
+    private var _input_engine:InputEngine;
+    private var _input_field:InputTextField;
+    private var _loader:XLoader;
     private var _outputField:PlainText;
     private var _prefixText:PlainText;
-    private var _inputEngine:InputEngine;
-    private var _commandHistoryLength:Number;
-    private var _currentHistoryIndex:int;
+    private var _command_history_length:Number;
+    private var _current_history_index:int;
     private var _tmpHistorySave:String;
     private var _isShowing:Boolean;
     private var _navigatingHistory:Boolean;
 
+    // * CONSTRUCTOR * /////////////////////////////////////////////////////////
     public function DebugConsole(stage:Stage) {
 
       _filePath = File.applicationDirectory.nativePath;
-      _saveFile = new File(_filePath).resolvePath('console.dat');
-      _inputEngine = new InputEngine(stage);
-      _isShowing = false;
-      _currentHistoryIndex = -1;
-      _commandHistoryLength = 0;
+      _save_file = new URL(new File(_filePath).resolvePath('console.dat').toString());
+      _input_engine = new InputEngine(stage);
+      _loader = new XLoader();
+
       _tmpHistorySave = "";
+      _current_history_index = -1;
+      _command_history_length = 0;
       _navigatingHistory = false;
+      _isShowing = false;
 
       if (saveExists)
         loadSave();
       else
-        createSave();
+        create_save();
 
       _prefixText = new PlainText(this, 0, 0, 'debug | ');
       _prefixText.color = Color.PRODUCT_RED.value;
       _outputField = new PlainText(this, 0, 0);
       _outputField.color = Color.PRODUCT_GREEN.value;
-      _inputField = new InputTextField(this, _prefixText.x + _prefixText.textWidth, 0, '');
-      _inputField.color = Color.EGGSHELL.value;
-      _inputField.showingUnderline = false;
+      _input_field = new InputTextField(this, _prefixText.x + _prefixText.textWidth, 0, '');
+      _input_field.color = Color.EGGSHELL.value;
+      _input_field.showing_underline = false;
 
-      _inputField.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);
-      _inputField.addEventListener(Event.CHANGE, onTextFieldChange);
+      _input_field.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);
+      _input_field.addEventListener(Event.CHANGE, onTextFieldChange);
 
-      hideConsole();
+      hide_console();
 
       var addcom:ConsoleCommand = new ConsoleCommand('add', add);
       var subcom:ConsoleCommand = new ConsoleCommand('sub', subtract);
       var grepcom:ConsoleCommand = new ConsoleCommand('grep', grep);
-      var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clearHistory);
+      var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clear_history);
       addCommand(addcom);
       addCommand(subcom);
       addCommand(grepcom);
@@ -72,95 +78,100 @@ package net.blaxstar.starlib.debug.console {
       addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
     }
 
+    // * PUBLIC * //////////////////////////////////////////////////////////
+
     public function addCommand(com:ConsoleCommand):void {
       commandDictionary[com.name] = com;
     }
 
-    public function addInputToHistory(command:String):void {
+    public function add_input_to_history(command:String):void {
       var trimmedCommand:String = StringUtil.trim(command);
-      var commandIndex:int = commandHistory.indexOf(trimmedCommand);
+      var commandIndex:int = command_history.indexOf(trimmedCommand);
 
-      if (_navigatingHistory && _commandHistoryLength) {
-        commandHistory.removeAt(_currentHistoryIndex);
+      if (_navigatingHistory && _command_history_length) {
+        command_history.removeAt(_current_history_index);
       }
 
-      if (commandHistory.length > historyMax) {
-        commandHistory.shift();
+      if (command_history.length > historyMax) {
+        command_history.shift();
       }
 
-      _data.commandHistory.push(trimmedCommand);
-      _commandHistoryLength = commandHistory.length;
+      _data.command_history.push(trimmedCommand);
+      _command_history_length = command_history.length;
 
       writeSave();
     }
 
-    public function toggleConsole():void {
+    public function toggle_console():void {
       if (_isShowing) {
-        hideConsole();
+        hide_console();
       }
       else {
-        showConsole();
+        show_console();
       }
     }
 
-    public function showConsole():void {
+    public function show_console():void {
       if (!visible) {
 
         visible = true;
         stage.stageFocusRect = false;
-        stage.focus = _inputField.input;
+        stage.focus = _input_field.input_target;
 
-        _inputEngine.addKeyboardDelegate(onKeyPressInConsole, InputEngine.KEYDOWN);
+        _input_engine.add_keyboard_delegate(onKeyPressInConsole, InputEngine.KEYDOWN);
       }
     }
-    public function hideConsole():void {
+    public function hide_console():void {
       if (visible) {
         visible = false;
-        _inputEngine.removeKeyboardDelegates(onKeyPressInConsole);
+        _input_engine.remove_keyboard_delegates(onKeyPressInConsole);
         resetHistoryNavigation();
       }
     }
 
     public function clearConsole():void {
-      _inputField.text = "";
+      _input_field.text = "";
     }
 
     public function loadSave():void {
-      _data = IOUtil.loadFile(_saveFile, false).readObject() as Dictionary;
-      _commandHistoryLength = commandHistory.length;
+      _loader.queue_files(_save_file);
+      _loader.ON_COMPLETE.add(function ():void {
+          _command_history_length = command_history.length;
+          _data = _loader.get_loaded_data(_save_file.name) as Dictionary;
+        });
 
     }
     public function writeSave():void {
-      IOUtil.exportFile(_data, 'console', '.dat', _filePath, null, true);
+      IOUtil.exportFile(_data, 'console', '.dat', _filePath, null);
     }
 
     public function clearSave():void {
       for (var key:String in _data) {
         delete _data[key];
       }
-      createSave();
+      create_save();
     }
 
-    // PRIVATE //////////////////////////////////////////////////
+    // * PRIVATE * /////////////////////////////////////////////////////////////
 
-    private function createSave():void {
+    private function create_save():void {
 
       _data ||= new Dictionary();
-      _data.commandDictionary = new Dictionary();
-      _data.commandHistory = [];
+      _data.command_dictionary = new Dictionary();
+      _data.command_history = [];
 
       historyMax = 100;
-      openKey = InputEngine.KEYS.TILDE;
-      executeKey = InputEngine.KEYS.ENTER;
-      prevHistoryKey = InputEngine.KEYS.UP;
-      nextHistoryKey = InputEngine.KEYS.DOWN;
+      openKey = _input_engine.keys.TILDE;
+      execute_key = _input_engine.keys.ENTER;
+      prevHistoryKey = _input_engine.keys.UP;
+      nextHistoryKey = _input_engine.keys.DOWN;
 
       writeSave();
     }
 
     private function add(...args):Number {
       var sum:Number = 0;
-      for (var i:uint = 0; i < args.length; i++) {
+      for (var i:uint = 0;i < args.length;i++) {
         var parsedNumber:Number = parseFloat(args[i]);
         if (isNaN(parsedNumber))
           continue;
@@ -173,7 +184,7 @@ package net.blaxstar.starlib.debug.console {
     private function subtract(...args):Number {
       var diff:Number = args[0];
 
-      for (var i:uint = 1; i < args.length; i++) {
+      for (var i:uint = 1;i < args.length;i++) {
         var parsedNumber:Number = parseFloat(args[i]);
         if (isNaN(parsedNumber))
           continue;
@@ -192,151 +203,152 @@ package net.blaxstar.starlib.debug.console {
 
     }
 
-    private function clearHistory():void {
-      _currentHistoryIndex = -1;
-      _commandHistoryLength = 0;
-      commandHistory = [];
-      hideConsole();
+    private function clear_history():void {
+      _current_history_index = -1;
+      _command_history_length = 0;
+      command_history = [];
+      hide_console();
       writeSave();
     }
 
-    private function printToConsole(...rest):void {
+    private function print_to_console(...rest):void {
       var outString:String = "";
       if (rest[0] is Array) {
         rest = rest[0];
       }
-      for (var i:uint = 0; i < rest.length; i++) {
+      for (var i:uint = 0;i < rest.length;i++) {
         outString += rest[i];
       }
       _outputField.text = outString;
     }
 
     private function resetHistoryNavigation():void {
-      _currentHistoryIndex = -1;
+      _current_history_index = -1;
       _navigatingHistory = false;
       clearConsole();
       _tmpHistorySave = "";
     }
 
-    // GETTERS, SETTERS ///////////////////////////////////////////
+    // * GETTERS, SETTERS * ////////////////////////////////////////////////////
 
     public function get previousCommand():String {
-      if (_currentHistoryIndex < 0) {
-        _currentHistoryIndex = _commandHistoryLength - 1;
-        return currentCommand;
+      if (_current_history_index < 0) {
+        _current_history_index = _command_history_length - 1;
+        return current_command;
       }
 
-      _currentHistoryIndex--;
-      return currentCommand;
+      _current_history_index--;
+      return current_command;
     }
 
     public function get nextCommand():String {
-      if (_currentHistoryIndex >= _commandHistoryLength - 1) {
-        _currentHistoryIndex = -1;
+      if (_current_history_index >= _command_history_length - 1) {
+        _current_history_index = -1;
         _navigatingHistory = false;
-        return currentCommand;
+        return current_command;
       }
 
-      _currentHistoryIndex++;
-      return currentCommand;
+      _current_history_index++;
+      return current_command;
     }
 
-    public function get currentCommand():String {
-      if (_currentHistoryIndex >= 0 && _currentHistoryIndex < _commandHistoryLength) {
-        return commandHistory[_currentHistoryIndex];
+    public function get current_command():String {
+      if (_current_history_index >= 0 && _current_history_index < _command_history_length) {
+        return command_history[_current_history_index];
       }
       return _tmpHistorySave;
     }
 
     static public function get commandDictionary():Dictionary {
-      return _data.commandDictionary as Dictionary;
+      return _data.command_dictionary as Dictionary;
     }
 
-    static public function get commandHistory():Array {
-      return _data.commandHistory;
+    static public function get command_history():Array {
+      return _data.command_history;
     }
 
-    static public function set commandHistory(val:Array):void {
-      _data.commandHistory = val;
+    static public function set command_history(val:Array):void {
+      _data.command_history = val;
     }
 
     public function get historyMax():uint {
-      return _data.historyMax;
+      return _data.history_max;
     }
 
     public function set historyMax(val:uint):void {
-      _data.historyMax = val;
+      _data.history_max = val;
     }
 
     public function get openKey():uint {
-      return _data.openKey;
+      return _data.open_key;
     }
 
     public function set openKey(val:uint):void {
-      _data.openKey = val;
+      _data.open_key = val;
     }
 
-    public function get executeKey():uint {
-      return _data.executeKey;
+    public function get execute_key():uint {
+      return _data.execute_key;
     }
 
-    public function set executeKey(val:uint):void {
-      _data.executeKey = val;
+    public function set execute_key(val:uint):void {
+      _data.execute_key = val;
     }
 
     public function get prevHistoryKey():uint {
-      return _data.prevHistoryKey;
+      return _data.previous_history_key;
     }
 
     public function set prevHistoryKey(val:uint):void {
-      _data.prevHistoryKey = val;
+      _data.previous_history_key = val;
     }
 
     public function get nextHistoryKey():uint {
-      return _data.nextHistoryKey;
+      return _data.next_history_key;
     }
 
     public function set nextHistoryKey(val:uint):void {
-      _data.nextHistoryKey = val;
+      _data.next_history_key = val;
     }
     public function get saveExists():Boolean {
-      return _saveFile.exists;
+      return _save_file.exists;
     }
 
     // DELEGATES ///////////////////////////////////////
+    private function on_save_loaded(e:Event):void {}
 
     private function onKeyPressInConsole(e:KeyboardEvent):void {
-      if (e.keyCode == executeKey) {
-        if (_inputField.text.replace(" ", "") == "") {
+      if (e.keyCode == execute_key) {
+        if (_input_field.text.replace(" ", "") == "") {
           return;
         }
 
-        addInputToHistory(_inputField.text.toLowerCase());
+        add_input_to_history(_input_field.text.toLowerCase());
 
         var pipeline:Pipe = new Pipe();
-        pipeline.parseCommandsFromString(_inputField.text.toLowerCase());
-        printToConsole(pipeline.run());
+        pipeline.parse_commands_from_string(_input_field.text.toLowerCase());
+        print_to_console(pipeline.run());
 
         resetHistoryNavigation();
       }
       else if (e.keyCode == prevHistoryKey) {
-        if (_currentHistoryIndex == 0) {
-          printToConsole(_currentHistoryIndex);
+        if (_current_history_index == 0) {
+          print_to_console(_current_history_index);
           return;
         }
         _navigatingHistory = true;
-        _inputField.text = previousCommand;
-        printToConsole(_currentHistoryIndex);
+        _input_field.text = previousCommand;
+        print_to_console(_current_history_index);
       }
       else if (e.keyCode == nextHistoryKey) {
-        if (_currentHistoryIndex == -1) {
-          printToConsole(_currentHistoryIndex);
+        if (_current_history_index == -1) {
+          print_to_console(_current_history_index);
           _navigatingHistory = false;
           return;
         }
         _navigatingHistory = true;
-        _inputField.text = nextCommand;
-        printToConsole(_currentHistoryIndex);
+        _input_field.text = nextCommand;
+        print_to_console(_current_history_index);
       }
     }
 
@@ -348,27 +360,27 @@ package net.blaxstar.starlib.debug.console {
       g.drawRect(0, 0, stage.stageWidth, 60);
       g.endFill();
 
-      _inputField.width = _outputField.width = stage.stageWidth;
-      _outputField.move(10, _inputField.height);
+      _input_field.width = _outputField.width = stage.stageWidth;
+      _outputField.move(10, _input_field.height);
 
-      _inputEngine.addKeyboardDelegate(onToggleKeyPress, InputEngine.KEYDOWN);
+      _input_engine.add_keyboard_delegate(onToggleKeyPress, InputEngine.KEYDOWN);
     }
 
     private function onConsoleFocusOut(event:FocusEvent):void {
-      hideConsole();
+      hide_console();
     }
 
     private function onToggleKeyPress(e:KeyboardEvent):void {
       if (e.keyCode == openKey) {
         if (!visible)
           e.preventDefault();
-        toggleConsole();
+        toggle_console();
       }
     }
 
     private function onTextFieldChange(e:Event):void {
       if (!_navigatingHistory) {
-        _tmpHistorySave = _inputField.text;
+        _tmpHistorySave = _input_field.text;
       }
     }
   }

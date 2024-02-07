@@ -6,14 +6,12 @@ package net.blaxstar.starlib.components {
     import flash.display.StageAlign;
     import flash.display.StageScaleMode;
     import flash.events.Event;
-    import flash.events.IEventDispatcher;
     import flash.filters.DropShadowFilter;
 
     import net.blaxstar.starlib.math.Arithmetic;
 
     import thirdparty.org.osflash.signals.Signal;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import net.blaxstar.starlib.style.Style;
 
     /**
      * Base Component Class.
@@ -31,6 +29,7 @@ package net.blaxstar.starlib.components {
 
         private var _function_queue:Vector.<Function>;
         private var _param_queue:Vector.<Array>;
+        private var _dropshadow_filter:DropShadowFilter;
 
         protected var _id_:uint;
         protected var _width_:Number;
@@ -78,6 +77,8 @@ package net.blaxstar.starlib.components {
         public function init():void {
             _function_queue = new Vector.<Function>();
             _param_queue = new Vector.<Array>();
+            _dropshadow_filter = new DropShadowFilter(4, 90, 0, 0.3, 7, 7, .6);
+
             if (!on_enter_frame_signal) {
                 on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
             }
@@ -134,6 +135,7 @@ package net.blaxstar.starlib.components {
          */
         public function add_children():void {
             // trace('on added triggered from ' + this.toString());
+            commit();
         }
 
         /**
@@ -167,9 +169,9 @@ package net.blaxstar.starlib.components {
          * @param    xpos    new x position of the component.
          * @param    ypos    new y position of the component.
          */
-        public function move(xpos:Number, ypos:Number):void {
-            x = Arithmetic.round(xpos);
-            y = Arithmetic.round(ypos);
+        public function move(x_position:Number, y_position:Number):void {
+            x = Arithmetic.round(x_position);
+            y = Arithmetic.round(y_position);
         }
 
         /**
@@ -177,9 +179,10 @@ package net.blaxstar.starlib.components {
          * @param    w    new width of the component.
          * @param    h    new height of the component.
          */
-        public function set_size(w:Number, h:Number):void {
-            _width_ = w;
-            _height_ = h;
+        public function set_size(width:Number, height:Number):void {
+            _width_ = width;
+            _height_ = height;
+
             draw();
             on_resize_signal.dispatch(_resizeEvent_);
         }
@@ -188,7 +191,7 @@ package net.blaxstar.starlib.components {
          * apply a pre-created dropshadow filter effect on the component.
          */
         public function apply_shadow():void {
-            filters = [new DropShadowFilter(4, 90, 0, 0.3, 7, 7, .6)];
+            filters = [_dropshadow_filter];
         }
 
         /**
@@ -275,8 +278,8 @@ package net.blaxstar.starlib.components {
             return _enabled_;
         }
 
-        public function destroy(e:Event = null):void {
-            IEventDispatcher(e.currentTarget).removeEventListener(Event.REMOVED_FROM_STAGE, destroy);
+        public function destroy():void {
+
         }
 
     }

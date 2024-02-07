@@ -1,7 +1,7 @@
 package net.blaxstar.starlib.networking
 {
 import flash.system.Security;
-import debug.DebugDaemon;
+import net.blaxstar.starlib.debug.DebugDaemon;
 
 /**
 	 * ...
