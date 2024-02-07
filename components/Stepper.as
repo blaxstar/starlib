@@ -46,8 +46,8 @@ package net.blaxstar.starlib.components {
     }
 
     override public function update_skin():void {
-      _downButton.getIcon().setColor(Style.SECONDARY.value.toString());
-      _upButton.getIcon().setColor(Style.SECONDARY.value.toString());
+      _downButton.get_icon().set_color(Style.SECONDARY.value.toString());
+      _upButton.get_icon().set_color(Style.SECONDARY.value.toString());
     }
 
     private function stepUp(e:MouseEvent):void {

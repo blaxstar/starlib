@@ -152,8 +152,7 @@ package net.blaxstar.starlib.components {
       _textField.borderColor = Style.SECONDARY.value;
     }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
+    override public function destroy():void {
     }
 
   }

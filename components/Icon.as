@@ -103,7 +103,7 @@ package net.blaxstar.starlib.components {
       dispatchEvent(new Event('iconLoaded'));
       _isRendered = true;
       add_children();
-      on_added.addOnce(draw);
+      on_added_signal.addOnce(draw);
       _width_ = _doc.width;
       _height_ = _doc.height;
       _whRatio = _height_ / _width_;
@@ -128,7 +128,7 @@ package net.blaxstar.starlib.components {
     }
 
     /** END INTERFACE ===================== */
-    public function setColor(colorCode:String = 'FFFFFF'):void {
+    public function set_color(colorCode:String = 'FFFFFF'):void {
       if (colorCode.indexOf('#') < 0) {
         colorCode = '#' + colorCode;
       }

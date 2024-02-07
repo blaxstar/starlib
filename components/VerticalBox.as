@@ -42,7 +42,7 @@
     override public function draw(e:Event = null):void {
       super.draw();
       var ypos:Number = 0;
-      width = _height_ = 0;
+      _width_ = _height_ = 0;
 
       for (var i:int = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);
@@ -88,7 +88,7 @@
         (child as Component).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -101,7 +101,7 @@
         Component(child).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -114,7 +114,7 @@
         Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -127,7 +127,7 @@
         Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -135,7 +135,7 @@
      * internal handler for resize event of any attached component. Will redo the layout based on new size.
      */
     protected function onComponentResize(event:Event = null):void {
-      draw();
+      commit();
     }
 
     public function set maskThreshold(value:Number):void {
@@ -165,8 +165,8 @@
     /**
      *  getter and setter for the spacing between each subcomponent.
      */
-    public function set spacing(s:Number):void {
-      _spacing_ = s;
+    public function set spacing(pixel_spacing:Number):void {
+      _spacing_ = pixel_spacing;
       commit();
     }
 
@@ -186,8 +186,7 @@
       return _alignment;
     }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
+    override public function destroy():void {
 
       for (var i:uint = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);
