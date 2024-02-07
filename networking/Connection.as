@@ -2,7 +2,6 @@ package net.blaxstar.starlib.networking {
   import flash.utils.Timer;
   import flash.events.TimerEvent;
   import flash.net.SecureSocket;
-  import debug.DebugDaemon;
   import flash.events.Event;
   import flash.events.IOErrorEvent;
   import net.blaxstar.starlib.io.URL;
@@ -11,6 +10,7 @@ package net.blaxstar.starlib.networking {
   import thirdparty.org.osflash.signals.natives.NativeSignal;
   import thirdparty.org.osflash.signals.Signal;
   import net.blaxstar.starlib.utils.StringUtil;
+  import net.blaxstar.starlib.debug.DebugDaemon;
 
   /**
    * TODO: documentation

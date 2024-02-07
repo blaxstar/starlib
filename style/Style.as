@@ -66,6 +66,11 @@ import flash.display.StageScaleMode;
 		 */
 		static public var TEXT:RGBA;
 
+    /**
+     * initialize the main stage/display with the default theme (dark).
+     * @param main the Main display object (not stage).
+     * @return void
+     */
 		static public function init(main:DisplayObjectContainer):void
 		{
 			setTheme(DARK);
@@ -73,6 +78,12 @@ import flash.display.StageScaleMode;
 			main.stage.align = StageAlign.TOP_LEFT;
 			main.stage.scaleMode = StageScaleMode.NO_SCALE;
 		}
+
+    /**
+     * sets the visual theme of the application.
+     * @param style the id of the style to select.
+     * @return void
+     */
 		static public function setTheme(style:uint):void
 		{
 			switch (style)

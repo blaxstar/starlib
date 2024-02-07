@@ -16,7 +16,7 @@ package net.blaxstar.starlib.debug.console {
     private var _commandObjects:Vector.<ConsoleCommand>;
     private var _result:*;
 
-    public function parseCommandsFromString(pipelineString:String):void {
+    public function parse_commands_from_string(pipelineString:String):void {
       _commands = pipelineString.split(PIPES);
       _commandObjects = new Vector.<ConsoleCommand>();
 
