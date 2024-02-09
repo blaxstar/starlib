@@ -6,21 +6,30 @@ package net.blaxstar.starlib.debug.console {
   import flash.events.FocusEvent;
   import flash.events.KeyboardEvent;
   import flash.filesystem.File;
+  import flash.utils.ByteArray;
   import flash.utils.Dictionary;
 
   import net.blaxstar.starlib.components.InputTextField;
   import net.blaxstar.starlib.components.PlainText;
+  import net.blaxstar.starlib.debug.console.commands.ArithmeticAddCommand;
+  import net.blaxstar.starlib.debug.console.commands.ArithmeticSubCommand;
   import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
+  import net.blaxstar.starlib.debug.console.commands.GrepCommand;
   import net.blaxstar.starlib.input.InputEngine;
   import net.blaxstar.starlib.io.IOUtil;
+  import net.blaxstar.starlib.io.URL;
+  import net.blaxstar.starlib.io.XLoader;
   import net.blaxstar.starlib.style.Color;
   import net.blaxstar.starlib.utils.StringUtil;
-  import net.blaxstar.starlib.io.XLoader;
-  import net.blaxstar.starlib.io.URL;
+
+  import thirdparty.org.osflash.signals.Signal;
 
   public class DebugConsole extends Sprite {
+    static private const _ON_DICTIONARY_INIT:Signal = new Signal();
+    
     static private var _data:Dictionary;
     private var _save_file:URL;
+    private var _save_bytes:ByteArray;
     private var _filePath:String;
 
     private var _input_engine:InputEngine;
@@ -33,26 +42,34 @@ package net.blaxstar.starlib.debug.console {
     private var _tmpHistorySave:String;
     private var _isShowing:Boolean;
     private var _navigatingHistory:Boolean;
+    private var _pipeline:Pipe;
 
     // * CONSTRUCTOR * /////////////////////////////////////////////////////////
     public function DebugConsole(stage:Stage) {
 
       _filePath = File.applicationDirectory.nativePath;
-      _save_file = new URL(new File(_filePath).resolvePath('console.dat').toString());
+      _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
+      
+      _save_file.expected_data_type = URL.TEXT;
       _input_engine = new InputEngine(stage);
       _loader = new XLoader();
+      _data = new Dictionary();
+      init_default_commands();
+      _pipeline = new Pipe(command_dictionary);
 
       _tmpHistorySave = "";
       _current_history_index = -1;
       _command_history_length = 0;
       _navigatingHistory = false;
       _isShowing = false;
+      open_key = _input_engine.keys.TILDE;
 
-      if (saveExists)
-        loadSave();
-      else
+      if (save_exists) {
+        load_save();
+      } else {
         create_save();
-
+      }
+        
       _prefixText = new PlainText(this, 0, 0, 'debug | ');
       _prefixText.color = Color.PRODUCT_RED.value;
       _outputField = new PlainText(this, 0, 0);
@@ -66,14 +83,7 @@ package net.blaxstar.starlib.debug.console {
 
       hide_console();
 
-      var addcom:ConsoleCommand = new ConsoleCommand('add', add);
-      var subcom:ConsoleCommand = new ConsoleCommand('sub', subtract);
-      var grepcom:ConsoleCommand = new ConsoleCommand('grep', grep);
-      var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clear_history);
-      addCommand(addcom);
-      addCommand(subcom);
-      addCommand(grepcom);
-      addCommand(clhscom);
+      
 
       addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
     }
@@ -81,7 +91,10 @@ package net.blaxstar.starlib.debug.console {
     // * PUBLIC * //////////////////////////////////////////////////////////
 
     public function addCommand(com:ConsoleCommand):void {
-      commandDictionary[com.name] = com;
+      if (!command_dictionary) {
+        _data.command_dictionary = new Dictionary();
+      }
+      command_dictionary[com.name] = com;
     }
 
     public function add_input_to_history(command:String):void {
@@ -92,14 +105,14 @@ package net.blaxstar.starlib.debug.console {
         command_history.removeAt(_current_history_index);
       }
 
-      if (command_history.length > historyMax) {
+      if (command_history.length > history_max) {
         command_history.shift();
       }
 
       _data.command_history.push(trimmedCommand);
       _command_history_length = command_history.length;
 
-      writeSave();
+      write_save();
     }
 
     public function toggle_console():void {
@@ -133,19 +146,18 @@ package net.blaxstar.starlib.debug.console {
       _input_field.text = "";
     }
 
-    public function loadSave():void {
+    public function load_save():void {
       _loader.queue_files(_save_file);
-      _loader.ON_COMPLETE.add(function ():void {
-          _command_history_length = command_history.length;
-          _data = _loader.get_loaded_data(_save_file.name) as Dictionary;
-        });
-
-    }
-    public function writeSave():void {
-      IOUtil.exportFile(_data, 'console', '.dat', _filePath, null);
+      _loader.ON_COMPLETE.add(on_save_loaded);
     }
 
-    public function clearSave():void {
+    public function write_save(update:Boolean=false):void {
+      pack_bytes();
+      IOUtil.exportFile(_save_bytes.toString(), 'console', '.dat', _filePath, null);
+      load_save();
+    }
+
+    public function clear_save():void {
       for (var key:String in _data) {
         delete _data[key];
       }
@@ -153,54 +165,38 @@ package net.blaxstar.starlib.debug.console {
     }
 
     // * PRIVATE * /////////////////////////////////////////////////////////////
+    private function init_default_commands():void {
+      var addcom:ConsoleCommand = new ArithmeticAddCommand();
+      var subcom:ConsoleCommand = new ArithmeticSubCommand();
+      var grepcom:ConsoleCommand = new GrepCommand();
+      var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clear_history);
+      
+      addCommand(addcom);
+      addCommand(subcom);
+      addCommand(grepcom);
+      addCommand(clhscom);
+    }
 
     private function create_save():void {
-
-      _data ||= new Dictionary();
-      _data.command_dictionary = new Dictionary();
-      _data.command_history = [];
-
-      historyMax = 100;
-      openKey = _input_engine.keys.TILDE;
+      _data = new Dictionary();
+      command_history = [];
+      history_max = 126;
+      //open_key = _input_engine.keys.TILDE;
       execute_key = _input_engine.keys.ENTER;
-      prevHistoryKey = _input_engine.keys.UP;
-      nextHistoryKey = _input_engine.keys.DOWN;
+      prev_history_key = _input_engine.keys.UP;
+      next_history_key = _input_engine.keys.DOWN;
 
-      writeSave();
+      write_save();
     }
 
-    private function add(...args):Number {
-      var sum:Number = 0;
-      for (var i:uint = 0;i < args.length;i++) {
-        var parsedNumber:Number = parseFloat(args[i]);
-        if (isNaN(parsedNumber))
-          continue;
-        else
-          sum = sum + parsedNumber;
-      }
-      return sum;
-    }
+    private function pack_bytes():void {
+      if (!_save_bytes) {
+        _save_bytes = new ByteArray();
+      } else {
+        _save_bytes.clear();
+      }      
 
-    private function subtract(...args):Number {
-      var diff:Number = args[0];
-
-      for (var i:uint = 1;i < args.length;i++) {
-        var parsedNumber:Number = parseFloat(args[i]);
-        if (isNaN(parsedNumber))
-          continue;
-        else
-          diff = diff - parsedNumber;
-      }
-      return diff;
-    }
-
-    private function grep(...args):String {
-      var textInput:String = args.pop() as String;
-      var pattern:String = args.pop() as String;
-      var regex:RegExp = new RegExp(pattern);
-
-      return regex.exec(textInput)[0];
-
+      _save_bytes.writeObject(_data);
     }
 
     private function clear_history():void {
@@ -208,7 +204,7 @@ package net.blaxstar.starlib.debug.console {
       _command_history_length = 0;
       command_history = [];
       hide_console();
-      writeSave();
+      write_save();
     }
 
     private function print_to_console(...rest):void {
@@ -259,31 +255,31 @@ package net.blaxstar.starlib.debug.console {
       return _tmpHistorySave;
     }
 
-    static public function get commandDictionary():Dictionary {
+    public function get command_dictionary():Dictionary {
       return _data.command_dictionary as Dictionary;
     }
 
-    static public function get command_history():Array {
+    public function get command_history():Array {
       return _data.command_history;
     }
 
-    static public function set command_history(val:Array):void {
+    public function set command_history(val:Array):void {
       _data.command_history = val;
     }
 
-    public function get historyMax():uint {
+    public function get history_max():uint {
       return _data.history_max;
     }
 
-    public function set historyMax(val:uint):void {
+    public function set history_max(val:uint):void {
       _data.history_max = val;
     }
 
-    public function get openKey():uint {
+    public function get open_key():uint {
       return _data.open_key;
     }
 
-    public function set openKey(val:uint):void {
+    public function set open_key(val:uint):void {
       _data.open_key = val;
     }
 
@@ -295,27 +291,32 @@ package net.blaxstar.starlib.debug.console {
       _data.execute_key = val;
     }
 
-    public function get prevHistoryKey():uint {
-      return _data.previous_history_key;
+    public function get prev_history_key():uint {
+      return _data.prev_history_key;
     }
 
-    public function set prevHistoryKey(val:uint):void {
-      _data.previous_history_key = val;
+    public function set prev_history_key(val:uint):void {
+      _data.prev_history_key = val;
     }
 
-    public function get nextHistoryKey():uint {
+    public function get next_history_key():uint {
       return _data.next_history_key;
     }
 
-    public function set nextHistoryKey(val:uint):void {
+    public function set next_history_key(val:uint):void {
       _data.next_history_key = val;
     }
-    public function get saveExists():Boolean {
+    public function get save_exists():Boolean {
       return _save_file.exists;
     }
 
     // DELEGATES ///////////////////////////////////////
-    private function on_save_loaded(e:Event):void {}
+    private function on_save_loaded(target:URL, data:ByteArray):void {
+        _data = data.readObject() as Dictionary;
+        open_key = _input_engine.keys.TILDE;
+        data.length = 0;
+        _ON_DICTIONARY_INIT.dispatch();
+    }
 
     private function onKeyPressInConsole(e:KeyboardEvent):void {
       if (e.keyCode == execute_key) {
@@ -325,13 +326,12 @@ package net.blaxstar.starlib.debug.console {
 
         add_input_to_history(_input_field.text.toLowerCase());
 
-        var pipeline:Pipe = new Pipe();
-        pipeline.parse_commands_from_string(_input_field.text.toLowerCase());
-        print_to_console(pipeline.run());
+        _pipeline.parse_commands_from_string(_input_field.text.toLowerCase());
+        print_to_console(_pipeline.run());
 
         resetHistoryNavigation();
       }
-      else if (e.keyCode == prevHistoryKey) {
+      else if (e.keyCode == prev_history_key) {
         if (_current_history_index == 0) {
           print_to_console(_current_history_index);
           return;
@@ -340,7 +340,7 @@ package net.blaxstar.starlib.debug.console {
         _input_field.text = previousCommand;
         print_to_console(_current_history_index);
       }
-      else if (e.keyCode == nextHistoryKey) {
+      else if (e.keyCode == next_history_key) {
         if (_current_history_index == -1) {
           print_to_console(_current_history_index);
           _navigatingHistory = false;
@@ -371,7 +371,7 @@ package net.blaxstar.starlib.debug.console {
     }
 
     private function onToggleKeyPress(e:KeyboardEvent):void {
-      if (e.keyCode == openKey) {
+      if (open_key == e.keyCode) {
         if (!visible)
           e.preventDefault();
         toggle_console();

@@ -155,7 +155,7 @@ package net.blaxstar.starlib.components {
         public function update_skin():void {
 
         }
-
+        
         /**
          * marks the component for redraw on the next frame.
          * this minimizes the processing load per frame, improving performance.
@@ -229,6 +229,9 @@ package net.blaxstar.starlib.components {
 
         override public function set y(value:Number):void {
             super.y = Arithmetic.round(value);
+        }
+        public function get padding():uint {
+          return PADDING;
         }
 
         public function get id():uint {

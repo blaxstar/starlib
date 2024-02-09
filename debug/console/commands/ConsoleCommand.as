@@ -4,12 +4,15 @@ package net.blaxstar.starlib.debug.console.commands {
     protected var _delegateFunction:Function;
     protected var _args:Array;
 
-    public function ConsoleCommand(name:String, func:Function, ...args) {
-      _name = name;
-      _delegateFunction = func;
-      _args = [];
-      setArgs(args);
+    public function ConsoleCommand(name:String="", func:Function=null, ...args) {
+      if (name != "") {
+        _name = name;
+      }
+      if (func) {
+        _delegateFunction = func;
+      }
 
+      setArgs(args);
     }
 
     public function execute():* {
@@ -28,10 +31,10 @@ package net.blaxstar.starlib.debug.console.commands {
     }
 
     public function setArgs(args:Array):void {
-      _args.length = 0;
+      if (_args) _args.length = 0;
       _args = args;
     }
-
+    // catch argument count mismatch error
     protected function catch1063(e:Error):void {
       if (e.errorID == 1063) {
           var expected:uint = parseInt(e.message.slice(e.message.indexOf("Expected ") + 9, e.message.lastIndexOf(",")));

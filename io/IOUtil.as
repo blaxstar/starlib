@@ -3,12 +3,14 @@ package net.blaxstar.starlib.io {
 import flash.display.Loader;
 import flash.events.Event;
 import flash.events.IOErrorEvent;
+import flash.events.ProgressEvent;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 import flash.net.URLRequest;
 import flash.utils.ByteArray;
-import flash.events.ProgressEvent;
+
+import net.blaxstar.starlib.debug.printf;
 
 /**
 	 * Utilities relating to the IO (input/output) of files.
@@ -35,7 +37,7 @@ import flash.events.ProgressEvent;
 			displayObjectLoader.load(new URLRequest(url));
 		}
 
-		static public function exportFile(target:*, filename:String, fileExtension:String = "", outputDirectory:String = "", onComplete:Function=null):void {
+		static public function exportFile(target:*, filename:String, fileExtension:String = "", outputDirectory:String = "", onComplete:Function=null, filemode:String=FileMode.UPDATE):void {
 			var packedBytes:ByteArray = new ByteArray();
 			var stream:FileStream     = new FileStream();
 			var file:File             = new File(File.applicationDirectory.nativePath);
@@ -48,12 +50,15 @@ import flash.events.ProgressEvent;
 				packedBytes.writeObject(target);
 			}
 
-			file = file.resolvePath(outputDirectory + filename + fileExtension);
-			stream.open(file, FileMode.UPDATE);
+			file = file.resolvePath(outputDirectory + File.separator + filename + fileExtension);
+			stream.open(file, filemode);
 			stream.writeBytes(packedBytes);
 			stream.close();
-			if (onComplete !== null) onComplete(SUCCESS);
-			else onComplete(FAILURE);
+			if (onComplete) {
+        onComplete.call(SUCCESS);
+      } else {
+        printf("file write failed: %s.%s @ %s", filename, fileExtension, outputDirectory);
+      }
 		}
 
 		/**

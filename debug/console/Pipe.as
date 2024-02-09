@@ -10,11 +10,15 @@ package net.blaxstar.starlib.debug.console {
     static private const COMMAND:RegExp = /(^[ ]*[a-zA-Z.0-9]+)/;
     static private const SWITCHES:RegExp = /([-0-9+.]+[0-9+])|([+0-9+])|(-[a-zA-Z]+)|(\|[a-zA-Z]+)|(\|\s[a-zA-Z]+)/g;
     static private const PIPES:RegExp = /\|/g;
-    static private const cmdLookup:Dictionary = DebugConsole.commandDictionary;
 
     private var _commands:Array;
     private var _commandObjects:Vector.<ConsoleCommand>;
     private var _result:*;
+    private var _command_dictionary:Dictionary;
+
+    public function Pipe(dictionary:Dictionary) {
+      _command_dictionary = dictionary;
+    }
 
     public function parse_commands_from_string(pipelineString:String):void {
       _commands = pipelineString.split(PIPES);
@@ -25,7 +29,7 @@ package net.blaxstar.starlib.debug.console {
         var cmd:String = currPipeline.match(COMMAND)[0].replace(" ", "");
         var args:Array = currPipeline.match(SWITCHES);
 
-        var currentCommand:ConsoleCommand = cmdLookup[cmd];
+        var currentCommand:ConsoleCommand = _command_dictionary[cmd];
 
         if (currentCommand != null) {
           _commandObjects.push(currentCommand);

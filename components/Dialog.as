@@ -100,7 +100,6 @@ package net.blaxstar.starlib.components {
 
             _width_ = _dialog_card.width;
             _height_ = _dialog_card.height;
-
             _component_container.move(PADDING, _text_container.y + _text_container.height + PADDING);
             _option_container.move(PADDING, _height_ - option_container.height);
             _component_container.isShowingBounds = true;

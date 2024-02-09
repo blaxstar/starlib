@@ -92,7 +92,7 @@ package net.blaxstar.starlib.io {
     // * GETTERS, SETTERS * ////////////////////////////////////////////////////
 
     public function get exists():Boolean {
-      return new File(_path).exists;
+      return new File().resolvePath(_path).exists;
     }
 
     public function get on_request_complete():NativeSignal {
