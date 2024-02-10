@@ -3,9 +3,7 @@ package net.blaxstar.starlib.debug.console.commands
   public class ArithmeticSubCommand extends ConsoleCommand {
     
     public function ArithmeticSubCommand() {
-      super();
-      _name = "sub";
-      _delegateFunction = subtract;
+      super("sub", subtract);
     }
 
     private function subtract(...args):Number {

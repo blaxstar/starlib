@@ -3,9 +3,7 @@ package net.blaxstar.starlib.debug.console.commands
   public class GrepCommand extends ConsoleCommand {
     
     public function GrepCommand() {
-      super();
-      _name = "grep";
-      _delegateFunction = grep;
+      super("grep", grep);
     }
 
     private function grep(...args):String {

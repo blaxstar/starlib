@@ -57,7 +57,7 @@ import net.blaxstar.starlib.debug.printf;
 			if (onComplete) {
         onComplete.call(SUCCESS);
       } else {
-        printf("file write failed: %s.%s @ %s", filename, fileExtension, outputDirectory);
+        printf("file write sucessful! %s%s @ %s", filename, fileExtension, outputDirectory);
       }
 		}
 
