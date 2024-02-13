@@ -353,21 +353,20 @@ package net.blaxstar.starlib.debug.console {
                     return;
                 }
 
-                add_input_to_history(_input_field.text.toLowerCase());
-                _pipeline.parse_commands_from_string(_input_field.text.toLowerCase());
+                add_input_to_history(_input_field.text);
+                _pipeline.parse_commands_from_string(_input_field.text);
                 print_to_console(_pipeline.run());
                 resetHistoryNavigation();
 
             } else if (e.keyCode == prev_history_key) {
 
                 if (_current_history_index == 0) {
-                    print_to_console(_current_history_index);
                     return;
                 }
-
+                var text_length:uint = _input_field.text.length;
                 _navigatingHistory = true;
                 _input_field.text = previousCommand;
-                print_to_console(_current_history_index);
+                _input_field.input_target.setSelection(text_length, text_length);
 
             } else if (e.keyCode == next_history_key) {
 
@@ -376,9 +375,10 @@ package net.blaxstar.starlib.debug.console {
                     return;
 
                 }
+                text_length = _input_field.text.length;
                 _navigatingHistory = true;
                 _input_field.text = nextCommand;
-                print_to_console(_current_history_index);
+                _input_field.input_target.setSelection(text_length, text_length);
             }
         }
 

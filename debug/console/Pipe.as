@@ -29,7 +29,7 @@ package net.blaxstar.starlib.debug.console {
                 var cmd:String = current_pipeline.match(COMMAND)[0].replace(" ", "");
                 var args:Array = current_pipeline.match(SWITCHES);
 
-                var current_command:ConsoleCommand = _command_dictionary[cmd];
+                var current_command:ConsoleCommand = _command_dictionary[cmd] || _command_dictionary[cmd.toLowerCase()];
 
                 if (current_command != null) {
                     _command_objects.push(current_command);

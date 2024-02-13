@@ -28,6 +28,10 @@ package net.blaxstar.starlib.debug.console.commands {
                 if (accessible_property.hasOwnProperty(properties[i])) {
                   accessible_property = accessible_property[properties[i]];
                   object_name = object_name + "." + properties[i];
+                } else if (accessible_property.hasOwnProperty(String(properties[i]).toLowerCase())) {
+                  var lowercase_property:String = String(properties[i]).toLowerCase();
+                  accessible_property = accessible_property[lowercase_property];
+                  object_name = object_name + "." + lowercase_property;
                 } else {
                   return object_name + "." + properties[i] + " is not an accessible property: " + properties[i] + " is inaccessible!";
                 }
