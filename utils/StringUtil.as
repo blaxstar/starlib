@@ -17,6 +17,12 @@ package net.blaxstar.starlib.utils {
       return emailExpression.test(email);
     }
 
+    static public function is_valid_filepath(filepath:String):Boolean {
+      var filepath_expression:RegExp = /^(?:file:\/\/)?(?:[a-zA-Z]:|~[a-zA-Z0-9]+)(?:\\|\/)[^\n\\/]+(?:\\|\/)[^\n\\/]+/i;
+
+      return filepath_expression.test(filepath);
+    }
+
     /**
      * Removes whitespace and extras from a string.
      * @param	inputString The string to condense.

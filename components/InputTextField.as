@@ -82,6 +82,7 @@ package net.blaxstar.starlib.components {
             _text_field.sharpness = 300;
             _text_field.border = false;
             _text_field.background = false;
+            _text_field.height = 30;
             _text_field.width = 200;
             _text_field.text = _textfield_string;
             _text_field.setTextFormat(_text_format);
@@ -132,8 +133,8 @@ package net.blaxstar.starlib.components {
             if (_showing_underline) {
                 update_underline();
             } else {
-                _width_ = _text_field.width;
-                _height_ = _text_field.height;
+                _text_field.width = _width_;
+                _text_field.height = _height_;
             }
 
             on_draw_signal.dispatch();

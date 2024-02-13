@@ -23,6 +23,9 @@ package net.blaxstar.starlib.debug.console {
     import net.blaxstar.starlib.utils.StringUtil;
 
     import thirdparty.org.osflash.signals.Signal;
+    import net.blaxstar.starlib.debug.console.commands.PrintCommand;
+    import net.blaxstar.starlib.debug.console.commands.EvalObjectCommand;
+    import net.blaxstar.starlib.components.Component;
 
     public class DebugConsole extends Sprite {
         static private const _ON_DICTIONARY_INIT:Signal = new Signal();
@@ -45,51 +48,19 @@ package net.blaxstar.starlib.debug.console {
 
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function DebugConsole(stage:Stage) {
-
-            _filePath = File.applicationDirectory.nativePath;
-            _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
-
-            _save_file.expected_data_type = URL.TEXT;
             _input_engine = new InputEngine(stage);
-            _loader = new XLoader();
-            _data = new Dictionary();
-            init_default_commands();
-            _pipeline = new Pipe(command_dictionary);
-
-            _temp_history_save = "";
-            _current_history_index = -1;
-            _command_history_length = 0;
-            _navigatingHistory = false;
-            _isShowing = false;
-            open_key = _input_engine.keys.TILDE;
-
-            if (save_exists) {
-                load_save();
-            } else {
-                create_save();
-            }
-
-            _prefixText = new PlainText(this, 0, 0, 'debug | ');
-            _prefixText.color = Color.PRODUCT_RED.value;
-            _outputField = new PlainText(this, 0, 0);
-            _outputField.color = Color.PRODUCT_GREEN.value;
-            _input_field = new InputTextField(this, _prefixText.x + _prefixText.textWidth, 0, '');
-            _input_field.color = Color.EGGSHELL.value;
-            _input_field.showing_underline = false;
-
-            _input_field.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);
-            _input_field.addEventListener(Event.CHANGE, onTextFieldChange);
-            hide_console();
-
+            init();
             addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
         }
 
         // * PUBLIC * //////////////////////////////////////////////////////////////
 
         public function addCommand(com:ConsoleCommand):void {
+
             if (!command_dictionary) {
                 _data.command_dictionary = new Dictionary();
             }
+
             command_dictionary[com.name] = com;
         }
 
@@ -112,6 +83,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function toggle_console():void {
+
             if (_isShowing) {
                 hide_console();
             } else {
@@ -120,17 +92,17 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function show_console():void {
-            if (!visible) {
 
+            if (!visible) {
                 visible = true;
                 stage.stageFocusRect = false;
                 stage.focus = _input_field.input_target;
-
                 _input_engine.add_keyboard_delegate(onKeyPressInConsole, InputEngine.KEYDOWN);
             }
         }
 
         public function hide_console():void {
+
             if (visible) {
                 visible = false;
                 _input_engine.remove_keyboard_delegates(onKeyPressInConsole);
@@ -154,23 +126,73 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function clear_save():void {
+
             for (var key:String in _data) {
                 delete _data[key];
             }
+
             create_save();
         }
 
         // * PRIVATE * /////////////////////////////////////////////////////////////
+        private function init():void {
+            _filePath = File.applicationDirectory.nativePath;
+            _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
+            _save_file.expected_data_type = URL.TEXT;
+            _loader = new XLoader();
+            _data = new Dictionary();
+            init_default_commands();
+            _pipeline = new Pipe(command_dictionary);
+
+            _temp_history_save = "";
+            _current_history_index = -1;
+            _command_history_length = 0;
+            _navigatingHistory = false;
+            _isShowing = false;
+            open_key = _input_engine.keys.TILDE;
+
+            check_save();
+            init_text_fields();
+            hide_console();
+        }
+
+        private function check_save():void {
+
+            if (save_exists) {
+                load_save();
+            } else {
+                create_save();
+            }
+        }
+
+        private function init_text_fields():void {
+            _prefixText = new PlainText(this, 0, 0, 'debug | ');
+            _prefixText.color = Color.PRODUCT_RED.value;
+            _outputField = new PlainText(this, 0, 0);
+            _outputField.color = Color.PRODUCT_GREEN.value;
+            _input_field = new InputTextField(this, _prefixText.x + _prefixText.textWidth, 0, '');
+            _input_field.color = Color.EGGSHELL.value;
+            _input_field.showing_underline = false;
+            _input_field.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);
+            _input_field.addEventListener(Event.CHANGE, onTextFieldChange);
+        }
+
         private function init_default_commands():void {
+            var printcom:ConsoleCommand = new PrintCommand();
             var addcom:ConsoleCommand = new ArithmeticAddCommand();
             var subcom:ConsoleCommand = new ArithmeticSubCommand();
             var grepcom:ConsoleCommand = new GrepCommand();
+            var evalcom:ConsoleCommand = new EvalObjectCommand();
             var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clear_history);
 
+            addCommand(printcom);
             addCommand(addcom);
             addCommand(subcom);
             addCommand(grepcom);
+            addCommand(evalcom);
             addCommand(clhscom);
+
+            EvalObjectCommand.register_object("terminal", this);
         }
 
         private function create_save():void {
@@ -186,6 +208,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         private function pack_bytes():void {
+
             if (!_save_bytes) {
                 _save_bytes = new ByteArray();
             } else {
@@ -205,12 +228,15 @@ package net.blaxstar.starlib.debug.console {
 
         private function print_to_console(... rest):void {
             var outString:String = "";
+
             if (rest[0] is Array) {
                 rest = rest[0];
             }
+
             for (var i:uint = 0; i < rest.length; i++) {
                 outString += rest[i];
             }
+
             _outputField.text = outString;
         }
 
@@ -224,6 +250,7 @@ package net.blaxstar.starlib.debug.console {
         // * GETTERS, SETTERS * ////////////////////////////////////////////////////
 
         public function get previousCommand():String {
+
             if (_current_history_index < 0) {
                 _current_history_index = _command_history_length - 1;
                 return current_command;
@@ -234,6 +261,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function get nextCommand():String {
+
             if (_current_history_index >= _command_history_length - 1) {
                 _current_history_index = -1;
                 _navigatingHistory = false;
@@ -245,9 +273,11 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function get current_command():String {
+
             if (_current_history_index >= 0 && _current_history_index < _command_history_length) {
                 return command_history[_current_history_index];
             }
+
             return _temp_history_save;
         }
 
@@ -318,28 +348,33 @@ package net.blaxstar.starlib.debug.console {
 
         private function onKeyPressInConsole(e:KeyboardEvent):void {
             if (e.keyCode == execute_key) {
+
                 if (_input_field.text.replace(" ", "") == "") {
                     return;
                 }
 
                 add_input_to_history(_input_field.text.toLowerCase());
-
                 _pipeline.parse_commands_from_string(_input_field.text.toLowerCase());
                 print_to_console(_pipeline.run());
-
                 resetHistoryNavigation();
+
             } else if (e.keyCode == prev_history_key) {
+
                 if (_current_history_index == 0) {
                     print_to_console(_current_history_index);
                     return;
                 }
+
                 _navigatingHistory = true;
                 _input_field.text = previousCommand;
                 print_to_console(_current_history_index);
+
             } else if (e.keyCode == next_history_key) {
+
                 if (_current_history_index == -1) {
                     _navigatingHistory = false;
                     return;
+
                 }
                 _navigatingHistory = true;
                 _input_field.text = nextCommand;
@@ -348,16 +383,13 @@ package net.blaxstar.starlib.debug.console {
         }
 
         private function onAddedToStage(event:Event):void {
-
             var g:Graphics = this.graphics;
-
             g.beginFill(Color.DARK_GREY.value, 1);
             g.drawRect(0, 0, stage.stageWidth, 60);
             g.endFill();
-
-            _input_field.width = _outputField.width = stage.stageWidth;
+      
+            _input_field.width = _outputField.width = (stage.stageWidth - (Component.PADDING * 2));
             _outputField.move(10, _input_field.height);
-
             _input_engine.add_keyboard_delegate(onToggleKeyPress, InputEngine.KEYDOWN);
         }
 
@@ -367,8 +399,11 @@ package net.blaxstar.starlib.debug.console {
 
         private function onToggleKeyPress(e:KeyboardEvent):void {
             if (open_key == e.keyCode) {
-                if (!visible)
+
+                if (!visible) {
                     e.preventDefault();
+                }
+
                 toggle_console();
             }
         }

@@ -20,6 +20,7 @@ package net.blaxstar.starlib.debug.console.commands {
 
       try {
         output = _delegateFunction.apply(null, argument_array);
+        _args.length = 0;
       }
       catch (e:ArgumentError) {
         // if there's an argument count mismatch,
