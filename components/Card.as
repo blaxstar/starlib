@@ -90,8 +90,8 @@ package net.blaxstar.starlib.components {
             // auto resize if enabled, and there are children present
 
             if (_auto_resize) {
-                var totalW:Number = (PADDING * 2) + Math.max(_component_container.width, _option_container.width);
-                var totalH:Number = (PADDING * 2) + _component_container.height + _option_container.height;
+                var totalW:Number = (PADDING * 4) + Math.max(_component_container.width, _option_container.width);
+                var totalH:Number = (PADDING * 4) + _component_container.height + _option_container.height;
 
                 if (totalW > MIN_WIDTH) {
                     _width_ = totalW;

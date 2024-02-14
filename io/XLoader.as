@@ -6,10 +6,11 @@ package net.blaxstar.starlib.io {
   import flash.utils.ByteArray;
 
   import thirdparty.org.osflash.signals.Signal;
-  import debug.DebugDaemon;
   import flash.utils.getQualifiedClassName;
-  import debug.printf;
   import flash.display.Bitmap;
+  import flash.filesystem.File;
+  import net.blaxstar.starlib.debug.DebugDaemon;
+  import flash.net.FileFilter;
 
   /**
    * an elite loader for loading all kinds of content.
@@ -22,6 +23,7 @@ package net.blaxstar.starlib.io {
     public const ON_PROGRESS:Signal = new Signal(Number);
     public const ON_COMPLETE:Signal = new Signal(URL, ByteArray);
     public const ON_COMPLETE_GRAPHIC:Signal = new Signal(Object);
+    private const _DIALOG_LOADER:File = File.documentsDirectory;
 
     private var _data:Vector.<ByteArray>;
     private var _queued_urls:Vector.<URL>;
@@ -32,6 +34,30 @@ package net.blaxstar.starlib.io {
     public function XLoader() {
       _data = new Vector.<ByteArray>;
       _queued_urls = new Vector.<URL>;
+    }
+
+/**
+ * opens a file dialog via the OS for loading a file with the specified file
+ * filter(s).
+ * @param title the title displayed on the dialog window.
+ * @param filter an array of file filter strings, each in the format '*.ext'
+ */
+    public function load_file_dialog(
+      on_file_select_callback:Function,
+      on_file_cancel_callback:Function,
+      title:String = "Load file...",
+      filter:Array=null,
+      filetype_description:String="any"):void {
+
+      var filefilter_array:Array = [];
+      for (var i:uint = 0; i < filter.length; i++) {
+        var current_filter:FileFilter = new FileFilter(filetype_description, filter[i]);
+        filefilter_array.push(current_filter);
+      }
+
+      _DIALOG_LOADER.addEventListener(Event.SELECT, on_file_select_callback);
+      _DIALOG_LOADER.addEventListener(Event.CANCEL, on_file_cancel_callback);
+      _DIALOG_LOADER.browseForOpen(title, filefilter_array);
     }
 
     public function queue_files(...urls):void {
@@ -62,7 +88,7 @@ package net.blaxstar.starlib.io {
       return null;
     }
 
-    / * PRIVATE * /;
+    // * PRIVATE * /////////////////////////////////////////////////////////////
 
     private function load_next():void {
       var current_item:URL = _queued_urls[0];

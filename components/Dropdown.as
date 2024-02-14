@@ -21,7 +21,7 @@ package net.blaxstar.starlib.components {
         private var _labelFill:Sprite;
         private var _labelText:String;
         private var _dropdownButton:Button;
-        private var _dropdownList:List;
+        private var _list_component:List;
         private var _selectedItem:ListItem;
 
         public function Dropdown(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, initLabel:String = "Select an Item") {
@@ -56,10 +56,10 @@ package net.blaxstar.starlib.components {
             buttonIcon.set_color(Style.TEXT.value.toString(16));
             _dropdownButton.on_click.add(onClick);
 
-            _dropdownList ||= new List(null, 0, _displayLabel.height - 2);
-            _dropdownList.visible = false;
-            _dropdownList.width = _displayLabel.width;
-            _dropdownList.add_delegate_to_all(onListItemClick);
+            _list_component ||= new List(null, 0, _displayLabel.height - 2);
+            _list_component.visible = false;
+            _list_component.width = _displayLabel.width;
+            _list_component.add_delegate_to_all(onListItemClick);
 
             super.add_children();
         }
@@ -71,10 +71,10 @@ package net.blaxstar.starlib.components {
         }
 
         private function onClick(e:MouseEvent):void {
-            if (!_dropdownList.parent) {
-                addChild(_dropdownList);
+            if (!_list_component.parent) {
+                addChild(_list_component);
             }
-            _dropdownList.visible = !_dropdownList.visible;
+            _list_component.visible = !_list_component.visible;
 
             draw();
         }
@@ -83,16 +83,16 @@ package net.blaxstar.starlib.components {
          * base method for (re)drawing the component itself. created to be overridden.
          */
         override public function draw(e:Event = null):void {
-            if (_dropdownList.visible) {
-                _height_ = MIN_HEIGHT + _dropdownList.height;
+            if (_list_component.visible) {
+                _height_ = MIN_HEIGHT + _list_component.height;
             } else {
                 _height_ = MIN_HEIGHT;
             }
 
             drawBorder();
 
-            if (_dropdownList.num_items == 1) {
-                _selectedItem = _dropdownList.get_item_at(0);
+            if (_list_component.num_items == 1) {
+                _selectedItem = _list_component.get_item_at(0);
             }
 
             _displayLabel.text = _labelText;
@@ -119,7 +119,7 @@ package net.blaxstar.starlib.components {
         // public
 
         public function add_list_item(item:ListItem):void {
-            _dropdownList.add_item(item);
+            _list_component.add_item(item);
         }
 
         /**
@@ -127,9 +127,16 @@ package net.blaxstar.starlib.components {
          * @param ...tuple_array an array of tuples (string, function).
          */
         public function multi_add(... tuple_array):void {
-            _dropdownList.multi_add(tuple_array);
+            _list_component.multi_add(tuple_array);
         }
 
+        /**
+         *
+         * @param ...string_array an array of strings for each label in the list.
+         */
+        public function multi_add_string_array(string_array:Array, optional_listener:Function=null):void {
+            _list_component.multi_add_string_array(string_array, optional_listener);
+        }
         // private
         // getters/setters
 

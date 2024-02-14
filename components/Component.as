@@ -135,6 +135,7 @@ package net.blaxstar.starlib.components {
          */
         public function add_children():void {
             // trace('on added triggered from ' + this.toString());
+            commit();
         }
 
         /**
@@ -228,6 +229,9 @@ package net.blaxstar.starlib.components {
 
         override public function set y(value:Number):void {
             super.y = Arithmetic.round(value);
+        }
+        public function get padding():uint {
+          return PADDING;
         }
 
         public function get id():uint {

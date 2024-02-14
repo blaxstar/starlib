@@ -1,24 +1,25 @@
 package net.blaxstar.starlib.io {
-    import debug.DebugDaemon;
-
+    import net.blaxstar.starlib.debug.DebugDaemon;
     import flash.net.URLLoader;
 
     import net.blaxstar.starlib.networking.Connection;
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import flash.filesystem.File;
 
     /**
      * TODO: documentation
      * @author Deron D. (SnaiLegacy)
      */
     public class URL extends URLLoader {
-        / * URL DATA FORMATS */
+        / * URL DATA FORMATS */;
         public static const BINARY:String = "binary";
         static public const GRAPHICS:String = 'graphics';
         public static const TEXT:String = "text";
         public static const VARIABLES:String = "variables";
 
-        / * HTTP REQUEST METHODS * /
+        / * HTTP REQUEST METHODS * /;
+
         /**
          * Specifies that the URLRequest object is a POST.
          *
@@ -61,7 +62,9 @@ package net.blaxstar.starlib.io {
         private var _port:uint;
         private var _using_port:Boolean;
         private var _connection:Connection;
-
+        
+        // TODO: class documentation
+        // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function URL(url_path:String = null, port:uint = 80) {
             _path = url_path;
             _port = port;
@@ -70,6 +73,7 @@ package net.blaxstar.starlib.io {
             super();
         }
 
+        // * PUBLIC * //////////////////////////////////////////////////////////////
         public function connect(async:Boolean = true):void {
             if (async) {
                 _connection.connect_async();
@@ -83,6 +87,12 @@ package net.blaxstar.starlib.io {
                 DebugDaemon.write_log("request vars added to request without data" + "Format being set", DebugDaemon.WARN);
             }
             _connection.async_request_vars[key] = val;
+        }
+
+        // * GETTERS, SETTERS * ////////////////////////////////////////////////////
+
+        public function get exists():Boolean {
+            return new File().resolvePath(_path).exists;
         }
 
         public function get on_request_complete():NativeSignal {

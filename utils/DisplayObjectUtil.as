@@ -1,4 +1,11 @@
 package net.blaxstar.starlib.utils {
+  import flash.display.DisplayObjectContainer;
+  import flash.display.DisplayObject;
+  import flash.display.Loader;
+  import flash.display.Stage;
+  import flash.display.Sprite;
+  import flash.geom.Matrix;
+
   public class DisplayObjectUtil {
     static public function setRegistrationPoint(s:Sprite, regx:Number, regy:Number, showRegistration:Boolean):void {
       s.transform.matrix = new Matrix(1, 0, 0, 1, -regx, -regy);
@@ -15,39 +22,39 @@ package net.blaxstar.starlib.utils {
       }
     }
 
-    static public function removeAndNullChildren(dOC:DisplayObjectContainer, nullSelf:Boolean = true):void {
-      if (!dOC)
+    static public function removeAndNullChildren(root_container:DisplayObjectContainer, nullSelf:Boolean = true):void {
+      if (!root_container)
         return;
-      for (var i:uint = 0; i < dOC.numChildren; ++i) {
+      for (var i:uint = 0; i < root_container.numChildren; ++i) {
         // check if child is a DisplayObjectContainer, which could hold more children
-        if (dOC.getChildAt(i) is DisplayObjectContainer)
-          removeAndNullChildren(DisplayObjectContainer(dOC.getChildAt(i)));
+        if (root_container.getChildAt(i) is DisplayObjectContainer)
+          removeAndNullChildren(DisplayObjectContainer(root_container.getChildAt(i)));
         else {
           // remove and null child of parent
-          var child:DisplayObject = dOC.getChildAt(i);
-          if (!(dOC is Loader))
-            dOC.removeChild(child);
+          var child:DisplayObject = root_container.getChildAt(i);
+          if (!(root_container is Loader))
+            root_container.removeChild(child);
           child = null;
         }
       }
       // remove and null parent
-      if (!(dOC is Stage)) {
-        if (dOC.parent)
-          dOC.parent.removeChild(dOC);
+      if (!(root_container is Stage)) {
+        if (root_container.parent)
+          root_container.parent.removeChild(root_container);
         if (nullSelf)
-          dOC = null;
+          root_container = null;
       }
     }
 
-    static public function getNumChildren(dOC:DisplayObjectContainer):uint {
-      if (!dOC)
+    static public function getNumChildren(root_container:DisplayObjectContainer):uint {
+      if (!root_container)
         return 0;
       var numCh:uint = 0;
 
-      for (var i:uint = 0; i < dOC.numChildren; ++i) {
+      for (var i:uint = 0; i < root_container.numChildren; ++i) {
         // check if child is a DisplayObjectContainer, which could hold more children
-        if (dOC.getChildAt(i) is DisplayObjectContainer)
-          numCh += getNumChildren(DisplayObjectContainer(dOC.getChildAt(i)));
+        if (root_container.getChildAt(i) is DisplayObjectContainer)
+          numCh += getNumChildren(DisplayObjectContainer(root_container.getChildAt(i)));
         else {
           ++ numCh;
         }

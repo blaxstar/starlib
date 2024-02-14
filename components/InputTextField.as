@@ -18,9 +18,9 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.Font;
     import net.blaxstar.starlib.style.Style;
 
-
     import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import debug.DebugDaemon;
+    import net.blaxstar.starlib.debug.DebugDaemon;
+    import net.blaxstar.starlib.utils.StringUtil;
 
     /**
      * ...
@@ -47,6 +47,7 @@ package net.blaxstar.starlib.components {
         private var _selected_suggestion:Suggestion;
         private var _suggestions_available:Boolean;
         private var _is_password_field:Boolean;
+        private var _is_hinting:Boolean;
 
         private var _input_engine:InputEngine;
         private var _on_focus:NativeSignal;
@@ -60,7 +61,7 @@ package net.blaxstar.starlib.components {
             super(parent, xpos, ypos);
         }
 
-        // public
+        // * public methods
 
         override public function init():void {
             _text_format = Font.BODY_2;
@@ -81,6 +82,7 @@ package net.blaxstar.starlib.components {
             _text_field.sharpness = 300;
             _text_field.border = false;
             _text_field.background = false;
+            _text_field.height = 30;
             _text_field.width = 200;
             _text_field.text = _textfield_string;
             _text_field.setTextFormat(_text_format);
@@ -105,17 +107,21 @@ package net.blaxstar.starlib.components {
 
         }
 
-        override protected function on_added(e:Event):void {
-            _input_engine = new InputEngine(stage, true);
-            draw();
-        }
-
         override public function draw(e:Event = null):void {
             if (_text_field.text == _hint_text || _text_field.text.length < 1) {
-                if (Style.CURRENT_THEME == Style.DARK) {
-                    _text_field.textColor = Style.TEXT.shade().value;
+                if (_is_hinting) {
+                    if (Style.CURRENT_THEME == Style.DARK) {
+                        _text_field.textColor = Style.TEXT.shade().value;
+                    } else {
+                        _text_field.textColor = Style.TEXT.tint().value;
+                    }
+                    _text_field.text = _hint_text;
                 } else {
-                    _text_field.textColor = Style.TEXT.tint().value;
+                    if (Style.CURRENT_THEME == Style.DARK) {
+                        _text_field.textColor = Style.TEXT.shade().value;
+                    } else {
+                        _text_field.textColor = Style.TEXT.tint().value;
+                    }
                 }
             } else {
                 _text_field.textColor = Style.TEXT.value;
@@ -127,8 +133,8 @@ package net.blaxstar.starlib.components {
             if (_showing_underline) {
                 update_underline();
             } else {
-                _width_ = _text_field.width;
-                _height_ = _text_field.height;
+                _text_field.width = _width_;
+                _text_field.height = _height_;
             }
 
             on_draw_signal.dispatch();
@@ -152,7 +158,10 @@ package net.blaxstar.starlib.components {
             commit();
         }
 
-        // private
+        public function add_suggestion():void {
+        }
+
+        // * private methods
 
         private function update_underline():void {
             _textfield_underline.graphics.clear();
@@ -202,27 +211,33 @@ package net.blaxstar.starlib.components {
 
         }
 
-        private function on_suggestion_select(e:MouseEvent = null):void {
-            var item:ListItem = (e.currentTarget as ListItem);
-            _selected_suggestion = new Suggestion();
-            _selected_suggestion.label = item.label;
-            _selected_suggestion.data = (item.data as Suggestion).data;
-            _text_field.text = _selected_suggestion.label;
-            _text_field.setTextFormat(_text_field.defaultTextFormat);
-            _input_cache = item.label;
-            _typed_chars = item.label.length;
+        // * getters & setters //
 
+        public function get input_target():TextField {
+            return _text_field;
         }
-
-        // getters/setters
 
         public function get text():String {
             return _textfield_string;
         }
 
         public function set text(val:String):void {
+            _is_hinting = false;
             _textfield_string = val;
             draw();
+        }
+
+        public function get hint_text():String {
+            return _hint_text;
+        }
+
+        public function set hint_text(val:String):void {
+            if (StringUtil.stringIsEmpty(val)) {
+                _hint_text = "enter text";
+                return;
+            }
+            _hint_text = val;
+            show_hint_text();
         }
 
         public function get color():uint {
@@ -267,7 +282,7 @@ package net.blaxstar.starlib.components {
                 _suggestion_list.width = _width_;
                 _suggestion_limit = 5;
                 _suggestion_iterator_index = 0;
-                _input_engine.addKeyboardDelegate(on_key_press);
+                _input_engine.add_keyboard_delegate(on_key_press);
             } else {
                 if (_suggestion_list != null) {
                     _suggestion_list.clear();
@@ -275,9 +290,8 @@ package net.blaxstar.starlib.components {
                 }
                 _suggestion_limit = 0;
                 _suggestion_iterator_index = 0;
-                _input_engine.removeKeyboardDelegates(on_key_press);
+                _input_engine.remove_keyboard_delegates(on_key_press);
             }
-
         }
 
         public function set suggestion_store(json:String):void {
@@ -313,16 +327,40 @@ package net.blaxstar.starlib.components {
             _is_password_field = val;
         }
 
-        //! delegate functions
+        public function set restrict(value:String):void {
+            _text_field.restrict = value;
+        }
+
+        // * delegate functions
+
+        private function on_suggestion_select(e:MouseEvent = null):void {
+            var item:ListItem = (e.currentTarget as ListItem);
+            _selected_suggestion = new Suggestion();
+            _selected_suggestion.label = item.label;
+            _selected_suggestion.data = (item.data as Suggestion).data;
+            _text_field.text = _selected_suggestion.label;
+            _text_field.setTextFormat(_text_field.defaultTextFormat);
+            _input_cache = item.label;
+            _typed_chars = item.label.length;
+
+        }
+
+        /*
+           private function on_added(e:Event):void {
+           _input_engine = new InputEngine(stage, true);
+           draw();
+           }
+         */
+
         public function get on_text_update():NativeSignal {
-          return _on_text_update;
+            return _on_text_update;
         }
 
         private function on_key_press(e:KeyboardEvent):void {
             var pressedKey:uint = e.keyCode;
             var keyName:String = _input_engine.getKeyName(e.keyCode).toLowerCase();
 
-            if (_input_engine.modIsDown())
+            if (_input_engine.mod_is_down())
                 return;
 
             // TODO (dyxribo, STARLIB-7): implement arrow navigation for suggestions
@@ -346,7 +384,7 @@ package net.blaxstar.starlib.components {
 
         private function onFocus(e:FocusEvent):void {
             _on_focus.remove(onFocus);
-            _text_field.textColor = Style.TEXT.value;
+            _is_hinting = false;
             if (_text_field.text == _hint_text) {
                 _text_field.text = "";
                 if (_is_password_field) {
@@ -364,7 +402,7 @@ package net.blaxstar.starlib.components {
                     addChild(_suggestion_list);
                 show_suggestions();
             }
-
+            commit();
             _on_defocus.add(onDeFocus);
         }
 
@@ -373,7 +411,7 @@ package net.blaxstar.starlib.components {
             _on_defocus.remove(onDeFocus);
 
             if (_text_field.text == "") {
-                showHintText();
+                show_hint_text();
             }
 
             if (_showing_underline) {
@@ -384,17 +422,12 @@ package net.blaxstar.starlib.components {
             _on_focus.add(onFocus);
         }
 
-        private function showHintText():void {
-            if (Style.CURRENT_THEME == Style.DARK)
-                _text_field.textColor = Style.TEXT.shade().value;
-
-            else
-                _text_field.textColor = Style.TEXT.tint().value;
-            _text_field.text = _hint_text;
-
+        private function show_hint_text():void {
             if (_is_password_field) {
                 _text_field.displayAsPassword = false;
             }
+            _is_hinting = true;
+            commit();
         }
 
         private function onTextChange(e:Event):void {

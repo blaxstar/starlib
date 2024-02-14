@@ -1,4 +1,4 @@
-﻿package net.blaxstar.starlib.components {
+package net.blaxstar.starlib.components {
   import flash.display.DisplayObject;
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
@@ -42,7 +42,7 @@
     override public function draw(e:Event = null):void {
       super.draw();
       var ypos:Number = 0;
-      width = _height_ = 0;
+      _width_ = _height_ = 0;
 
       for (var i:int = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);
@@ -88,7 +88,7 @@
         (child as Component).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -101,7 +101,7 @@
         Component(child).on_resize_signal.add(onComponentResize);
       else
         child.addEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -114,7 +114,7 @@
         Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -127,7 +127,7 @@
         Component(child).on_resize_signal.remove(onComponentResize);
       else
         child.removeEventListener(Event.RESIZE, onComponentResize);
-      draw();
+      commit();
       return child;
     }
 
@@ -135,7 +135,7 @@
      * internal handler for resize event of any attached component. Will redo the layout based on new size.
      */
     protected function onComponentResize(event:Event = null):void {
-      draw();
+      commit();
     }
 
     public function set maskThreshold(value:Number):void {

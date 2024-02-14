@@ -32,41 +32,41 @@ import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 		public var rightStick:GamepadJoystick;
 		/** directional pad. */
 		public var dpad:GamepadDPadButton;
-		
+
 		public var back:GamepadButton;
 		public var start:GamepadButton;
-		
+
 		public function Xbox360Gamepad(device:GameInputDevice) {
-			_type = GamepadType.XBOX;
+			_type = GamepadType.XBOX_360;
 			super(device);
 		}
-		
+
 		override protected function bindControls():void {
 			var controlMap:Dictionary = new Dictionary();
 			for (var i:uint = 0; i < device.numControls; i++) {
 				var control:GameInputControl = device.getControlAt(i);
 				controlMap[control.id] = control;
 			}
-			
+
 			a = new GamepadButton(this, controlMap['BUTTON_4']);
 			b = new GamepadButton(this, controlMap['BUTTON_5']);
 			x = new GamepadButton(this, controlMap['BUTTON_6']);
 			y = new GamepadButton(this, controlMap['BUTTON_7']);
-			
+
 			lb = new GamepadButton(this, controlMap['BUTTON_8']);
 			rb = new GamepadButton(this, controlMap['BUTTON_9']);
 			lt = new GamepadTrigger(this, controlMap['BUTTON_10']);
 			rt = new GamepadTrigger(this, controlMap['BUTTON_11']);
-			
+
 			leftStick = new GamepadJoystick(this, controlMap['AXIS_0'], controlMap['AXIS_1'], controlMap['BUTTON_14']);
 			rightStick = new GamepadJoystick(this, controlMap['AXIS_2'], controlMap['AXIS_3'], controlMap['BUTTON_15']);
-			
+
 			dpad = new GamepadDPadButton(this, controlMap['BUTTON_16'], controlMap['BUTTON_17'], controlMap['BUTTON_18'], controlMap['BUTTON_19']);
-			
+
 			back = new GamepadButton(this, controlMap['BUTTON_12']);
 			start = new GamepadButton(this, controlMap['BUTTON_13']);
 		}
-		
+
 		override public function reset():void {
 			a.reset();
 			b.reset();

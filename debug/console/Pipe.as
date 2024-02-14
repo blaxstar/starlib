@@ -1,70 +1,81 @@
 package net.blaxstar.starlib.debug.console {
-  import flash.utils.Dictionary;
-  import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
+    import flash.utils.Dictionary;
+    import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
 
-  /**
-   * ...
-   * @author SnaiLegacy (Psycho)
-   */
-  public class Pipe extends Object {
-    static private const COMMAND:RegExp = /(^[ ]*[a-zA-Z.0-9]+)/;
-    static private const SWITCHES:RegExp = /([-0-9+.]+[0-9+])|([+0-9+])|(-[a-zA-Z]+)|(\|[a-zA-Z]+)|(\|\s[a-zA-Z]+)/g;
-    static private const PIPES:RegExp = /\|/g;
-    static private const cmdLookup:Dictionary = DebugConsole.commandDictionary;
+    /**
+     * TODO: class documentation
+     * @author Deron Decamp (decamp.deron@gmail.com)
+     */
+    public class Pipe extends Object {
+        static private const COMMAND:RegExp = /(^[ ]*[a-zA-Z.0-9]+)/;
+        static private const SWITCHES:RegExp = /([-0-9+.]+[0-9+])|([+0-9+])|(-[a-zA-Z]+)|(\|[a-zA-Z]+)|(?<!\|)(?<=\s)[^\s|]+/g;
+        static private const PIPES:RegExp = /\|/g;
 
-    private var _commands:Array;
-    private var _commandObjects:Vector.<ConsoleCommand>;
-    private var _result:*;
+        private var _commands:Array;
+        private var _command_objects:Vector.<ConsoleCommand>;
+        private var _result:*;
+        private var _command_dictionary:Dictionary;
 
-    public function parseCommandsFromString(pipelineString:String):void {
-      _commands = pipelineString.split(PIPES);
-      _commandObjects = new Vector.<ConsoleCommand>();
-
-      for (var i:int = 0; i < _commands.length; i++) {
-        var currPipeline:String = _commands[i];
-        var cmd:String = currPipeline.match(COMMAND)[0].replace(" ", "");
-        var args:Array = currPipeline.match(SWITCHES);
-
-        var currentCommand:ConsoleCommand = cmdLookup[cmd];
-
-        if (currentCommand != null) {
-          _commandObjects.push(currentCommand);
-          currentCommand.setArgs(args);
+        public function Pipe(dictionary:Dictionary) {
+            _command_dictionary = dictionary;
         }
-        else {
-          trace("Invalid command: " + cmd);
+
+        public function parse_commands_from_string(pipelineString:String):void {
+            _commands = pipelineString.split(PIPES);
+            _command_objects = new Vector.<ConsoleCommand>();
+
+            for (var i:int = 0; i < _commands.length; i++) {
+                var current_pipeline:String = _commands[i];
+                var cmd:String = current_pipeline.match(COMMAND)[0].replace(" ", "");
+                var args:Array = current_pipeline.match(SWITCHES);
+
+                var current_command:ConsoleCommand = _command_dictionary[cmd] || _command_dictionary[cmd.toLowerCase()];
+
+                if (current_command != null) {
+                    _command_objects.push(current_command);
+
+                    if (current_command.argument_array.length) {
+                        if (args.length) {
+                            current_command.push_args(args);
+                        }
+                    } else {
+                        if (args.length) {
+                            current_command.set_args(args);
+                        }
+                    }
+                } else {
+                    trace("Invalid command: " + cmd);
+                }
+            }
+
         }
-      }
 
-    }
-
-    public function run():* {
-      if (!_commandObjects) return;
-      if (_commandObjects.length > 1) {
-        for (var i:uint = 1; i < _commandObjects.length; i++) {
-          _result = connect(_commandObjects[i - 1], _commandObjects[i]);
+        public function run():* {
+            if (!_command_objects)
+                return;
+            if (_command_objects.length > 1) {
+                for (var i:uint = 1; i < _command_objects.length; i++) {
+                    _result = connect(_command_objects[i - 1], _command_objects[i]);
+                }
+                return _result;
+            } else if (_command_objects.length > 0) {
+                return _command_objects[0].execute();
+            }
         }
-        return _result;
-      } else if (_commandObjects.length > 0) {
-        return _commandObjects[0].execute();
-      }
+
+        static private function connect(prev_command:ConsoleCommand, next_command:ConsoleCommand):* {
+            var com1_out:* = prev_command.execute();
+            var all_args:Array = [];
+
+            all_args = next_command.argument_array;
+            all_args.push(com1_out);
+
+            return next_command.execute();
+        }
+
+        public function get result():* {
+            return (result == undefined || result == null) ? run() : _result;
+        }
     }
-
-    static private function connect(prevCommand:ConsoleCommand, nextCommand:ConsoleCommand):* {
-      var prevFunc:Function = prevCommand.func;
-      var nextFunc:Function = nextCommand.func;
-      var com1out:* = prevFunc.apply(null, prevCommand.argArray);
-      var allArgs:Array = [];
-
-      allArgs = nextCommand.argArray;
-      allArgs.push(com1out);
-
-      return nextFunc.apply(null, allArgs);
-    }
-
-    public function get result():* {
-      return (result == undefined || result == null) ? run() : _result;
-    }
-  }
 
 }

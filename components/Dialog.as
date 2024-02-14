@@ -17,24 +17,25 @@ package net.blaxstar.starlib.components {
            . keep track of the currently active one via a `currentlyActive` property.
            . when a dialog is clicked (mousedown), move `currentlyActive` to the inactive vector, then set the clicked dialog to `currentlyActive`.
            also bring the currently active to the front.
-           . make it so that dialogs whose `draggable` property is set to false cannot participate in this behavior (just in case it is positioned above another displayobject).
            . also make a `pin()` method, which will always ensure the dialog is on top. only one dialog should be pinned at a time, since multiple cannot possibly be placed at the same index.
          */
-        protected var _title_textfield:PlainText;
-        protected var _message_textfield:PlainText;
+        private var _title_textfield:PlainText;
+        private var _message_textfield:PlainText;
         private var _title_string:String;
         private var _message_string:String;
         private var _text_container:VerticalBox;
         private var _dialog_card:Card;
+        private var _component_container:VerticalBox;
+        private var _option_container:HorizontalBox;
         private var _draggable:Boolean;
-        private var _prevParent:DisplayObjectContainer;
-        private var _onClose:Signal;
+        private var _prev_parent:DisplayObjectContainer;
+        private var _on_close:Signal;
 
         public function Dialog(parent:DisplayObjectContainer = null, title:String = '', message:String = '') {
             _title_string = title;
             _message_string = message;
-            _onClose = new Signal();
-            addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+            _on_close = new Signal();
+            addEventListener(Event.ADDED_TO_STAGE, on_added_to_stage);
             super(parent);
         }
 
@@ -53,7 +54,9 @@ package net.blaxstar.starlib.components {
 
             _title_textfield.enabled = false;
             _dialog_card.draggable = true;
-
+            _dialog_card.auto_resize = true;
+            //_text_container.isShowingBounds = true;
+            isShowingBounds = true;
             super.init();
         }
 
@@ -67,17 +70,20 @@ package net.blaxstar.starlib.components {
          */
         override public function add_children():void {
 
-            _dialog_card.auto_resize = false;
             _text_container.move(PADDING, PADDING);
             _dialog_card.add_child_native(_text_container);
             _title_textfield.text = _title_string;
             _message_textfield.text = _message_string;
-
+            // cache the containers, no need to keep accessing them via dot
+            _component_container = _dialog_card.component_container;
+            _option_container = _dialog_card.option_container;
+            _component_container.move(0, _text_container.y + _text_container.height);
             _text_container.addChild(_title_textfield);
             _text_container.addChild(_message_textfield);
             addChild(_dialog_card);
 
             _dialog_card.on_resize_signal.add(draw);
+            commit();
         }
 
         /**
@@ -94,10 +100,9 @@ package net.blaxstar.starlib.components {
 
             _width_ = _dialog_card.width;
             _height_ = _dialog_card.height;
-
-            componentContainer.move(PADDING, _text_container.y + _text_container.height + PADDING);
-            optionContainer.move(PADDING, _height_ - optionContainer.height);
-
+            _component_container.move(PADDING, _text_container.y + _text_container.height + PADDING);
+            _option_container.move(PADDING, _height_ - option_container.height);
+            //_component_container.isShowingBounds = true;
             super.draw(e);
         }
 
@@ -131,7 +136,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function get onClose():Signal {
-            return _onClose;
+            return _on_close;
         }
 
         public function set viewableItems(val:uint):void {
@@ -172,13 +177,13 @@ package net.blaxstar.starlib.components {
         public function close(e:Event = null):void {
             if (parent) {
                 parent.removeChild(this);
-                _onClose.dispatch();
+                _on_close.dispatch();
             }
         }
 
         public function open():void {
-            if (_prevParent != null) {
-                _prevParent.addChild(this);
+            if (_prev_parent != null) {
+                _prev_parent.addChild(this);
             }
         }
 
@@ -195,16 +200,16 @@ package net.blaxstar.starlib.components {
             return parent && enabled;
         }
 
-        public function get componentContainer():VerticalBox {
+        public function get component_container():VerticalBox {
             return _dialog_card.component_container;
         }
 
-        public function get optionContainer():HorizontalBox {
+        public function get option_container():HorizontalBox {
             return _dialog_card.option_container;
         }
 
-        private function onAddedToStage(e:Event):void {
-            _prevParent = parent;
+        private function on_added_to_stage(e:Event):void {
+            _prev_parent = parent;
         }
     }
 
