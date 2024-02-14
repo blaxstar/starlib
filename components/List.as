@@ -232,8 +232,7 @@ package net.blaxstar.starlib.components {
             draw();
         }
 
-        override public function destroy(e:Event = null):void {
-            super.destroy(e);
+        override public function destroy():void {
 
             for (var i:uint = 0; i < _item_container.numChildren; i++) {
                 var child:ListItem = ListItem(_item_container.getChildAt(i));

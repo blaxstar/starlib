@@ -12,75 +12,83 @@ package net.blaxstar.starlib.components {
     private const MIN_HEIGHT:Number = 30;
     private const MAX_WIDTH:Number = 40;
 
-    private var _chipSurface:Sprite;
-    private var _chipLabel:PlainText;
-    private var _closeButton:Button;
-    private var _layoutBox:HorizontalBox;
-    private var _labelText:String;
+    private var _chip_surface:Sprite;
+    private var _chip_label:PlainText;
+    private var _close_button:Button;
+    private var _layout_box:HorizontalBox;
+    private var _label_text:String;
     private var _data:Object;
-    private var _cornerRadius:Number;
+    private var _corner_radius:Number;
 
     public function Chip(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = 'CHIP', data:Object = null) {
-      _labelText = label;
+      _label_text = label;
       _data = data;
       super(parent, xpos, ypos);
     }
 
     override public function init():void {
+      _layout_box = new HorizontalBox();
+      _close_button = new Button();
+      _chip_label = new PlainText();
+      _chip_surface = new Sprite();
+
       _width_ = MIN_WIDTH;
       _height_ = MIN_HEIGHT;
-      _cornerRadius = _height_ / 2;
+      _corner_radius = _height_ / 2;
       super.init();
     }
 
     override public function add_children():void {
-      drawSurface();
-      _layoutBox = new HorizontalBox(this);
-      _layoutBox.spacing = 10;
-      addChild(_chipSurface);
-      drawIcon();
-      drawLabel();
+      _layout_box.spacing = 10;
+
+      addChild(_chip_surface);
+      addChild(_layout_box);
+      draw_surface();
+      draw_icon();
+      draw_label();
 
       apply_shadow();
-      setChildIndex(_chipSurface, 0);
+      setChildIndex(_chip_surface, 0);
       super.add_children();
     }
 
-    private function drawIcon():void {
-      _closeButton ||= new Button(_layoutBox, 0, 0);
-      _closeButton.icon = Icon.CLOSE;
-      _closeButton.getIcon().setColor('#' + Style.TEXT.value.toString(16));
-      _closeButton.set_size(16, 16);
-      _closeButton.on_click.add(removeChip);
+    private function draw_icon():void {
+      _close_button.icon = Icon.CLOSE;
+      _close_button.get_icon().set_color('#' + Style.TEXT.value.toString(16));
+      _close_button.set_size(16, 16);
+      _close_button.on_click.add(remove_chip);
+      addChild(_close_button);
     }
 
-    private function removeChip(e:MouseEvent):void {
+    private function remove_chip(e:MouseEvent):void {
       parent.removeChild(this);
-      destroy(e);
+      destroy();
     }
 
-    private function drawLabel():void {
-      _chipLabel ||= new PlainText(_layoutBox, 0, 0, _labelText);
-      _chipLabel.width = MAX_WIDTH;
-      _chipLabel.color = Style.TEXT.value;
+    private function draw_label():void {
+      _chip_label.text = _label_text;
+      _chip_label.width = MAX_WIDTH;
+      _chip_label.color = Style.TEXT.value;
+
+      _layout_box.addChild(_chip_label);
     }
 
-    private function drawSurface():void {
-      _chipSurface ||= new Sprite();
-      var g:Graphics = _chipSurface.graphics;
+    private function draw_surface():void {
+      var g:Graphics = _chip_surface.graphics;
       g.beginFill(Style.SECONDARY.value);
-      g.drawRoundRectComplex(0, 0, _width_ + PADDING, _height_, _cornerRadius, _cornerRadius, _cornerRadius, _cornerRadius);
+      g.drawRoundRectComplex(0, 0, _width_ + PADDING, _height_, _corner_radius, _corner_radius, _corner_radius, _corner_radius);
       g.endFill();
     }
 
     override public function draw(e:Event = null):void {
 
-      _layoutBox.alignment = HorizontalBox.CENTER;
-      _width_ = _layoutBox.width;
-      drawSurface();
-      drawLabel();
-      _layoutBox.x = PADDING;
-      _layoutBox.y = 5;
+      _layout_box.alignment = HorizontalBox.CENTER;
+      _width_ = _layout_box.width;
+      _layout_box.x = PADDING;
+      _layout_box.y = 5;
+
+      draw_surface();
+      draw_label();
       super.draw();
     }
   }

@@ -181,8 +181,7 @@ package net.blaxstar.starlib.components {
       return _alignment;
     }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
+    override public function destroy():void {
 
       for (var i:uint = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);

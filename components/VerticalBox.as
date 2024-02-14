@@ -165,8 +165,8 @@
     /**
      *  getter and setter for the spacing between each subcomponent.
      */
-    public function set spacing(s:Number):void {
-      _spacing_ = s;
+    public function set spacing(pixel_spacing:Number):void {
+      _spacing_ = pixel_spacing;
       commit();
     }
 
@@ -186,8 +186,7 @@
       return _alignment;
     }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
+    override public function destroy():void {
 
       for (var i:uint = 0; i < numChildren; i++) {
         var child:DisplayObject = getChildAt(i);

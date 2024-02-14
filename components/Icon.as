@@ -128,7 +128,7 @@ package net.blaxstar.starlib.components {
     }
 
     /** END INTERFACE ===================== */
-    public function setColor(colorCode:String = 'FFFFFF'):void {
+    public function set_color(colorCode:String = 'FFFFFF'):void {
       if (colorCode.indexOf('#') < 0) {
         colorCode = '#' + colorCode;
       }

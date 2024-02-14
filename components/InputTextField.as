@@ -1,425 +1,422 @@
 package net.blaxstar.starlib.components {
 
-  import flash.display.DisplayObject;
-  import flash.display.DisplayObjectContainer;
-  import flash.display.Shape;
-  import flash.events.Event;
-  import flash.events.FocusEvent;
-  import flash.events.KeyboardEvent;
-  import flash.events.MouseEvent;
-  import flash.text.AntiAliasType;
-  import flash.text.GridFitType;
-  import flash.text.TextField;
-  import flash.text.TextFieldAutoSize;
-  import flash.text.TextFieldType;
-  import flash.text.TextFormat;
+    import flash.display.DisplayObject;
+    import flash.display.DisplayObjectContainer;
+    import flash.display.Shape;
+    import flash.events.Event;
+    import flash.events.FocusEvent;
+    import flash.events.KeyboardEvent;
+    import flash.events.MouseEvent;
+    import flash.text.AntiAliasType;
+    import flash.text.GridFitType;
+    import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
+    import flash.text.TextFieldType;
+    import flash.text.TextFormat;
 
-  import net.blaxstar.starlib.input.InputEngine;
-  import net.blaxstar.starlib.style.Font;
-  import net.blaxstar.starlib.style.Style;
+    import net.blaxstar.starlib.input.InputEngine;
+    import net.blaxstar.starlib.style.Font;
+    import net.blaxstar.starlib.style.Style;
 
 
-import thirdparty.org.osflash.signals.natives.NativeSignal;
-import debug.DebugDaemon;
+    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import debug.DebugDaemon;
 
-  /**
-   * ...
-   * @author Deron D. (decamp.deron@gmail.com)
-   */
-  public class InputTextField extends Component {
+    /**
+     * ...
+     * @author Deron D. (decamp.deron@gmail.com)
+     */
+    public class InputTextField extends Component {
 
-    private var _textField:TextField;
-    private var _textFieldUnderline:Shape;
-    private var _textFieldUnderlineStrength:uint;
-    private var _textFieldString:String;
-    private var _textFormat:TextFormat;
-    private var _hintText:String;
-    private var _showingUnderline:Boolean;
-    private var _showingSuggestions:Boolean;
-    private var _hasLeadingIcon:Boolean;
-    private var _leadingIcon:Icon;
-    private var _suggestionList:List;
-    private var _suggestionLimit:uint;
-    private var _suggestionGenerator:Suggestitron;
-    private var _suggestionIteratorIndex:uint;
-    private var _input_cache:String;
-    private var _suggestionCache:Vector.<Suggestion>;
-    private var _selectedSuggestion:Suggestion;
-    private var _suggestionsAvailable:Boolean;
-    private var _is_password_field:Boolean;
+        private var _text_field:TextField;
+        private var _textfield_underline:Shape;
+        private var _textfield_underline_strength:uint;
+        private var _textfield_string:String;
+        private var _text_format:TextFormat;
+        private var _hint_text:String;
+        private var _leading_icon:Icon;
+        private var _suggestion_cache:Vector.<Suggestion>;
+        private var _suggestion_list:List;
+        private var _suggestion_limit:uint;
+        private var _suggestion_generator:Suggestitron;
+        private var _suggestion_iterator_index:uint;
+        private var _input_cache:String;
+        private var _showing_underline:Boolean;
+        private var _showing_suggestions:Boolean;
+        private var _has_leading_icon:Boolean;
+        private var _selected_suggestion:Suggestion;
+        private var _suggestions_available:Boolean;
+        private var _is_password_field:Boolean;
 
-    private var _input_engine:InputEngine;
-    private var _onFocus:NativeSignal;
-    private var _onDeFocus:NativeSignal;
-    private var _onTextChange:NativeSignal;
-    private var _typedChars:uint;
+        private var _input_engine:InputEngine;
+        private var _on_focus:NativeSignal;
+        private var _on_defocus:NativeSignal;
+        private var _on_text_update:NativeSignal;
+        private var _typed_chars:uint;
 
-    // TODO (dyxribo, STARCOMPS-3): add icon support to InputTextField
-    public function InputTextField(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, hintText:String = "") {
-      _hintText = _textFieldString = hintText;
-      super(parent, xpos, ypos);
-    }
-
-    // public
-
-    override public function init():void {
-      _textFormat = Font.BODY_2;
-      _textFormat.color = Style.TEXT.value;
-      _showingUnderline = true;
-      super.init();
-    }
-
-    override public function add_children():void {
-      _textField = new TextField();
-      _textField.type = TextFieldType.INPUT;
-      _textField.autoSize = TextFieldAutoSize.NONE;
-      _textField.defaultTextFormat = _textFormat;
-      _textField.embedFonts = true;
-      _textField.antiAliasType = AntiAliasType.ADVANCED;
-      _textField.gridFitType = GridFitType.SUBPIXEL;
-      _textField.selectable = true;
-      _textField.sharpness = 300;
-      _textField.border = false;
-      _textField.background = false;
-      _textField.width = 200;
-      _textField.text = _textFieldString;
-      _textField.setTextFormat(_textFormat);
-      addChild(_textField);
-
-      if (_showingUnderline) {
-        _textFieldUnderline = new Shape();
-        _textFieldUnderlineStrength = 1;
-        addChild(_textFieldUnderline);
-        updateUnderline();
-      }
-
-      _onFocus = new NativeSignal(_textField, FocusEvent.FOCUS_IN, FocusEvent);
-      _onDeFocus = new NativeSignal(_textField, FocusEvent.FOCUS_OUT, FocusEvent);
-
-      // TODO (dyxribo, STARCOMPS-11): use keydown listeners in favor of change event in InputTextField
-      _onTextChange = new NativeSignal(_textField, Event.CHANGE, Event);
-      _onFocus.add(onFocus);
-      _onTextChange.add(onTextChange);
-
-      super.add_children();
-
-    }
-
-    override protected function on_added(e:Event):void {
-      _input_engine = new InputEngine(stage, true);
-      draw();
-    }
-
-    override public function draw(e:Event = null):void {
-      if (_textField.text == _hintText || _textField.text.length < 1) {
-        if (Style.CURRENT_THEME == Style.DARK) {
-          _textField.textColor = Style.TEXT.shade().value;
-        } else {
-          _textField.textColor = Style.TEXT.tint().value;
+        // TODO (dyxribo, STARCOMPS-3): add icon support to InputTextField
+        public function InputTextField(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, hintText:String = "") {
+            _hint_text = _textfield_string = hintText;
+            super(parent, xpos, ypos);
         }
-      } else {
-        _textField.textColor = Style.TEXT.value;
-      }
-      _textField.text = _textFieldString;
-      _textField.height = _textField.textHeight + 4;
-      if (_showingUnderline) {
-        updateUnderline();
-      } else {
-        _width_ = _textField.width;
-        _height_ = _textField.height;
-      }
-      on_draw_signal.dispatch();
-    }
 
-    override public function addChild(child:DisplayObject):DisplayObject {
-      if (child is Icon) {
-        DebugDaemon.write_log("please use leadingIcon property for adding an " +
-        "icon to InputTextField!", DebugDaemon.ERROR_MISUSE);
-      }
-      return super.addChild(child);
-    }
+        // public
 
-    public function format(fmt:TextFormat = null):void {
-      if (fmt == null) {
-        _textField.setTextFormat(Font.BODY_2);
-        _textFormat = Font.BODY_2;
-      }
-      else {
-        _textField.defaultTextFormat = fmt;
-        _textFormat = fmt;
-      }
-      commit();
-    }
-
-    // private
-
-    private function updateUnderline():void {
-      _textFieldUnderline.graphics.clear();
-      _textFieldUnderline.graphics.lineStyle(_textFieldUnderlineStrength, Style.SECONDARY.value);
-
-      if (!leadingIcon) {
-        _textFieldUnderline.graphics.lineTo(_textField.width, 0);
-      }
-      else {
-        _textFieldUnderline.graphics.lineTo(_textField.width + _leadingIcon.width, 0);
-      }
-      _textFieldUnderline.y = _textField.height + 4;
-      _width_ = _textFieldUnderline.width;
-      _height_ = _textFieldUnderline.y + _textFieldUnderline.height;
-    }
-
-    private function showSuggestions():void {
-      if (_input_cache == _textField.text) {
-        if (!_suggestionList.parent)
-          addChild(_suggestionList);
-      } else {
-        _suggestionList.clear();
-        _suggestionCache = _suggestionGenerator.generateSuggestions(_textField.text, _suggestionLimit);
-
-        if (!_suggestionCache.length) {
-          if (_suggestionList.parent)
-            removeChild(_suggestionList);
-          return;
+        override public function init():void {
+            _text_format = Font.BODY_2;
+            _text_format.color = Style.TEXT.value;
+            _showing_underline = true;
+            super.init();
         }
-        else {
-          for (var i:uint = 0; i < _suggestionCache.length; i++) {
-            var currentSuggestion:Suggestion = _suggestionCache[i];
-            var item:ListItem = _suggestionList.get_cached_item(currentSuggestion.linkageid);
-            if (item) {
-              _suggestionList.add_item(item);
+
+        override public function add_children():void {
+            _text_field = new TextField();
+            _text_field.type = TextFieldType.INPUT;
+            _text_field.autoSize = TextFieldAutoSize.NONE;
+            _text_field.defaultTextFormat = _text_format;
+            _text_field.embedFonts = true;
+            _text_field.antiAliasType = AntiAliasType.ADVANCED;
+            _text_field.gridFitType = GridFitType.SUBPIXEL;
+            _text_field.selectable = true;
+            _text_field.sharpness = 300;
+            _text_field.border = false;
+            _text_field.background = false;
+            _text_field.width = 200;
+            _text_field.text = _textfield_string;
+            _text_field.setTextFormat(_text_format);
+            addChild(_text_field);
+
+            if (_showing_underline) {
+                _textfield_underline = new Shape();
+                _textfield_underline_strength = 1;
+                addChild(_textfield_underline);
+                update_underline();
             }
-            else {
-              item = new ListItem(_suggestionList, 0, 0, currentSuggestion.label);
-              item.linkage_id = currentSuggestion.linkageid;
-              item.label = currentSuggestion.label;
-              item.on_click.add(onSuggestionSelect);
+
+            _on_focus = new NativeSignal(_text_field, FocusEvent.FOCUS_IN, FocusEvent);
+            _on_defocus = new NativeSignal(_text_field, FocusEvent.FOCUS_OUT, FocusEvent);
+
+            // TODO (dyxribo, STARCOMPS-11): use keydown listeners in favor of change event in InputTextField
+            _on_text_update = new NativeSignal(_text_field, Event.CHANGE, Event);
+            _on_focus.add(onFocus);
+            _on_text_update.add(onTextChange);
+
+            super.add_children();
+
+        }
+
+        override protected function on_added(e:Event):void {
+            _input_engine = new InputEngine(stage, true);
+            draw();
+        }
+
+        override public function draw(e:Event = null):void {
+            if (_text_field.text == _hint_text || _text_field.text.length < 1) {
+                if (Style.CURRENT_THEME == Style.DARK) {
+                    _text_field.textColor = Style.TEXT.shade().value;
+                } else {
+                    _text_field.textColor = Style.TEXT.tint().value;
+                }
+            } else {
+                _text_field.textColor = Style.TEXT.value;
             }
-          }
+
+            _text_field.text = _textfield_string;
+            _text_field.height = _text_field.textHeight + 4;
+
+            if (_showing_underline) {
+                update_underline();
+            } else {
+                _width_ = _text_field.width;
+                _height_ = _text_field.height;
+            }
+
+            on_draw_signal.dispatch();
         }
-      }
-      _suggestionList.y = _textFieldUnderline.y + 1;
-      _suggestionList.width = _width_;
 
-    }
-
-    private function onSuggestionSelect(e:MouseEvent = null):void {
-      var item:ListItem = (e.currentTarget as ListItem);
-      _selectedSuggestion = new Suggestion();
-      _selectedSuggestion.label = item.label;
-      _selectedSuggestion.data = (item.data as Suggestion).data;
-      _textField.text = _selectedSuggestion.label;
-      _textField.setTextFormat(_textField.defaultTextFormat);
-      _input_cache = item.label;
-      _typedChars = item.label.length;
-
-    }
-
-    // getters/setters
-
-    public function get text():String {
-      return _textFieldString;
-    }
-
-    public function set text(val:String):void {
-      _textFieldString = val;
-      draw();
-    }
-
-    public function get color():uint {
-      return _textField.textColor;
-    }
-
-    public function set color(val:uint):void {
-      _textField.textColor = val;
-    }
-
-    public function get leadingIcon():Icon {
-      return _leadingIcon;
-    }
-
-    public function set leadingIcon(icon:Icon):void {
-      if (icon == null) {
-        if (_leadingIcon && _leadingIcon.parent) {
-          super.removeChild(_leadingIcon);
-          _leadingIcon = null;
-          _textField.x = 0;
-          updateUnderline();
-          return;
+        override public function addChild(child:DisplayObject):DisplayObject {
+            if (child is Icon) {
+                DebugDaemon.write_log("please use leadingIcon property for adding an " + "icon to InputTextField!", DebugDaemon.ERROR_MISUSE);
+            }
+            return super.addChild(child);
         }
-      }
-      _leadingIcon = icon;
-      _width_ = _width_ + _leadingIcon.width;
-      _leadingIcon.y = _leadingIcon.y + (PADDING / 2);
-      _textField.x = _leadingIcon.width + PADDING;
-      super.addChild(_leadingIcon);
-      updateUnderline();
-    }
 
-    public function get showingSuggestions():Boolean {
-      return _showingSuggestions;
-    }
-
-    public function set showingSuggestions(val:Boolean):void {
-      _showingSuggestions = _suggestionsAvailable = val;
-
-      if (val) {
-        _suggestionList ||= new List(this);
-        _suggestionList.width = _width_;
-        _suggestionLimit = 5;
-        _suggestionIteratorIndex = 0;
-        _input_engine.addKeyboardDelegate(onKeyPress);
-      }
-      else {
-        if (_suggestionList != null) {
-          _suggestionList.clear();
-          _suggestionList.width = _width_;
+        public function format(fmt:TextFormat = null):void {
+            if (fmt == null) {
+                _text_field.setTextFormat(Font.BODY_2);
+                _text_format = Font.BODY_2;
+            } else {
+                _text_field.defaultTextFormat = fmt;
+                _text_format = fmt;
+            }
+            commit();
         }
-        _suggestionLimit = 0;
-        _suggestionIteratorIndex = 0;
-        _input_engine.removeKeyboardDelegates(onKeyPress);
-      }
 
-    }
+        // private
 
-    public function set suggestionStore(json:String):void {
-      _suggestionGenerator.loadFromJsonString(json);
-    }
+        private function update_underline():void {
+            _textfield_underline.graphics.clear();
+            _textfield_underline.graphics.lineStyle(_textfield_underline_strength, Style.SECONDARY.value);
 
-    public function get suggestionLimit():uint {
-      return _suggestionLimit;
-    }
-
-    public function set suggestionLimit(val:uint):void {
-      if (val < 1)
-        _suggestionLimit = 1;
-      else
-        _suggestionLimit = val;
-    }
-
-    public function get showingUnderline():Boolean {
-      return _showingUnderline;
-    }
-
-    public function set showingUnderline(val:Boolean):void {
-      if (!val) {
-        _textFieldUnderline.graphics.clear();
-        if (_textFieldUnderline.parent)
-          removeChild(_textFieldUnderline);
-      }
-      _showingUnderline = val;
-      draw();
-    }
-
-    public function set display_as_password(val:Boolean):void {
-      _is_password_field = val;
-    }
-    // delegate functions
-
-    private function onKeyPress(e:KeyboardEvent):void {
-      var pressedKey:uint = e.keyCode;
-      var keyName:String = _input_engine.getKeyName(e.keyCode).toLowerCase();
-
-      if (_input_engine.modIsDown())
-        return;
-
-      // TODO (dyxribo, STARLIB-7): implement arrow navigation for suggestions
-      if (pressedKey == _input_engine.keys.TAB) {
-        e.preventDefault();
-        return;
-      }
-      else if (pressedKey == _input_engine.keys.UP) {
-        return;
-      }
-      else if (pressedKey == _input_engine.keys.DOWN) {
-        return; // letter pressed                         number pressed                        numpad number
-        // pressed
-      }
-      else if ((pressedKey > 64 && pressedKey < 91) || (pressedKey > 47 && pressedKey < 58) || (pressedKey > 95 && pressedKey < 106)) {
-        if (!_suggestionList.parent)
-          showSuggestions();
-      }
-      else if (pressedKey == _input_engine.keys.BACKSPACE) {
-        if (_textField.text == '') {
-          _suggestionList.hide_items();
+            if (!prefixed_icon) {
+                _textfield_underline.graphics.lineTo(_text_field.width, 0);
+            } else {
+                _textfield_underline.graphics.lineTo(_text_field.width + _leading_icon.width, 0);
+            }
+            _textfield_underline.y = _text_field.height + 4;
+            _width_ = _textfield_underline.width;
+            _height_ = _textfield_underline.y + _textfield_underline.height;
         }
-      }
-    }
 
-    private function onFocus(e:FocusEvent):void {
-      _onFocus.remove(onFocus);
-      _textField.textColor = Style.TEXT.value;
-      if (_textField.text == _hintText) {
-        _textField.text = "";
-        if (_is_password_field) {
-          _textField.displayAsPassword = true;
+        private function show_suggestions():void {
+            if (_input_cache == _text_field.text) {
+                if (!_suggestion_list.parent) {
+                    addChild(_suggestion_list);
+                }
+            } else {
+                _suggestion_list.clear();
+                _suggestion_cache = _suggestion_generator.generateSuggestions(_text_field.text, _suggestion_limit);
+
+                if (!_suggestion_cache.length) {
+                    if (_suggestion_list.parent) {
+                        removeChild(_suggestion_list);
+                    }
+                    return;
+                } else {
+                    for (var i:uint = 0; i < _suggestion_cache.length; i++) {
+                        var currentSuggestion:Suggestion = _suggestion_cache[i];
+                        var item:ListItem = _suggestion_list.get_cached_item(currentSuggestion.linkageid);
+                        if (item) {
+                            _suggestion_list.add_item(item);
+                        } else {
+                            item = new ListItem(_suggestion_list, 0, 0, currentSuggestion.label);
+                            item.linkage_id = currentSuggestion.linkageid;
+                            item.label = currentSuggestion.label;
+                            item.on_click.add(on_suggestion_select);
+                        }
+                    }
+                }
+            }
+            _suggestion_list.y = _textfield_underline.y + 1;
+            _suggestion_list.width = _width_;
+
         }
-      }
 
-      if (_showingUnderline) {
-        _textFieldUnderlineStrength = 2;
-        updateUnderline();
-      }
+        private function on_suggestion_select(e:MouseEvent = null):void {
+            var item:ListItem = (e.currentTarget as ListItem);
+            _selected_suggestion = new Suggestion();
+            _selected_suggestion.label = item.label;
+            _selected_suggestion.data = (item.data as Suggestion).data;
+            _text_field.text = _selected_suggestion.label;
+            _text_field.setTextFormat(_text_field.defaultTextFormat);
+            _input_cache = item.label;
+            _typed_chars = item.label.length;
 
-      if (_suggestionsAvailable && _suggestionCache && _suggestionCache.length > 0) {
-        if (!_suggestionList.parent)
-          addChild(_suggestionList);
-        showSuggestions();
-      }
-
-      _onDeFocus.add(onDeFocus);
-    }
-
-    private function onDeFocus(e:FocusEvent):void {
-      // TODO(dyxribo, STARLIB-9): Allow suggestion list to hide on InputTextField defocus
-      _onDeFocus.remove(onDeFocus);
-
-      if (_textField.text == "") {
-        showHintText();
-      }
-
-      if (_showingUnderline) {
-        _textFieldUnderlineStrength = 1;
-        updateUnderline();
-      }
-
-      _onFocus.add(onFocus);
-    }
-
-    private function showHintText():void {
-      if (Style.CURRENT_THEME == Style.DARK)
-        _textField.textColor = Style.TEXT.shade().value;
-
-      else
-        _textField.textColor = Style.TEXT.tint().value;
-      _textField.text = _hintText;
-
-      if (_is_password_field) {
-        _textField.displayAsPassword = false;
-      }
-    }
-
-    private function onTextChange(e:Event):void {
-      if (_suggestionsAvailable) {
-        if (_textField.text.length > 0) {
-          if (!_suggestionList.parent)
-            addChild(_suggestionList);
-          showSuggestions();
         }
-        else if (_suggestionList.parent) {
-          removeChild(_suggestionList);
-        }
-      }
-      _textFieldString = _textField.text;
-      commit();
-      on_resize_signal.dispatch(_resizeEvent_);
-    }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
-      _onFocus.removeAll();
-      _onDeFocus.removeAll();
-      _onTextChange.removeAll();
+        // getters/setters
+
+        public function get text():String {
+            return _textfield_string;
+        }
+
+        public function set text(val:String):void {
+            _textfield_string = val;
+            draw();
+        }
+
+        public function get color():uint {
+            return _text_field.textColor;
+        }
+
+        public function set color(val:uint):void {
+            _text_field.textColor = val;
+        }
+
+        public function get prefixed_icon():Icon {
+            return _leading_icon;
+        }
+
+        public function set prefixed_icon(icon:Icon):void {
+            if (icon == null) {
+                if (_leading_icon && _leading_icon.parent) {
+                    super.removeChild(_leading_icon);
+                    _leading_icon = null;
+                    _text_field.x = 0;
+                    update_underline();
+                    return;
+                }
+            }
+            _leading_icon = icon;
+            _width_ = _width_ + _leading_icon.width;
+            _leading_icon.y = _leading_icon.y + (PADDING / 2);
+            _text_field.x = _leading_icon.width + PADDING;
+            super.addChild(_leading_icon);
+            update_underline();
+        }
+
+        public function get showing_suggestions():Boolean {
+            return _showing_suggestions;
+        }
+
+        public function set showing_suggestions(val:Boolean):void {
+            _showing_suggestions = _suggestions_available = val;
+
+            if (val) {
+                _suggestion_list ||= new List(this);
+                _suggestion_list.width = _width_;
+                _suggestion_limit = 5;
+                _suggestion_iterator_index = 0;
+                _input_engine.addKeyboardDelegate(on_key_press);
+            } else {
+                if (_suggestion_list != null) {
+                    _suggestion_list.clear();
+                    _suggestion_list.width = _width_;
+                }
+                _suggestion_limit = 0;
+                _suggestion_iterator_index = 0;
+                _input_engine.removeKeyboardDelegates(on_key_press);
+            }
+
+        }
+
+        public function set suggestion_store(json:String):void {
+            _suggestion_generator.loadFromJsonString(json);
+        }
+
+        public function get suggestion_limit():uint {
+            return _suggestion_limit;
+        }
+
+        public function set suggestion_limit(val:uint):void {
+            if (val < 1)
+                _suggestion_limit = 1;
+            else
+                _suggestion_limit = val;
+        }
+
+        public function get showing_underline():Boolean {
+            return _showing_underline;
+        }
+
+        public function set showing_underline(val:Boolean):void {
+            if (!val) {
+                _textfield_underline.graphics.clear();
+                if (_textfield_underline.parent)
+                    removeChild(_textfield_underline);
+            }
+            _showing_underline = val;
+            draw();
+        }
+
+        public function set display_as_password(val:Boolean):void {
+            _is_password_field = val;
+        }
+
+        //! delegate functions
+        public function get on_text_update():NativeSignal {
+          return _on_text_update;
+        }
+
+        private function on_key_press(e:KeyboardEvent):void {
+            var pressedKey:uint = e.keyCode;
+            var keyName:String = _input_engine.getKeyName(e.keyCode).toLowerCase();
+
+            if (_input_engine.modIsDown())
+                return;
+
+            // TODO (dyxribo, STARLIB-7): implement arrow navigation for suggestions
+            if (pressedKey == _input_engine.keys.TAB) {
+                e.preventDefault();
+                return;
+            } else if (pressedKey == _input_engine.keys.UP) {
+                return;
+            } else if (pressedKey == _input_engine.keys.DOWN) {
+                return; // letter pressed                         number pressed                        numpad number
+                    // pressed
+            } else if ((pressedKey > 64 && pressedKey < 91) || (pressedKey > 47 && pressedKey < 58) || (pressedKey > 95 && pressedKey < 106)) {
+                if (!_suggestion_list.parent)
+                    show_suggestions();
+            } else if (pressedKey == _input_engine.keys.BACKSPACE) {
+                if (_text_field.text == '') {
+                    _suggestion_list.hide_items();
+                }
+            }
+        }
+
+        private function onFocus(e:FocusEvent):void {
+            _on_focus.remove(onFocus);
+            _text_field.textColor = Style.TEXT.value;
+            if (_text_field.text == _hint_text) {
+                _text_field.text = "";
+                if (_is_password_field) {
+                    _text_field.displayAsPassword = true;
+                }
+            }
+
+            if (_showing_underline) {
+                _textfield_underline_strength = 2;
+                update_underline();
+            }
+
+            if (_suggestions_available && _suggestion_cache && _suggestion_cache.length > 0) {
+                if (!_suggestion_list.parent)
+                    addChild(_suggestion_list);
+                show_suggestions();
+            }
+
+            _on_defocus.add(onDeFocus);
+        }
+
+        private function onDeFocus(e:FocusEvent):void {
+            // TODO(dyxribo, STARLIB-9): Allow suggestion list to hide on InputTextField defocus
+            _on_defocus.remove(onDeFocus);
+
+            if (_text_field.text == "") {
+                showHintText();
+            }
+
+            if (_showing_underline) {
+                _textfield_underline_strength = 1;
+                update_underline();
+            }
+
+            _on_focus.add(onFocus);
+        }
+
+        private function showHintText():void {
+            if (Style.CURRENT_THEME == Style.DARK)
+                _text_field.textColor = Style.TEXT.shade().value;
+
+            else
+                _text_field.textColor = Style.TEXT.tint().value;
+            _text_field.text = _hint_text;
+
+            if (_is_password_field) {
+                _text_field.displayAsPassword = false;
+            }
+        }
+
+        private function onTextChange(e:Event):void {
+            if (_suggestions_available) {
+                if (_text_field.text.length > 0) {
+                    if (!_suggestion_list.parent)
+                        addChild(_suggestion_list);
+                    show_suggestions();
+                } else if (_suggestion_list.parent) {
+                    removeChild(_suggestion_list);
+                }
+            }
+            _textfield_string = _text_field.text;
+            commit();
+            on_resize_signal.dispatch(_resizeEvent_);
+        }
+
+        override public function destroy():void {
+            _on_focus.removeAll();
+            _on_defocus.removeAll();
+            _on_text_update.removeAll();
+        }
     }
-  }
 
 }

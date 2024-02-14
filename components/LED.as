@@ -7,27 +7,27 @@ package net.blaxstar.starlib.components {
   import flash.events.Event;
 
   public class LED extends Component {
-    private var _onColor:uint;
-    private var _offColor:uint;
-    private var _flashInterval:uint;
-    private var _isFlashing:Boolean;
-    private var _isOn:Boolean;
+    private var _on_color:uint;
+    private var _off_color:uint;
+    private var _flash_interval:uint;
+    private var _is_flashing:Boolean;
+    private var _is_on:Boolean;
 
     /**
      * @param parent
      * @param xpos
      * @param ypos
-     * @param onColor
+     * @param on_color
      */
-    public function LED(parent:DisplayObjectContainer, xpos:Number = 0, ypos:Number = 0, onColor:uint = 0) {
+    public function LED(parent:DisplayObjectContainer, xpos:Number = 0, ypos:Number = 0, on_color:uint = 0) {
 
-      if (onColor > 0)
-        _onColor = onColor;
+      if (on_color > 0)
+        _on_color = on_color;
       else
-        _onColor = Color.PRODUCT_BLUE.value;
+        _on_color = Color.PRODUCT_BLUE.value;
 
-      _offColor = 0x1a1a1a;
-      _isFlashing = false;
+      _off_color = 0x1a1a1a;
+      _is_flashing = false;
 
       super(parent, xpos, ypos);
     }
@@ -39,71 +39,71 @@ package net.blaxstar.starlib.components {
 
     override public function add_children():void {
       draw();
-      _isOn = true;
+      _is_on = true;
       super.add_children();
     }
 
     override public function draw(e:Event = null):void {
       var g:Graphics = this.graphics;
-      var currColor:uint = 0;
+      var curr_color:uint = 0;
 
-      if (_isFlashing) {
-        if (_isOn) {
-          currColor = _onColor;
+      if (_is_flashing) {
+        if (_is_on) {
+          curr_color = _on_color;
         }
         else {
-          currColor = _offColor;
+          curr_color = _off_color;
         }
       }
       else {
-        if (_isOn) {
-          currColor = _onColor;
+        if (_is_on) {
+          curr_color = _on_color;
         }
         else {
-          currColor = _offColor;
+          curr_color = _off_color;
         }
       }
       g.clear();
-      g.beginFill(currColor, 1);
+      g.beginFill(curr_color, 1);
       g.drawCircle(_width_, _width_, _width_);
       g.endFill();
     }
 
     public function flash():void {
-      if (_isOn)
-        turnOff();
+      if (_is_on)
+        turn_off();
       else
-        turnOn();
+        turn_on();
 
       draw();
     }
 
-    public function turnOn():void {
-      _isOn = true;
+    public function turn_on():void {
+      _is_on = true;
     }
 
-    public function turnOff():void {
-      _isOn = false;
+    public function turn_off():void {
+      _is_on = false;
     }
 
-    public function set offColor(val:uint):void {
-      _offColor = val;
+    public function set off_color(val:uint):void {
+      _off_color = val;
       draw();
     }
 
-    public function set onColor(val:uint):void {
-      _onColor = val;
+    public function set on_color(val:uint):void {
+      _on_color = val;
       draw();
     }
 
-    public function set isFlashing(val:Boolean):void {
+    public function set is_flashing(val:Boolean):void {
       if (!val) {
-        clearInterval(_flashInterval);
+        clearInterval(_flash_interval);
       }
       else {
-        _flashInterval = setInterval(flash, 1000);
+        _flash_interval = setInterval(flash, 1000);
       }
-      _isFlashing = val;
+      _is_flashing = val;
       draw();
     }
   }

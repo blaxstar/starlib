@@ -135,8 +135,7 @@ package net.blaxstar.starlib.components {
             _in_cache = value;
         }
 
-        override public function destroy(e:Event = null):void {
-            super.destroy(e);
+        override public function destroy():void {
             _on_click_signal.removeAll();
         }
     }

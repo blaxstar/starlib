@@ -13,6 +13,10 @@ package net.blaxstar.starlib.components {
     function add_children():void;
 
     function draw(e:Event = null):void;
+
+    function move(x_position:Number, y_position:Number):void;
+
+    function destroy():void;
   }
 
 }
