@@ -35,7 +35,6 @@ package net.blaxstar.starlib.components {
             _title_string = title;
             _message_string = message;
             _on_close = new Signal();
-            addEventListener(Event.ADDED_TO_STAGE, on_added_to_stage);
             super(parent);
         }
 
@@ -62,7 +61,8 @@ package net.blaxstar.starlib.components {
 
         override protected function on_added(e:Event):void {
             super.on_added(e);
-            move((stage.nativeWindow.width / 2) - (_width_ / 2), (stage.nativeWindow.height / 2) - (_width_ / 2));
+            _prev_parent = parent;
+            // move((stage.nativeWindow.width / 2) - (_width_ / 2), (stage.nativeWindow.height / 2) - (_width_ / 2));
         }
 
         /**
@@ -206,10 +206,6 @@ package net.blaxstar.starlib.components {
 
         public function get option_container():HorizontalBox {
             return _dialog_card.option_container;
-        }
-
-        private function on_added_to_stage(e:Event):void {
-            _prev_parent = parent;
         }
     }
 

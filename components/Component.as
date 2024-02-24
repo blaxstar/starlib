@@ -49,7 +49,7 @@ package net.blaxstar.starlib.components {
          * @param ypos  y position of the new component.
          */
         public function Component(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
-          super();
+            super();
             // component tracking
             if (lscmp == null) {
                 lscmp = new Vector.<Component>();
@@ -83,7 +83,7 @@ package net.blaxstar.starlib.components {
                 on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
             }
             if (!on_added_signal) {
-                on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
+                on_added_signal = new NativeSignal(this, Event.ADDED, Event);
             }
             if (!on_resize_signal) {
                 _resizeEvent_ = new Event(Event.RESIZE);
@@ -230,8 +230,9 @@ package net.blaxstar.starlib.components {
         override public function set y(value:Number):void {
             super.y = Arithmetic.round(value);
         }
+
         public function get padding():uint {
-          return PADDING;
+            return PADDING;
         }
 
         public function get id():uint {
