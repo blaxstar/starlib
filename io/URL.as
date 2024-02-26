@@ -62,7 +62,8 @@ package net.blaxstar.starlib.io {
         private var _port:uint;
         private var _using_port:Boolean;
         private var _connection:Connection;
-        
+        private var dataFormat:String;
+
         // TODO: class documentation
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function URL(url_path:String = null, port:uint = 80) {
@@ -84,7 +85,7 @@ package net.blaxstar.starlib.io {
 
         public function add_request_variable(key:Object, val:Object):void {
             if (dataFormat !== VARIABLES) {
-                DebugDaemon.write_log("request vars added to request without data" + "Format being set", DebugDaemon.WARN);
+                DebugDaemon.write_warning("request vars added to request without expected_data_type being set!");
             }
             _connection.async_request_vars[key] = val;
         }
@@ -115,24 +116,24 @@ package net.blaxstar.starlib.io {
             return _path;
         }
 
-        public function set host(val:String):void {
-            _path = val;
+        public function set host(value:String):void {
+            _connection.host = _path = value;
         }
 
         public function get port():uint {
             return _port;
         }
 
-        public function set port(val:uint):void {
-            _port = val;
+        public function set port(value:uint):void {
+            _port = value;
         }
 
         public function get use_port():Boolean {
             return _using_port;
         }
 
-        public function set use_port(val:Boolean):void {
-            _using_port = val;
+        public function set use_port(value:Boolean):void {
+            _using_port = value;
         }
 
         public function get http_method():String {

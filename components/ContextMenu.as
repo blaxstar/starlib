@@ -1,14 +1,15 @@
 package net.blaxstar.starlib.components {
-    import net.blaxstar.starlib.components.Component;
-    import net.blaxstar.starlib.components.Card;
-    import net.blaxstar.starlib.components.List;
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
-    import net.blaxstar.starlib.components.ListItem;
     import flash.utils.Dictionary;
-    import debug.DebugDaemon;
-    import geom.Point;
 
+    import net.blaxstar.starlib.components.Card;
+    import net.blaxstar.starlib.components.Component;
+    import net.blaxstar.starlib.components.List;
+    import net.blaxstar.starlib.components.ListItem;
+    import net.blaxstar.starlib.debug.DebugDaemon;
+
+    // TODO: REMOVE DEBUG STUFF
     public class ContextMenu extends Component {
 
         private var _card:Card;
@@ -61,7 +62,7 @@ package net.blaxstar.starlib.components {
 
         public function add_context(context_id:String):void {
             if (has_context(context_id)) {
-                DebugDaemon.write_log("cannot add context: the context name already exists in this object!", DebugDaemon.ERROR_GENERIC);
+                DebugDaemon.write_log("cannot add context: the context name already exists in this object!", DebugDaemon.ERROR);
                 return;
             } else {
                 _context_directory[context_id] = [];
@@ -83,7 +84,7 @@ package net.blaxstar.starlib.components {
 
                 }
             } else {
-                DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", DebugDaemon.ERROR_GENERIC, context_id);
+                DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", DebugDaemon.ERROR, context_id);
             }
         }
 

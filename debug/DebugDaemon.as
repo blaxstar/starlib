@@ -9,9 +9,7 @@ package net.blaxstar.starlib.debug {
         public static const OK:uint = 0;
         public static const DEBUG:uint = 1;
         public static const WARN:uint = 2;
-        public static const ERROR_GENERIC:uint = 3;
-        public static const ERROR_IO:uint = 4;
-        public static const ERROR_MISUSE:uint = 5;
+        public static const ERROR:uint = 3;
 
         private static var _log_file:File;
         private static var _instance:DebugDaemon;
@@ -46,6 +44,22 @@ package net.blaxstar.starlib.debug {
             return _instance;
         }
 
+        static public function write_success(message:String, ... format):void {
+            write_log.apply(null, [message, DebugDaemon.OK].concat(format));
+        }
+
+        static public function write_debug(message:String, ... format):void {
+            write_log.apply(null, [message, DebugDaemon.DEBUG].concat(format));
+        }
+
+        static public function write_warning(message:String, ... format):void {
+            write_log.apply(null, [message, DebugDaemon.WARN].concat(format));
+        }
+
+        static public function write_error(message:String, ... format):void {
+            write_log.apply(null, [message, DebugDaemon.ERROR].concat(format));
+        }
+
         static public function write_log(message:String, severity:uint = DebugDaemon.DEBUG, ... format):void {
             var prefix:String = "[".concat(new Date().toUTCString()).concat("]");
             var full_message:String = "";
@@ -64,9 +78,7 @@ package net.blaxstar.starlib.debug {
                 case WARN:
                     prefix = prefix.concat("[WARN]");
                     break;
-                case ERROR_GENERIC:
-                case ERROR_IO:
-                case ERROR_MISUSE:
+                case ERROR:
                     prefix = prefix.concat("[ERROR]");
                     break;
             }
@@ -74,7 +86,7 @@ package net.blaxstar.starlib.debug {
             full_message = printf(prefix.concat(" ").concat(message), format);
             _log.push(full_message);
 
-            if (severity == ERROR_MISUSE || severity == ERROR_IO || severity == ERROR_GENERIC) {
+            if (severity == ERROR) {
                 flush_log();
                 throw new Error(full_message, severity);
             }
@@ -86,11 +98,11 @@ package net.blaxstar.starlib.debug {
                 try {
                     _filestream.writeUTFBytes(_log[i].concat("\n"));
                 } catch (e:Error) {
-                    write_log("error writing log file: %s", DebugDaemon.ERROR_IO, e.message);
+                    write_log("error writing log file: %s", DebugDaemon.ERROR, e.message);
                 }
 
             }
-            
+
             _filestream.close();
             return true;
         }

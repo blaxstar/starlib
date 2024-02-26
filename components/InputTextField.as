@@ -142,7 +142,7 @@ package net.blaxstar.starlib.components {
 
         override public function addChild(child:DisplayObject):DisplayObject {
             if (child is Icon) {
-                DebugDaemon.write_log("please use leadingIcon property for adding an " + "icon to InputTextField!", DebugDaemon.ERROR_MISUSE);
+                DebugDaemon.write_error("please use leadingIcon property for adding an " + "icon to InputTextField!");
             }
             return super.addChild(child);
         }
