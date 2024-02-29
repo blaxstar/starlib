@@ -50,6 +50,7 @@ package net.blaxstar.starlib.networking {
             _host = _url_request_data.host;
             _endpoint_path = _url_request_data.endpoint_path;
             _port = _url_request_data.port;
+            // changes not syncing properly, this is a small change to get it back on track
         }
 
         public function connect():void {

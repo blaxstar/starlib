@@ -59,7 +59,7 @@ package net.blaxstar.starlib.networking {
           _api_endpoint.endpoint_path = endpoint_url;
           _api_endpoint.use_port = true;
           _api_endpoint.port = 443;
-          _api_endpoint.data
+          // changes not syncing properly, this is a small change to get it back on track
         }
         private function send_next():void {
 

@@ -127,6 +127,7 @@ package net.blaxstar.starlib.io {
 
         public function set endpoint_path(value:String):void {
             _connection.endpoint_path = _endpoint_path = value;
+            // changes not syncing properly, this is a small change to get it back on track
         }
 
         public function get port():uint {
