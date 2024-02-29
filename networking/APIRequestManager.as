@@ -46,13 +46,21 @@ package net.blaxstar.starlib.networking {
             if (_backlog.length > 0 || _api_endpoint.connection.busy) {
                 _backlog.push(q);
             } else {
-                _api_endpoint.host = q;
+                _api_endpoint.endpoint_path = q;
                 _api_endpoint.http_method = http_method;
                 _api_endpoint.on_request_complete.add(on_response);
                 _api_endpoint.connect();
             }
         }
 
+        public function set_https_request(host:String, endpoint_url:String, data:Object=null):void {
+
+
+          _api_endpoint.endpoint_path = endpoint_url;
+          _api_endpoint.use_port = true;
+          _api_endpoint.port = 443;
+          _api_endpoint.data
+        }
         private function send_next():void {
 
             if (!_connection || _backlog.length == 0) {

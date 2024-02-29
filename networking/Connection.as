@@ -29,6 +29,7 @@ package net.blaxstar.starlib.networking {
         // vars
         //-- sync
         private var _host:String;
+        private var _endpoint_path:String;
         private var _port:uint;
         private var _socket:SecureSocket;
 
@@ -47,18 +48,19 @@ package net.blaxstar.starlib.networking {
         public function Connection(url:URL) {
             _url_request_data = url;
             _host = _url_request_data.host;
+            _endpoint_path = _url_request_data.endpoint_path;
             _port = _url_request_data.port;
         }
 
         public function connect():void {
 
             if (!SecureSocket.isSupported) {
-                DebugDaemon.write_error("SecureSocket is not supported on this system." + "Secure connections cannot be made, so NO persistent connections " + "will be made. Cancelling connection request.");
+                DebugDaemon.write_error("SecureSocket is not supported on this system! Secure connections cannot be made, so NO persistent connections will be made. Cancelling connection request.");
                 return;
             }
 
             if (!_host || _host.replace(" ", "") == "" || _port > 65535) {
-                DebugDaemon.write_log("Invalid host address, cancelling connection " + "request. got: '%s:%i'", DebugDaemon.ERROR, _host, _port);
+                DebugDaemon.write_error("Invalid host address, cancelling connection " + "request. got: '%s:%i'", _host, _port);
                 return;
             }
 
@@ -72,6 +74,7 @@ package net.blaxstar.starlib.networking {
             _socket.addEventListener(IOErrorEvent.IO_ERROR, on_io_error);
             busy = true;
             _socket.connect(_host, _port);
+
         }
 
         public function connect_async():void {
@@ -154,6 +157,14 @@ package net.blaxstar.starlib.networking {
             _host = value;
         }
 
+        public function get endpoint_path():String {
+            return _endpoint_path;
+        }
+
+        public function set endpoint_path(value:String):void {
+            _endpoint_path = value;
+        }
+
         public function get active():Boolean {
             return _active;
         }
@@ -197,7 +208,7 @@ package net.blaxstar.starlib.networking {
         }
 
         private function on_close(e:Event):void {
-
+          // TODO: handle close
         }
 
         private function on_io_error(e:IOErrorEvent):void {

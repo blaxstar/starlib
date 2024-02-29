@@ -100,7 +100,7 @@ package net.blaxstar.starlib.io {
                 current_item.dataFormat = current_item.expected_data_type;
                 current_item.connect();
             } else {
-                IOUtil.loadExternalDisplayObject(current_item.host, on_complete_graphic, on_progress, on_io_error);
+                IOUtil.loadExternalDisplayObject(current_item.endpoint_path, on_complete_graphic, on_progress, on_io_error);
             }
         }
 

@@ -57,7 +57,8 @@ package net.blaxstar.starlib.io {
         public static const REQUEST_METHOD_OPTIONS:String = "OPTIONS";
 
         private var _name:String;
-        private var _path:String;
+        private var _host:String;
+        private var _endpoint_path:String;
         private var _expected_data_type:String;
         private var _port:uint;
         private var _using_port:Boolean;
@@ -67,7 +68,7 @@ package net.blaxstar.starlib.io {
         // TODO: class documentation
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function URL(url_path:String = null, port:uint = 80) {
-            _path = url_path;
+            _endpoint_path = url_path;
             _port = port;
             _connection = new Connection(this);
 
@@ -93,7 +94,7 @@ package net.blaxstar.starlib.io {
         // * GETTERS, SETTERS * ////////////////////////////////////////////////////
 
         public function get exists():Boolean {
-            return new File().resolvePath(_path).exists;
+            return new File().resolvePath(_endpoint_path).exists;
         }
 
         public function get on_request_complete():NativeSignal {
@@ -113,11 +114,19 @@ package net.blaxstar.starlib.io {
         }
 
         public function get host():String {
-            return _path;
+            return _host;
         }
 
         public function set host(value:String):void {
-            _connection.host = _path = value;
+            _connection.host = _host = value;
+        }
+
+        public function get endpoint_path():String {
+            return _endpoint_path;
+        }
+
+        public function set endpoint_path(value:String):void {
+            _connection.endpoint_path = _endpoint_path = value;
         }
 
         public function get port():uint {
