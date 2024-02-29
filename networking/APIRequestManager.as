@@ -33,7 +33,7 @@ package net.blaxstar.starlib.networking {
         // constructor
         public function APIRequestManager(endpoint_path:String = "http://localhost", port:uint = 3000) {
 
-            _api_endpoint = new URL(endpoint_path, port);
+            _api_endpoint = new URL(endpoint_path, null, port);
             _api_endpoint.name = "server";
             _backlog = new Vector.<String>();
         }
@@ -53,14 +53,15 @@ package net.blaxstar.starlib.networking {
             }
         }
 
-        public function set_https_request(host:String, endpoint_url:String, data:Object=null):void {
+        public function set_https_request(host:String, endpoint_url:String, data:Object = null):void {
 
 
-          _api_endpoint.endpoint_path = endpoint_url;
-          _api_endpoint.use_port = true;
-          _api_endpoint.port = 443;
-          // changes not syncing properly, this is a small change to get it back on track
+            _api_endpoint.endpoint_path = endpoint_url;
+            _api_endpoint.use_port = true;
+            _api_endpoint.port = 443;
+            // changes not syncing properly, this is a small change to get it back on track
         }
+
         private function send_next():void {
 
             if (!_connection || _backlog.length == 0) {

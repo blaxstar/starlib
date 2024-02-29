@@ -11,6 +11,11 @@ package net.blaxstar.starlib.networking {
     import thirdparty.org.osflash.signals.Signal;
     import net.blaxstar.starlib.utils.StringUtil;
     import net.blaxstar.starlib.debug.DebugDaemon;
+    import flash.utils.ByteArray;
+    import flash.utils.getDefinitionByName;
+    import avmplus.getQualifiedClassName;
+    import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPack;
+    import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPackFlags;
 
     /**
      * TODO: documentation
@@ -27,18 +32,21 @@ package net.blaxstar.starlib.networking {
         static private const _TIMEOUT_REPS:uint = 2;
 
         // vars
-        //-- sync
+        // * sync
         private var _host:String;
         private var _endpoint_path:String;
         private var _port:uint;
+        private var _http_method:String;
+        private var _http_request_data:Array;
         private var _socket:SecureSocket;
+        private var _msgpack:MsgPack;
 
-        //-- async
+        // * async
         private var _async_request:URLRequest;
         private var _async_request_vars:URLVariables;
         private var _timeout_timer:Timer;
 
-        //-- general
+        // * general
         private var _url_request_data:URL;
         private var _async_response_signal:NativeSignal;
         private var _async_on_io_error_signal:NativeSignal;
@@ -50,7 +58,8 @@ package net.blaxstar.starlib.networking {
             _host = _url_request_data.host;
             _endpoint_path = _url_request_data.endpoint_path;
             _port = _url_request_data.port;
-            // changes not syncing properly, this is a small change to get it back on track
+            _http_method = _url_request_data.http_method;
+            _http_request_data = _url_request_data.http_request_data;
         }
 
         public function connect():void {
@@ -67,6 +76,7 @@ package net.blaxstar.starlib.networking {
 
             if (!_socket) {
                 _socket = new SecureSocket();
+                _msgpack = new MsgPack(MsgPackFlags.READ_RAW_AS_BYTE_ARRAY);
             }
 
             _socket.timeout = _REQUEST_TIMEOUT * _TIMEOUT_REPS;
@@ -202,19 +212,58 @@ package net.blaxstar.starlib.networking {
 
         private function on_connect(e:Event):void {
             _timeout_timer.stop();
-            DebugDaemon.write_log("Connection successful to host %s:%i!", DebugDaemon.OK, _host, _port);
+            DebugDaemon.write_success("Connection successful to host %s:%i!", _host, _port);
+
+            var request_data_bytes:ByteArray;
+            // write any data from the http_request_data array, as long as the data isnt null or empty, including the header
+            if (_endpoint_path && !StringUtil.string_is_empty_or_null(_endpoint_path) && http_method_is_valid) {
+                request_data_bytes = new ByteArray();
+                request_data_bytes.writeUTFBytes(build_header());
+
+                if (_http_request_data.length > 0) {
+                    request_data_bytes.writeBytes(build_data_stream());
+                }
+                _msgpack.write(request_data_bytes, _socket);
+                _socket.flush();
+            }
 
             busy = false;
             active = true;
         }
 
+        private function build_header():String {
+            var header:String = "GET " + _endpoint_path + " HTTP/1.1\r\n";
+            header.concat("Host: " + _host + "\r\n");
+            header.concat("Connection: close\r\n");
+            header.concat("\r\n");
+
+            var request_data_bytes:ByteArray = new ByteArray();
+            request_data_bytes.writeUTFBytes(header);
+
+            return header;
+        }
+
+        private function build_data_stream():ByteArray {
+            var data_bytes:ByteArray = new ByteArray();
+
+            for (var i:int = 0; i < _http_request_data.length; i++) {
+                _msgpack.write(_http_request_data[i], data_bytes);
+            }
+
+            return data_bytes;
+        }
+
         private function on_close(e:Event):void {
-          // TODO: handle close
+            // TODO: handle close
         }
 
         private function on_io_error(e:IOErrorEvent):void {
             _timeout_timer.stop();
             DebugDaemon.write_log(e.text, DebugDaemon.DEBUG);
+        }
+
+        private function get http_method_is_valid():Boolean {
+            return _http_method == 'GET' || _http_method == 'POST' || _http_method == 'PUT' || _http_method == 'DELETE' || _http_method == 'OPTIONS' || _http_method == 'HEAD';
         }
 
     }

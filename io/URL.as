@@ -63,19 +63,31 @@ package net.blaxstar.starlib.io {
         private var _port:uint;
         private var _using_port:Boolean;
         private var _connection:Connection;
+        private var _http_request_data:Array;
         private var dataFormat:String;
 
         // TODO: class documentation
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
-        public function URL(url_path:String = null, port:uint = 80) {
-            _endpoint_path = url_path;
-            _port = port;
+        public function URL(host:String = null, endpoint_path:String = null, port:uint = null) {
+
+            if (host) {
+                this._host = host;
+            }
+
+            if (endpoint_path) {
+                this._endpoint_path = endpoint_path;
+            }
+
+            if (port) {
+                this._port = port;
+            }
+
             _connection = new Connection(this);
 
             super();
         }
 
-        // * PUBLIC * //////////////////////////////////////////////////////////////
+        // * PUBLIC * //
         public function connect(async:Boolean = true):void {
             if (async) {
                 _connection.connect_async();
@@ -91,7 +103,14 @@ package net.blaxstar.starlib.io {
             _connection.async_request_vars[key] = val;
         }
 
-        // * GETTERS, SETTERS * ////////////////////////////////////////////////////
+        public function add_http_request_data(data:*):void {
+            if (!_http_request_data) {
+                _http_request_data = [];
+            }
+            _http_request_data.push(data);
+        }
+
+        // * GETTERS & SETTERS * //
 
         public function get exists():Boolean {
             return new File().resolvePath(_endpoint_path).exists;
@@ -127,7 +146,22 @@ package net.blaxstar.starlib.io {
 
         public function set endpoint_path(value:String):void {
             _connection.endpoint_path = _endpoint_path = value;
-            // changes not syncing properly, this is a small change to get it back on track
+
+        }
+
+        public function get http_request_data():Array {
+            return _http_request_data;
+        }
+
+        public function set http_request_data(... rest):void {
+
+            if (!_http_request_data) {
+                _http_request_data = [];
+            }
+
+            for (var i:int = 0; i < rest.length; i++) {
+                _http_request_data.push(rest[i]);
+            }
         }
 
         public function get port():uint {
