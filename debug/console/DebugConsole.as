@@ -138,7 +138,7 @@ package net.blaxstar.starlib.debug.console {
         private function init():void {
             _filePath = File.applicationDirectory.nativePath;
             _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
-            _save_file.expected_data_type = URL.TEXT;
+            _save_file.data_format = URL.DATA_FORMAT_TEXT;
             _loader = new XLoader();
             _data = new Dictionary();
             init_default_commands();
@@ -334,7 +334,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function get save_exists():Boolean {
-            return _save_file.exists;
+            return _save_file.test_path_local;
         }
 
         // DELEGATES ///////////////////////////////////////
@@ -387,7 +387,7 @@ package net.blaxstar.starlib.debug.console {
             g.beginFill(Color.DARK_GREY.value, 1);
             g.drawRect(0, 0, stage.stageWidth, 60);
             g.endFill();
-      
+
             _input_field.width = _outputField.width = (stage.stageWidth - (Component.PADDING * 2));
             _outputField.move(10, _input_field.height);
             _input_engine.add_keyboard_delegate(onToggleKeyPress, InputEngine.KEYDOWN);

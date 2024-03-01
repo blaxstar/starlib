@@ -12,14 +12,13 @@ package net.blaxstar.starlib.io {
      * @author Deron D. (SnaiLegacy)
      */
     public class URL extends URLLoader {
-        / * URL DATA FORMATS */;
-        public static const BINARY:String = "binary";
-        static public const GRAPHICS:String = 'graphics';
-        public static const TEXT:String = "text";
-        public static const VARIABLES:String = "variables";
+        // * URL DATA FORMATS * //
+        public static const DATA_FORMAT_BINARY:String = "binary";
+        static public const DATA_FORMAT_GRAPHICS:String = 'graphics';
+        public static const DATA_FORMAT_TEXT:String = "text";
+        public static const DATA_FORMAT_VARIABLES:String = "variables";
 
-        / * HTTP REQUEST METHODS * /;
-
+        // * HTTP REQUEST METHODS * //
         /**
          * Specifies that the URLRequest object is a POST.
          *
@@ -56,26 +55,31 @@ package net.blaxstar.starlib.io {
          */
         public static const REQUEST_METHOD_OPTIONS:String = "OPTIONS";
 
+        // * HTTP AUTH TYPES * //
+        public static const AUTH_NONE:String = "none";
+        public static const AUTH_BASIC:String = "basic";
+        public static const AUTH_TOKEN:String = "token";
+
+        // * CLASS PROPERTIES * //
         private var _name:String;
-        private var _host:String;
-        private var _endpoint_path:String;
+        private var _endpoint:String;
         private var _expected_data_type:String;
         private var _port:uint;
-        private var _using_port:Boolean;
+        private var _is_using_port:Boolean;
         private var _connection:Connection;
         private var _http_request_data:Array;
+        private var _http_request_method:String;
+        private var _auth_type:String;
+        private var _auth_value:String;
+        private var _is_async:Boolean;
         private var dataFormat:String;
 
         // TODO: class documentation
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
-        public function URL(host:String = null, endpoint_path:String = null, port:uint = null) {
+        public function URL(endpoint:String = null, port:uint = undefined) {
 
-            if (host) {
-                this._host = host;
-            }
-
-            if (endpoint_path) {
-                this._endpoint_path = endpoint_path;
+            if (endpoint) {
+                this._endpoint = endpoint;
             }
 
             if (port) {
@@ -88,19 +92,15 @@ package net.blaxstar.starlib.io {
         }
 
         // * PUBLIC * //
-        public function connect(async:Boolean = true):void {
-            if (async) {
-                _connection.connect_async();
-            } else {
-                _connection.connect();
-            }
+        public function connect():void {
+            _connection.connect();
         }
 
         public function add_request_variable(key:Object, val:Object):void {
-            if (dataFormat !== VARIABLES) {
+            if (dataFormat !== DATA_FORMAT_VARIABLES) {
                 DebugDaemon.write_warning("request vars added to request without expected_data_type being set!");
             }
-            _connection.async_request_vars[key] = val;
+            _connection.add_http_request_variable(key,val);
         }
 
         public function add_http_request_data(data:*):void {
@@ -112,12 +112,12 @@ package net.blaxstar.starlib.io {
 
         // * GETTERS & SETTERS * //
 
-        public function get exists():Boolean {
-            return new File().resolvePath(_endpoint_path).exists;
+        public function get test_path_local():Boolean {
+            return new File().resolvePath(endpoint).exists;
         }
 
         public function get on_request_complete():NativeSignal {
-            return _connection.async_response_signal;
+            return _connection.on_connect_signal;
         }
 
         public function get connection():Connection {
@@ -132,21 +132,12 @@ package net.blaxstar.starlib.io {
             _name = value;
         }
 
-        public function get host():String {
-            return _host;
+        public function get endpoint():String {
+            return _endpoint;
         }
 
-        public function set host(value:String):void {
-            _connection.host = _host = value;
-        }
-
-        public function get endpoint_path():String {
-            return _endpoint_path;
-        }
-
-        public function set endpoint_path(value:String):void {
-            _connection.endpoint_path = _endpoint_path = value;
-
+        public function set endpoint(value:String):void {
+            _connection.endpoint = _endpoint = value;
         }
 
         public function get http_request_data():Array {
@@ -164,41 +155,69 @@ package net.blaxstar.starlib.io {
             }
         }
 
+        public function set auth_type(value:String):void {
+            _auth_type = value;
+        }
+
+        public function get auth_type():String {
+            return _auth_type;
+        }
+
+        /**
+         *
+         * @param value
+         */
+        public function set auth_value(value:String):void {
+            _auth_value = value;
+        }
+
+        public function get auth_value():String {
+            return _auth_value;
+        }
+
         public function get port():uint {
             return _port;
         }
 
         public function set port(value:uint):void {
-            _port = value;
+            _port = _connection.port = value;
         }
 
         public function get use_port():Boolean {
-            return _using_port;
+            return _is_using_port;
         }
 
         public function set use_port(value:Boolean):void {
-            _using_port = value;
+            _is_using_port = value;
         }
 
         public function get http_method():String {
-            return _connection.async_request.method;
+            return _http_request_method;
         }
 
         public function set http_method(value:String):void {
-            _connection.async_request.method = value;
+            _http_request_method = value;
         }
 
-        public function get expected_data_type():String {
+        public function get data_format():String {
             return _expected_data_type;
         }
 
-        public function set expected_data_type(value:String):void {
+        public function set data_format(value:String):void {
             _expected_data_type = value;
-            if (_expected_data_type !== GRAPHICS) {
+            if (_expected_data_type !== DATA_FORMAT_GRAPHICS) {
                 dataFormat = _expected_data_type;
             } else {
-                dataFormat = BINARY;
+                dataFormat = DATA_FORMAT_BINARY;
             }
+        }
+
+        public function get connection_is_async():Boolean {
+            return _is_async;
+        }
+
+        public function set connection_is_async(value:Boolean):void {
+          _is_async = value;
         }
     }
 

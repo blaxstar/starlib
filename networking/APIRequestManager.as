@@ -9,6 +9,7 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.io.XLoader;
     import flash.utils.ByteArray;
     import flash.html.script.Package;
+    import net.blaxstar.starlib.utils.StringUtil;
 
     /**
      * ...
@@ -26,40 +27,40 @@ package net.blaxstar.starlib.networking {
 
         // vars
         // -private
-        private var _backlog:Vector.<String>;
+        private var _backlog:Vector.<Object>;
         private var _api_endpoint:URL;
         private var _connection:Connection;
 
         // constructor
         public function APIRequestManager(endpoint_path:String = "http://localhost", port:uint = 3000) {
 
-            _api_endpoint = new URL(endpoint_path, null, port);
+            _api_endpoint = new URL(endpoint_path, port);
             _api_endpoint.name = "server";
-            _backlog = new Vector.<String>();
+            _backlog = new Vector.<Object>();
         }
 
-        public function query(q:String, http_method:String = URL.REQUEST_METHOD_GET):void {
-            if (!q || q == "") {
-                return;
-            }
+        /**
+         *
+         * @param host
+         * @param request_method any http request method (use URL class for values).
+         * @param endpoint_path
+         * @param data
+         */
+        public function send_https_request(endpoint:String, request_method:String = "GET", data:Object = null, auth_type:String = "NONE", auth_value:String = null):void {
 
             if (_backlog.length > 0 || _api_endpoint.connection.busy) {
-                _backlog.push(q);
-            } else {
-                _api_endpoint.endpoint_path = q;
-                _api_endpoint.http_method = http_method;
-                _api_endpoint.on_request_complete.add(on_response);
-                _api_endpoint.connect();
+                _backlog.push({"endpoint": endpoint, "request_method": request_method, "data": data, "auth_type": auth_type, "auth_value": auth_value});
             }
-        }
 
-        public function set_https_request(host:String, endpoint_url:String, data:Object = null):void {
-
-
-            _api_endpoint.endpoint_path = endpoint_url;
+            _api_endpoint.endpoint = endpoint;
             _api_endpoint.use_port = true;
             _api_endpoint.port = 443;
-            // changes not syncing properly, this is a small change to get it back on track
+            _api_endpoint.http_method = request_method;
+
+            if (data) {
+                _api_endpoint.add_http_request_data(data);
+            }
+            _api_endpoint.connect();
         }
 
         private function send_next():void {
@@ -67,8 +68,8 @@ package net.blaxstar.starlib.networking {
             if (!_connection || _backlog.length == 0) {
                 return;
             }
-
-            query(_backlog.splice(0, 1)[0]);
+            var next_request:Object = _backlog.splice(0, 1)[0];
+            send_https_request(next_request.endpoint, next_request.request_method, next_request.data, next_request.auth_type, next_request.auth_value);
         }
 
         public function get endpoint_name():String {
@@ -87,12 +88,12 @@ package net.blaxstar.starlib.networking {
             _api_endpoint.use_port = value;
         }
 
-        public function get expected_data_type():String {
-            return _api_endpoint.expected_data_type;
+        public function get data_format():String {
+            return _api_endpoint.data_format;
         }
 
-        public function set expected_data_type(value:String):void {
-            _api_endpoint.expected_data_type = value;
+        public function set data_format(value:String):void {
+            _api_endpoint.data_format = value;
         }
 
         private function on_response(e:Event):void {

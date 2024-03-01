@@ -1,21 +1,23 @@
 package net.blaxstar.starlib.networking {
-    import flash.utils.Timer;
-    import flash.events.TimerEvent;
-    import flash.net.SecureSocket;
     import flash.events.Event;
     import flash.events.IOErrorEvent;
-    import net.blaxstar.starlib.io.URL;
+    import flash.events.TimerEvent;
+    import flash.net.SecureSocket;
     import flash.net.URLRequest;
     import flash.net.URLVariables;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import thirdparty.org.osflash.signals.Signal;
-    import net.blaxstar.starlib.utils.StringUtil;
-    import net.blaxstar.starlib.debug.DebugDaemon;
     import flash.utils.ByteArray;
-    import flash.utils.getDefinitionByName;
-    import avmplus.getQualifiedClassName;
+    import flash.utils.Dictionary;
+    import flash.utils.Timer;
+
+    import net.blaxstar.starlib.debug.DebugDaemon;
+    import net.blaxstar.starlib.io.URL;
     import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPack;
     import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPackFlags;
+    import net.blaxstar.starlib.utils.StringUtil;
+
+    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import flash.events.ProgressEvent;
+    import thirdparty.org.osflash.signals.Signal;
 
     /**
      * TODO: documentation
@@ -23,43 +25,40 @@ package net.blaxstar.starlib.networking {
     public class Connection {
 
         // const
-        static private const _POST:String = "POST";
-        static private const _GET:String = "GET";
-        static private const _PUT:String = "PUT";
-        static private const _DELETE:String = "DELETE";
         static private const _REQUEST_TIMEOUT:uint = 7000;
-        static private const _RESPONSE_TIMEOUT:uint = 7000;
         static private const _TIMEOUT_REPS:uint = 2;
 
         // vars
-        // * sync
-        private var _host:String;
-        private var _endpoint_path:String;
-        private var _port:uint;
-        private var _http_method:String;
-        private var _http_request_data:Array;
         private var _socket:SecureSocket;
         private var _msgpack:MsgPack;
-
-        // * async
-        private var _async_request:URLRequest;
-        private var _async_request_vars:URLVariables;
+        private var _http_request_config:URL;
+        private var _endpoint:String;
+        private var _port:uint;
+        private var _http_request_method:String;
+        private var _http_request_vars:Dictionary;
+        private var _num_request_vars:int;
+        private var _http_request_payload:Array;
+        private var _http_request_data_format:String;
         private var _timeout_timer:Timer;
-
-        // * general
-        private var _url_request_data:URL;
-        private var _async_response_signal:NativeSignal;
-        private var _async_on_io_error_signal:NativeSignal;
         private var _active:Boolean
         private var _is_busy:Boolean;
+        private var _is_async:Boolean;
+
+        private var _on_connect_signal:NativeSignal;
+        private var _on_progress_signal:NativeSignal;
+        private var _on_close_signal:NativeSignal;
+        private var _on_io_error_signal:NativeSignal;
+        public var on_async_request_complete_signal:Signal;
 
         public function Connection(url:URL) {
-            _url_request_data = url;
-            _host = _url_request_data.host;
-            _endpoint_path = _url_request_data.endpoint_path;
-            _port = _url_request_data.port;
-            _http_method = _url_request_data.http_method;
-            _http_request_data = _url_request_data.http_request_data;
+            _http_request_config = url;
+            _endpoint = _http_request_config.endpoint;
+            _port = _http_request_config.port;
+            _http_request_method = _http_request_config.http_method;
+            _http_request_payload = _http_request_config.http_request_data;
+            _http_request_data_format = _http_request_config.data_format;
+            _is_async = _http_request_config.connection_is_async;
+
         }
 
         public function connect():void {
@@ -69,8 +68,8 @@ package net.blaxstar.starlib.networking {
                 return;
             }
 
-            if (!_host || _host.replace(" ", "") == "" || _port > 65535) {
-                DebugDaemon.write_error("Invalid host address, cancelling connection " + "request. got: '%s:%i'", _host, _port);
+            if (!_endpoint || _endpoint.replace(" ", "") == "" || _port > 65535) {
+                DebugDaemon.write_error("Invalid host address, cancelling connection " + "request. got: '%s:%i'", _endpoint, _port);
                 return;
             }
 
@@ -79,101 +78,200 @@ package net.blaxstar.starlib.networking {
                 _msgpack = new MsgPack(MsgPackFlags.READ_RAW_AS_BYTE_ARRAY);
             }
 
-            _socket.timeout = _REQUEST_TIMEOUT * _TIMEOUT_REPS;
-            _socket.addEventListener(Event.CONNECT, on_connect);
-            _socket.addEventListener(Event.CLOSE, on_close);
-            _socket.addEventListener(IOErrorEvent.IO_ERROR, on_io_error);
-            busy = true;
-            _socket.connect(_host, _port);
-
-        }
-
-        public function connect_async():void {
-            // first off, we need to confirm that we are actually expecting something
-            if (!_url_request_data.expected_data_type || StringUtil.trim(_url_request_data.expected_data_type) == "") {
-                DebugDaemon.write_error("cannot make async request: the connection does not expect a data type!");
-                return;
-            }
-
-            // make sure some request-related properties are not null when trying to connect
-            if (!_async_request) {
+            if (!_is_async) {
                 config_async();
             }
 
-            // set the timeout for either kind of connection
-            var current_timeout:uint = (_async_request.method == _POST ? _REQUEST_TIMEOUT : _RESPONSE_TIMEOUT);
+            _socket.timeout = _REQUEST_TIMEOUT * _TIMEOUT_REPS;
+            _on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
+            _on_progress_signal ||= new NativeSignal(_socket, ProgressEvent.SOCKET_DATA, ProgressEvent);
+            _on_close_signal ||= new NativeSignal(_socket, Event.CLOSE, Event);
+            _on_io_error_signal ||= new NativeSignal(_socket, IOErrorEvent.IO_ERROR, Event);
 
-            // only send variables if that's the expected data type
-            if (_url_request_data.dataFormat == URL.VARIABLES) {
-                _async_request.data = _async_request_vars;
-            }
+            _on_connect_signal.add(on_connect);
+            _on_progress_signal.add(on_progress);
+            _on_close_signal.add(on_close);
+            _on_io_error_signal.add(on_io_error);
 
-            // setup the timeout timer and wait for a response to the request
-            _timeout_timer = new Timer(current_timeout, _TIMEOUT_REPS);
-            _timeout_timer.addEventListener(TimerEvent.TIMER, on_timer_tick);
-            _timeout_timer.addEventListener(TimerEvent.TIMER_COMPLETE, on_timer_complete);
-            _async_response_signal.add(on_async_request_complete);
-            _timeout_timer.start();
-
-            // set the connection to busy, in case we need other objects to know
-            busy = true;
-
+            _is_busy = true;
             // comply with security...
-            NetUtil.load_policy_file(_host, _port);
+            NetUtil.load_policy_file(_endpoint, _port);
+            // then connect to the endpoint.
+            // TODO: socket error. need to config crosspolicy xml
+            _socket.connect(_endpoint, _port);
 
-            // then load the data!
-            _async_on_io_error_signal.add(on_io_error);
-            _url_request_data.load(_async_request);
         }
 
-        public function close():void {
+        public function add_http_request_variable(key:Object, val:Object):void {
+            if (!_http_request_vars) {
+                _http_request_vars = new Dictionary(true);
+                _num_request_vars = 0;
+            }
+
+            _http_request_vars[key] = val;
+            _num_request_vars++;
+
+        }
+
+        private function close():void {
             _timeout_timer.stop();
-            if (_socket.connected)
+            if (_socket.connected) {
                 _socket.close();
+            }
             active = false;
             busy = false;
         }
 
-        public function config_async():void {
-            _async_request = new URLRequest(_host + (_url_request_data.use_port ? ":" + _port : ""));
-
-            _async_request_vars = new URLVariables();
-            _async_response_signal = new NativeSignal(_url_request_data, Event.COMPLETE, Event);
-            _async_on_io_error_signal = new NativeSignal(_url_request_data, IOErrorEvent.IO_ERROR, IOErrorEvent);
-        }
-
-        public function get async_request():URLRequest {
-            if (!_async_request) {
-                config_async();
+        private function config_async():void {
+            if (!_http_request_config.data_format || StringUtil.string_is_empty_or_null(_http_request_config.data_format)) {
+                DebugDaemon.write_error("cannot make async request: the connection does not expect a data type!");
+                return;
             }
-            return _async_request;
         }
 
-        public function get async_request_vars():URLVariables {
-            return _async_request_vars;
-        }
+        private function build_header():String {
+            if (_num_request_vars) {
+                _endpoint.concat("?");
 
-        public function get async_response_signal():NativeSignal {
-            if (!_async_response_signal) {
-                _async_response_signal = new NativeSignal(_url_request_data, Event.COMPLETE, Event);
+                for (var rvkey:Object in _http_request_vars) {
+                    _endpoint.concat(String(rvkey) + "=" + String(_http_request_vars[rvkey]) + "&");
+                }
+
+                _endpoint = _endpoint.substr(0, _endpoint.length - 2);
             }
-            return _async_response_signal;
+
+            var header:String = "GET " + _endpoint + " HTTP/1.1\r\n";
+            header.concat("Host: " + _endpoint + "\r\n");
+
+            if (_http_request_config.auth_type == URL.AUTH_BASIC) {
+                header.concat("Authorization: Basic " + _http_request_config.auth_value + "\r\n");
+            } else if (_http_request_config.auth_type == URL.AUTH_TOKEN) {
+                header.concat("Authorization: Bearer " + _http_request_config.auth_value + "\r\n");
+            }
+
+            if (_is_async) {
+                header.concat("Connection: close\r\n");
+            } else {
+                header.concat("Connection: Keep-alive\n\n");
+            }
+
+            header.concat("\r\n");
+
+            var request_data_bytes:ByteArray = new ByteArray();
+            request_data_bytes.writeUTFBytes(header);
+
+            return header;
         }
 
-        public function get host():String {
-            return _host;
+        private function build_data_stream():ByteArray {
+            var data_bytes:ByteArray = new ByteArray();
+
+            for (var i:int = 0; i < _http_request_payload.length; i++) {
+                _msgpack.write(_http_request_payload[i], data_bytes);
+            }
+
+            return data_bytes;
         }
 
-        public function set host(value:String):void {
-            _host = value;
+        private function process_response_subframes(subframes:ByteArray):void {
+          var string_data:Object = subframes.readUTFBytes(subframes.length);
+          DebugDaemon.write_debug("incoming subframe: %s", string_data);
         }
 
-        public function get endpoint_path():String {
-            return _endpoint_path;
+        // * DELEGATES * //
+
+        private function on_close(e:Event):void {
+            // TODO: handle connection close
+
         }
 
-        public function set endpoint_path(value:String):void {
-            _endpoint_path = value;
+        private function on_progress(e:ProgressEvent):void {
+            var response_data:ByteArray = new ByteArray();
+
+            if (_is_async) {
+              while (_socket.bytesAvailable > 0) {
+
+              }
+            } else {
+              // TODO: continuous byte stream for online gameplay and other synchronous transmissions
+              /**
+               * * what we can do here is structure the data transmissions in a specific order with a leading identifier so that we know what the data is for and what we can expect. for example, we can start by writing an integer denoting the reason for the data i.e. player movement. so right away, we know the next few bytes or so will be related to a specific player's movement. we can terminate the data with a special character or integer, maybe a hex code. in case the data comes out of order, we might need to lead each byte sent with an integer or something to denote its order. so the full frame and packing order would come out to:
+               * * [INFO_TYPE > INFO [ORDER_ID > INFO_BYTES] * X > TERMINATOR]
+               *
+               * * where `X` is the number of info sub-frames. sub-frames can be sent as parts of a bigger subframe, or a single subframe. this function (or maybe a helper function) can be tasked with organizing the data and putting it together to be loaded into memory for the application.
+               */
+              _socket.readBytes(response_data, response_data.length, _socket.bytesAvailable);
+              process_response_subframes(response_data);
+            }
+
+            trace("Received data:", response_data.toString());
+        }
+
+        private function on_io_error(e:IOErrorEvent):void {
+            DebugDaemon.write_debug(e.text);
+        }
+
+        private function on_timer_tick(e:TimerEvent):void {
+        }
+
+        private function on_timer_complete(e:TimerEvent):void {
+            DebugDaemon.write_warning("connection timeout: %s @ %s", _http_request_config.name, _endpoint + ":" + _port)
+        }
+
+        public function on_async_request_complete(e:Event):void {
+            _timeout_timer.stop();
+            DebugDaemon.write_success("async request complete! got: %s", e.target.data);
+
+            if (_socket && !_socket.connected) {
+                busy = false;
+                active = false;
+            }
+
+        }
+
+        private function on_connect(e:Event):void {
+            _timeout_timer.stop();
+            DebugDaemon.write_success("Connection successful to host %s:%i!", _endpoint, _port);
+
+            var request_data_bytes:ByteArray;
+            // write any data from the http_request_data array, as long as the data isnt null or empty, including the header
+            if (http_method_is_valid) {
+                request_data_bytes = new ByteArray();
+                request_data_bytes.writeUTFBytes(build_header());
+
+                if (_http_request_payload.length > 0) {
+                    request_data_bytes.writeBytes(build_data_stream());
+                }
+                _msgpack.write(request_data_bytes, _socket);
+                _socket.flush();
+            }
+
+            busy = false;
+            active = true;
+        }
+
+        // * GETTERS & SETTERS * //
+
+        public function get on_connect_signal():NativeSignal {
+            _on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
+
+            return _on_connect_signal;
+        }
+
+        public function get endpoint():String {
+            return _endpoint;
+        }
+
+        public function set endpoint(value:String):void {
+            _endpoint = value;
+        }
+
+        public function get port():uint {
+            return _port;
+        }
+
+        public function set port(value:uint):void {
+            _port = value;
         }
 
         public function get active():Boolean {
@@ -192,78 +290,8 @@ package net.blaxstar.starlib.networking {
             _is_busy = value;
         }
 
-        private function on_timer_tick(e:TimerEvent):void {
-        }
-
-        private function on_timer_complete(e:TimerEvent):void {
-            DebugDaemon.write_log("connection timeout: %s @ %s", DebugDaemon.WARN, _url_request_data.name, _host + ":" + _port)
-        }
-
-        public function on_async_request_complete(e:Event):void {
-            _timeout_timer.stop();
-            DebugDaemon.write_log("async request complete! got: %s", DebugDaemon.OK, e.target.data);
-
-            if (_socket && !_socket.connected) {
-                busy = false;
-                active = false;
-            }
-
-        }
-
-        private function on_connect(e:Event):void {
-            _timeout_timer.stop();
-            DebugDaemon.write_success("Connection successful to host %s:%i!", _host, _port);
-
-            var request_data_bytes:ByteArray;
-            // write any data from the http_request_data array, as long as the data isnt null or empty, including the header
-            if (_endpoint_path && !StringUtil.string_is_empty_or_null(_endpoint_path) && http_method_is_valid) {
-                request_data_bytes = new ByteArray();
-                request_data_bytes.writeUTFBytes(build_header());
-
-                if (_http_request_data.length > 0) {
-                    request_data_bytes.writeBytes(build_data_stream());
-                }
-                _msgpack.write(request_data_bytes, _socket);
-                _socket.flush();
-            }
-
-            busy = false;
-            active = true;
-        }
-
-        private function build_header():String {
-            var header:String = "GET " + _endpoint_path + " HTTP/1.1\r\n";
-            header.concat("Host: " + _host + "\r\n");
-            header.concat("Connection: close\r\n");
-            header.concat("\r\n");
-
-            var request_data_bytes:ByteArray = new ByteArray();
-            request_data_bytes.writeUTFBytes(header);
-
-            return header;
-        }
-
-        private function build_data_stream():ByteArray {
-            var data_bytes:ByteArray = new ByteArray();
-
-            for (var i:int = 0; i < _http_request_data.length; i++) {
-                _msgpack.write(_http_request_data[i], data_bytes);
-            }
-
-            return data_bytes;
-        }
-
-        private function on_close(e:Event):void {
-            // TODO: handle close
-        }
-
-        private function on_io_error(e:IOErrorEvent):void {
-            _timeout_timer.stop();
-            DebugDaemon.write_log(e.text, DebugDaemon.DEBUG);
-        }
-
         private function get http_method_is_valid():Boolean {
-            return _http_method == 'GET' || _http_method == 'POST' || _http_method == 'PUT' || _http_method == 'DELETE' || _http_method == 'OPTIONS' || _http_method == 'HEAD';
+            return _http_request_method == 'GET' || _http_request_method == 'POST' || _http_request_method == 'PUT' || _http_request_method == 'DELETE' || _http_request_method == 'OPTIONS' || _http_request_method == 'HEAD';
         }
 
     }

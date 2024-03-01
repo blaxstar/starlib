@@ -18,7 +18,7 @@ package net.blaxstar.starlib.networking {
                     Security.loadPolicyFile(host + ":" + port);
                     Security.loadPolicyFile(host + ":" + port + "/crossdomain.xml");
                 } catch (e:Error) {
-                    DebugDaemon.write_error(e.message);
+                    DebugDaemon.write_warning(e.message);
                 }
 
             } else {
@@ -29,7 +29,7 @@ package net.blaxstar.starlib.networking {
                     Security.loadPolicyFile("xmlsocket://" + host + ":" + port + "/crossdomain.xml");
                     Security.loadPolicyFile("https://" + host + ":" + port + "/crossdomain.xml");
                 } catch (e:Error) {
-                    DebugDaemon.write_error(e.message);
+                    DebugDaemon.write_warning(e.message);
                 }
 
             }

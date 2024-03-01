@@ -92,15 +92,15 @@ package net.blaxstar.starlib.io {
         private function load_next():void {
             var current_item:URL = _queued_urls[0];
 
-            if (current_item.expected_data_type !== URL.GRAPHICS) {
+            if (current_item.data_format !== URL.DATA_FORMAT_GRAPHICS) {
                 current_item.addEventListener(IOErrorEvent.IO_ERROR, on_io_error);
                 current_item.addEventListener(SecurityErrorEvent.SECURITY_ERROR, on_security_error);
                 current_item.addEventListener(ProgressEvent.PROGRESS, on_progress);
                 current_item.addEventListener(Event.COMPLETE, on_complete);
-                current_item.dataFormat = current_item.expected_data_type;
+                current_item.dataFormat = current_item.data_format;
                 current_item.connect();
             } else {
-                IOUtil.loadExternalDisplayObject(current_item.endpoint_path, on_complete_graphic, on_progress, on_io_error);
+                IOUtil.loadExternalDisplayObject(current_item.endpoint, on_complete_graphic, on_progress, on_io_error);
             }
         }
 
@@ -149,7 +149,7 @@ package net.blaxstar.starlib.io {
             var target:URL = e.target as URL;
             target.close();
 
-            if (target.expected_data_type == URL.TEXT) {
+            if (target.data_format == URL.DATA_FORMAT_TEXT) {
                 var ba:ByteArray = new ByteArray();
                 ba.writeUTFBytes(target.data);
                 ba.position = 0;
