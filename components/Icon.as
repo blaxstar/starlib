@@ -72,7 +72,7 @@ package net.blaxstar.starlib.components {
         private var _whRatio:Number;
 
         public function Icon(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, url:String = '') {
-            if (!StringUtil.string_is_empty_or_null(url))
+            if (!StringUtil.is_empty_or_null(url))
                 _src = url;
             super(parent, xpos, ypos);
         }
@@ -161,7 +161,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set src(val:String):void {
-            if (StringUtil.string_is_empty_or_null(val))
+            if (StringUtil.is_empty_or_null(val))
                 return;
             _src = val;
             _doc.clear();

@@ -6,6 +6,7 @@ package net.blaxstar.starlib.io {
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.filesystem.File;
+    import thirdparty.org.osflash.signals.Signal;
 
     /**
      * TODO: documentation
@@ -20,7 +21,7 @@ package net.blaxstar.starlib.io {
 
         // * HTTP REQUEST METHODS * //
         /**
-         * Specifies that the URLRequest object is a POST.
+         * A POST request is used to send data to the server, for example, customer information, file upload, etc. using HTML forms.
          *
          * Note: For content running in Adobe AIR, when  using the
          * navigateToURL() function, the runtime treats a URLRequest that uses
@@ -31,27 +32,27 @@ package net.blaxstar.starlib.io {
         public static const REQUEST_METHOD_POST:String = "POST";
 
         /**
-         * Specifies that the URLRequest object is a GET.
+         * Requests using GET should only retrieve data and should have no other effect on the data.
          */
         public static const REQUEST_METHOD_GET:String = "GET";
 
         /**
-         * Specifies that the URLRequest object is a PUT.
+         * Replaces all current representations of the target resource with the uploaded content.
          */
         public static const REQUEST_METHOD_PUT:String = "PUT";
 
         /**
-         * Specifies that the URLRequest object is a DELETE.
+         * Removes all current representations of the target resource given by a URI.
          */
         public static const REQUEST_METHOD_DELETE:String = "DELETE";
 
         /**
-         * Specifies that the URLRequest object is a HEAD.
+         * Same as GET, but transfers the status line and header section only.
          */
         public static const REQUEST_METHOD_HEAD:String = "HEAD";
 
         /**
-         * Specifies that the URLRequest object is OPTIONS.
+         * Describes the communication options for the target resource.
          */
         public static const REQUEST_METHOD_OPTIONS:String = "OPTIONS";
 
@@ -63,7 +64,8 @@ package net.blaxstar.starlib.io {
         // * CLASS PROPERTIES * //
         private var _name:String;
         private var _endpoint:String;
-        private var _expected_data_type:String;
+        private var _query_path:String;
+        private var _data_format:String;
         private var _port:uint;
         private var _is_using_port:Boolean;
         private var _connection:Connection;
@@ -72,9 +74,10 @@ package net.blaxstar.starlib.io {
         private var _auth_type:String;
         private var _auth_value:String;
         private var _is_async:Boolean;
+        private var _is_http_request:Boolean;
         private var dataFormat:String;
 
-        // TODO: class documentation
+        // TODO: class documentation, EXPOSE LISTENERS PUBLICLY
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function URL(endpoint:String = null, port:uint = undefined) {
 
@@ -85,7 +88,7 @@ package net.blaxstar.starlib.io {
             if (port) {
                 this._port = port;
             }
-
+            _query_path = "";
             _connection = new Connection(this);
 
             super();
@@ -96,11 +99,15 @@ package net.blaxstar.starlib.io {
             _connection.connect();
         }
 
-        public function add_request_variable(key:Object, val:Object):void {
-            if (dataFormat !== DATA_FORMAT_VARIABLES) {
+        public function close_connection():void {
+            _connection.close();
+        }
+
+        public function add_query_variable(key:Object, val:Object):void {
+            if (_data_format !== DATA_FORMAT_VARIABLES) {
                 DebugDaemon.write_warning("request vars added to request without expected_data_type being set!");
             }
-            _connection.add_http_request_variable(key,val);
+            _connection.add_http_request_variable(key, val);
         }
 
         public function add_http_request_data(data:*):void {
@@ -114,10 +121,6 @@ package net.blaxstar.starlib.io {
 
         public function get test_path_local():Boolean {
             return new File().resolvePath(endpoint).exists;
-        }
-
-        public function get on_request_complete():NativeSignal {
-            return _connection.on_connect_signal;
         }
 
         public function get connection():Connection {
@@ -137,7 +140,15 @@ package net.blaxstar.starlib.io {
         }
 
         public function set endpoint(value:String):void {
-            _connection.endpoint = _endpoint = value;
+            _endpoint = value;
+        }
+
+        public function get query_path():String {
+            return _query_path;
+        }
+
+        public function set query_path(value:String):void {
+            _query_path = value;
         }
 
         public function get http_request_data():Array {
@@ -180,7 +191,7 @@ package net.blaxstar.starlib.io {
         }
 
         public function set port(value:uint):void {
-            _port = _connection.port = value;
+            _port = value;
         }
 
         public function get use_port():Boolean {
@@ -200,24 +211,32 @@ package net.blaxstar.starlib.io {
         }
 
         public function get data_format():String {
-            return _expected_data_type;
+            return _data_format;
         }
 
         public function set data_format(value:String):void {
-            _expected_data_type = value;
-            if (_expected_data_type !== DATA_FORMAT_GRAPHICS) {
-                dataFormat = _expected_data_type;
+            _data_format = value;
+            if (_data_format !== DATA_FORMAT_GRAPHICS) {
+                super.dataFormat = _data_format;
             } else {
-                dataFormat = DATA_FORMAT_BINARY;
+                super.dataFormat = DATA_FORMAT_BINARY;
             }
         }
 
-        public function get connection_is_async():Boolean {
+        public function get is_http_request():Boolean {
+            return _is_http_request;
+        }
+
+        public function set is_http_request(value:Boolean):void {
+            _is_http_request = value;
+        }
+
+        public function get is_async():Boolean {
             return _is_async;
         }
 
-        public function set connection_is_async(value:Boolean):void {
-          _is_async = value;
+        public function set is_async(value:Boolean):void {
+            _is_async = value;
         }
     }
 

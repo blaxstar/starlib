@@ -232,7 +232,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set hint_text(val:String):void {
-            if (StringUtil.string_is_empty_or_null(val)) {
+            if (StringUtil.is_empty_or_null(val)) {
                 _hint_text = "enter text";
                 return;
             }

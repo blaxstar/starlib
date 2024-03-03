@@ -7,7 +7,7 @@ package net.blaxstar.starlib.utils {
    */
   public class StringUtil {
 
-    static public function string_is_empty_or_null(val:String):Boolean {
+    static public function is_empty_or_null(val:String):Boolean {
       if (!val) return true;
       val = condenseString(val);
       return (val == "");

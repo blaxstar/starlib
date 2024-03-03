@@ -15,6 +15,7 @@ package net.blaxstar.starlib.debug {
         private static var _instance:DebugDaemon;
         private static var _log:Vector.<String>;
         private static var _filestream:FileStream;
+        private static var _enable_notifications:Boolean;
 
         /**
          * TODO: class documentation

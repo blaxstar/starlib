@@ -10,6 +10,8 @@ package net.blaxstar.starlib.networking {
     import flash.utils.ByteArray;
     import flash.html.script.Package;
     import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.debug.console.DebugConsole;
+    import net.blaxstar.starlib.debug.DebugDaemon;
 
     /**
      * ...
@@ -55,12 +57,42 @@ package net.blaxstar.starlib.networking {
             _api_endpoint.endpoint = endpoint;
             _api_endpoint.use_port = true;
             _api_endpoint.port = 443;
+            _api_endpoint.is_http_request = true;
+            _api_endpoint.is_async = true;
+            _api_endpoint.data_format = URL.DATA_FORMAT_TEXT;
+            _api_endpoint.query_path = "/search"
+            _api_endpoint.add_query_variable("q", 123);
             _api_endpoint.http_method = request_method;
 
             if (data) {
                 _api_endpoint.add_http_request_data(data);
             }
             _api_endpoint.connect();
+        }
+
+        public function establish_secure_connection(endpoint:String, data:Object = null, on_complete:Function = null, on_error:Function = null):Boolean {
+            if (_api_endpoint.connection.busy) {
+                DebugDaemon.write_debug("cannot connect, there is a connection that has not been closed.");
+                return false;
+            } else {
+                _api_endpoint.endpoint = endpoint;
+                _api_endpoint.use_port = true;
+                _api_endpoint.is_http_request = false;
+                _api_endpoint.is_async = false;
+                _api_endpoint.data_format = URL.DATA_FORMAT_BINARY;
+
+
+                if (data) {
+                    _api_endpoint.add_http_request_data(data);
+                }
+                _api_endpoint.connect();
+                return true;
+
+            }
+        }
+
+        private function test_on_complete(incoming_bytes:ByteArray):void {
+            DebugDaemon.write_debug("bytes loaded from response: %s", incoming_bytes)
         }
 
         private function send_next():void {
