@@ -1,160 +1,157 @@
 package net.blaxstar.starlib.components {
 
-  import flash.display.DisplayObjectContainer;
-  import flash.events.Event;
-  import flash.text.AntiAliasType;
-  import flash.text.GridFitType;
-  import flash.text.TextField;
-  import flash.text.TextFieldAutoSize;
-  import flash.text.TextFieldType;
-  import flash.text.TextFormat;
+    import flash.display.DisplayObjectContainer;
+    import flash.events.Event;
+    import flash.text.AntiAliasType;
+    import flash.text.GridFitType;
+    import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
+    import flash.text.TextFieldType;
+    import flash.text.TextFormat;
 
-  import net.blaxstar.starlib.style.Font;
-  import net.blaxstar.starlib.style.Style;
-
-  /**
-   * A simple component for displaying text information.
-   * @author Deron D. (decamp.deron@gmail.com)
-   */
-  public class PlainText extends Component {
-    private const DEFAULT_WIDTH:uint = 300;
-    private const DEFAULT_HEIGHT:uint = 30;
-
-    private var _textField:TextField;
-    private var _textFieldString:String;
-    private var _textFormat:TextFormat;
-    private var _colorOverwritten:Boolean;
-
-    public function PlainText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, text:String = "") {
-      _textFieldString = text;
-      super(parent, xpos, ypos);
-    }
-
-    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
+    import net.blaxstar.starlib.style.Font;
+    import net.blaxstar.starlib.style.Style;
 
     /**
-     * initializes the component by adding all the children
-     * and committing the visual changes to be written on the next frame.
-     * created to be overridden.
+     * A simple component for displaying text information.
+     * @author Deron D. (decamp.deron@gmail.com)
      */
-    override public function init():void {
-      _width_ = DEFAULT_WIDTH;
-      _height_ = DEFAULT_HEIGHT;
-      _textFormat = Font.BODY_2;
-      mouseEnabled = mouseChildren = false;
-      super.init();
+    public class PlainText extends Component {
+        private const DEFAULT_WIDTH:uint = 300;
+        private const DEFAULT_HEIGHT:uint = 30;
+
+        private var _textfield:TextField;
+        private var _textfield_string:String;
+        private var _text_format:TextFormat;
+        private var _colorOverwritten:Boolean;
+
+        public function PlainText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, text:String = "") {
+            _textfield_string = text;
+            super(parent, xpos, ypos);
+        }
+
+        /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
+
+        /**
+         * initializes the component by adding all the children
+         * and committing the visual changes to be written on the next frame.
+         * created to be overridden.
+         */
+        override public function init():void {
+            mouseEnabled = mouseChildren = false;
+            super.init();
+        }
+
+        /**
+         * initializes and adds all required children of the component.
+         */
+        override public function add_children():void {
+            _width_ = DEFAULT_WIDTH;
+            _height_ = DEFAULT_HEIGHT;
+
+            _textfield = new TextField();
+            _text_format = Font.BODY_2;
+            _textfield.embedFonts = Font.embedFonts;
+            _textfield.type = TextFieldType.DYNAMIC;
+            _textfield.antiAliasType = AntiAliasType.ADVANCED;
+            _textfield.gridFitType = GridFitType.PIXEL;
+            _textfield.thickness = 0;
+            _textfield.sharpness = 400;
+            _textfield.selectable = _textfield.border = _textfield.multiline = _textfield.wordWrap = _textfield.mouseEnabled = _textfield.selectable = false;
+            _textfield.defaultTextFormat = _text_format;
+            _textfield.autoSize = TextFieldAutoSize.LEFT;
+            _textfield.text = _textfield_string;
+            _textfield.textColor = Style.TEXT.value;
+
+            addChild(_textfield);
+            super.add_children();
+        }
+
+        /**
+         * (re)draws the component and applies any pending visual changes.
+         */
+        override public function draw(e:Event = null):void {
+            super.draw(e);
+            _textfield.text = _textfield_string;
+
+            if (!_textfield.multiline) {
+                _width_ = _textfield.width;
+                dispatchEvent(new Event(Event.RESIZE));
+                _height_ = _textfield.height = 18;
+            } else {
+                _textfield.width = _width_;
+            }
+
+        }
+
+        /** END INTERFACE ===================== */
+
+        override public function update_skin():void {
+            if (!_colorOverwritten) {
+                color = Style.TEXT.value;
+            }
+        }
+
+        public function format(fmt:TextFormat = null):void {
+            if (fmt == null) {
+                _textfield.setTextFormat(Font.BODY_2);
+                _text_format = Font.BODY_2;
+            } else {
+                _textfield.defaultTextFormat = fmt;
+                _text_format = fmt;
+            }
+            commit();
+        }
+
+        public function get text():String {
+            return _textfield_string;
+        }
+
+        public function set text(val:String):void {
+            _textfield_string = val;
+            commit();
+        }
+
+        public function get htmlText():String {
+            return _textfield.htmlText;
+        }
+
+        public function set htmlText(val:String):void {
+            _textfield.htmlText = val;
+            commit();
+        }
+
+        public function get color():uint {
+            return _textfield.textColor;
+        }
+
+        public function set color(val:uint):void {
+            _colorOverwritten = true;
+            _textfield.text = (_textfield_string.length) ? _textfield_string : '...';
+            _textfield.textColor = val;
+            commit();
+        }
+
+        public function get text_width():Number {
+            return _textfield.textWidth;
+        }
+
+        public function get text_height():Number {
+            return _textfield.textHeight;
+        }
+
+        public function set multiline(val:Boolean):void {
+            _textfield.multiline = _textfield.wordWrap = val;
+        }
+
+        public function set border(border:Boolean):void {
+            _textfield.border = border;
+            _textfield.borderColor = Style.SECONDARY.value;
+        }
+
+        override public function destroy():void {
+        }
+
     }
-
-    /**
-     * initializes and adds all required children of the component.
-     */
-    override public function add_children():void {
-      _textField = new TextField();
-      _textField.embedFonts = Font.embedFonts;
-      _textField.type = TextFieldType.DYNAMIC;
-      _textField.antiAliasType = AntiAliasType.ADVANCED;
-      _textField.gridFitType = GridFitType.PIXEL;
-      _textField.thickness = 0;
-      _textField.sharpness = 400;
-      _textField.selectable = _textField.border = _textField.multiline = _textField.wordWrap = _textField.mouseEnabled = _textField.selectable = false;
-      _textField.defaultTextFormat = _textFormat;
-      _textField.autoSize = TextFieldAutoSize.LEFT;
-      _textField.text = _textFieldString;
-      _textField.textColor = Style.TEXT.value;
-      addChild(_textField);
-
-      super.add_children();
-    }
-
-    override protected function on_added(e:Event):void {
-      draw();
-    }
-    /**
-     * (re)draws the component and applies any pending visual changes.
-     */
-    override public function draw(e:Event = null):void {
-      _textField.text = _textFieldString;
-
-      if (!_textField.multiline) {
-        _width_ = _textField.width;
-        _height_ = _textField.height;
-      }
-      else {
-        _textField.width = _width_;
-        _height_ = _textField.height;
-      }
-
-      on_resize_signal.dispatch(_resizeEvent_);
-      super.draw();
-    }
-
-    /** END INTERFACE ===================== */
-
-    override public function update_skin():void {
-        if (!_colorOverwritten) color = Style.TEXT.value;
-    }
-
-    public function format(fmt:TextFormat = null):void {
-      if (fmt == null) {
-        _textField.setTextFormat(Font.BODY_2);
-        _textFormat = Font.BODY_2;
-      }
-      else {
-        _textField.defaultTextFormat = fmt;
-        _textFormat = fmt;
-      }
-      commit();
-    }
-
-    public function get text():String {
-      return _textFieldString;
-    }
-
-    public function set text(val:String):void {
-      _textFieldString = val;
-      commit();
-    }
-
-    public function get htmlText():String {
-      return _textField.htmlText;
-    }
-
-    public function set htmlText(val:String):void {
-      _textField.htmlText = val;
-      commit();
-    }
-
-    public function get color():uint {
-      return _textField.textColor;
-    }
-
-    public function set color(val:uint):void {
-      _colorOverwritten = true;
-      _textField.text = (_textFieldString.length) ? _textFieldString : '...';
-      _textField.textColor = val;
-      commit();
-    }
-
-    public function get textWidth():Number {
-      return _textField.textWidth;
-    }
-
-    public function get textHeight():Number {
-      return _textField.textHeight;
-    }
-
-    public function set multiline(val:Boolean):void {
-      _textField.multiline = _textField.wordWrap = val;
-    }
-
-    public function set border(border:Boolean):void {
-      _textField.border = border;
-      _textField.borderColor = Style.SECONDARY.value;
-    }
-
-    override public function destroy():void {
-    }
-
-  }
 
 }

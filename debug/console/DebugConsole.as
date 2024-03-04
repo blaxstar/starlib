@@ -170,7 +170,7 @@ package net.blaxstar.starlib.debug.console {
             _prefixText.color = Color.PRODUCT_RED.value;
             _outputField = new PlainText(this, 0, 0);
             _outputField.color = Color.PRODUCT_GREEN.value;
-            _input_field = new InputTextField(this, _prefixText.x + _prefixText.textWidth, 0, '');
+            _input_field = new InputTextField(this, _prefixText.x + _prefixText.text_width, 0, '');
             _input_field.color = Color.EGGSHELL.value;
             _input_field.showing_underline = false;
             _input_field.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);

@@ -41,14 +41,17 @@ package net.blaxstar.starlib.networking {
         private var _is_busy:Boolean;
         private var _compress:Boolean;
 
-        private var _on_connect_signal:NativeSignal;
-        private var _on_progress_signal:NativeSignal;
-        private var _on_close_signal:NativeSignal;
-        private var _on_io_error_signal:NativeSignal;
-        public var on_request_complete_signal:Signal;
+        public var on_connect_signal:NativeSignal;
+        public var on_progress_signal:NativeSignal;
+        public var on_close_signal:NativeSignal;
+        public var on_io_error_signal:NativeSignal;
+        public var on_complete_signal:Signal;
 
         public function Connection(url:URL) {
             _http_request_config = url;
+            _socket = new SecureSocket();
+            _chunked_response_holder = new ByteArray();
+            config_socket();
         }
 
         public function connect(compress_data:Boolean = false):void {
@@ -64,24 +67,18 @@ package net.blaxstar.starlib.networking {
                 return;
             }
 
-            // * initialize socket
-            if (!_socket) {
-                _socket = new SecureSocket();
-                _chunked_response_holder = new ByteArray();
-                // * if the compress_data flag is true, we'll use msgpack to write bytes
-                if (compress_data) {
-                    _compress = true;
-                    _msgpack = new MsgPack(MsgPackFlags.READ_RAW_AS_BYTE_ARRAY);
-                }
-                // * initialize socket listeners
-                config_socket();
+            // * if the compress_data flag is true, we'll use msgpack to write bytes
+            if (compress_data) {
+                _compress = true;
+                _msgpack ||= new MsgPack(MsgPackFlags.READ_RAW_AS_BYTE_ARRAY);
             }
 
+
             // * add delegates
-            _on_connect_signal.add(on_connect);
-            _on_progress_signal.add(on_progress);
-            _on_close_signal.add(on_close);
-            _on_io_error_signal.add(on_io_error);
+            on_connect_signal.add(on_connect);
+            on_progress_signal.add(on_progress);
+            on_close_signal.add(on_close);
+            on_io_error_signal.add(on_io_error);
             // * set the connection status to busy and begin the connection
             _is_busy = true;
             _socket.connect(_http_request_config.endpoint, _http_request_config.port);
@@ -106,20 +103,21 @@ package net.blaxstar.starlib.networking {
 
         private function config_socket():void {
             _socket.timeout = _REQUEST_TIMEOUT * _TIMEOUT_REPS;
-            _on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
-            _on_progress_signal ||= new NativeSignal(_socket, ProgressEvent.SOCKET_DATA, ProgressEvent);
-            _on_close_signal ||= new NativeSignal(_socket, Event.CLOSE, Event);
-            _on_io_error_signal ||= new NativeSignal(_socket, IOErrorEvent.IO_ERROR, Event);
+            on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
+            on_progress_signal ||= new NativeSignal(_socket, ProgressEvent.SOCKET_DATA, ProgressEvent);
+            on_close_signal ||= new NativeSignal(_socket, Event.CLOSE, Event);
+            on_io_error_signal ||= new NativeSignal(_socket, IOErrorEvent.IO_ERROR, Event);
+            on_complete_signal ||= new Signal(ByteArray);
         }
 
         public function close():void {
             if (_socket.connected) {
                 _socket.close();
             }
-            _on_connect_signal.remove(on_connect);
-            _on_progress_signal.remove(on_progress);
-            _on_close_signal.remove(on_close);
-            _on_io_error_signal.remove(on_io_error);
+            on_connect_signal.remove(on_connect);
+            on_progress_signal.remove(on_progress);
+            on_close_signal.remove(on_close);
+            on_io_error_signal.remove(on_io_error);
             active = false;
             busy = false;
         }
@@ -184,13 +182,10 @@ package net.blaxstar.starlib.networking {
                 var chunk_string:String = current_chunk.toString();
                 if (chunk_string == "0\r\n\r\n" || chunk_string == "\r\n\r\n" || chunk_string == "") {
                     close();
-                    DebugDaemon.write_debug("chunked response complete. got: %s", _chunked_response_holder.toString());
-
+                    on_complete_signal.dispatch(_chunked_response_holder);
                 } else {
                     current_chunk.readBytes(_chunked_response_holder, _chunked_response_holder.length);
                 }
-
-                    //close();
             } else {
                 // TODO: continuous byte stream for online gameplay and other synchronous transmissions
                 /**
@@ -258,12 +253,6 @@ package net.blaxstar.starlib.networking {
 
         private function get http_method_is_valid():Boolean {
             return _http_request_config.http_method == 'GET' || _http_request_config.http_method == 'POST' || _http_request_config.http_method == 'PUT' || _http_request_config.http_method == 'DELETE' || _http_request_config.http_method == 'OPTIONS' || _http_request_config.http_method == 'HEAD';
-        }
-
-        public function get on_connect_signal():NativeSignal {
-            _on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
-
-            return _on_connect_signal;
         }
 
         public function set active(value:Boolean):void {

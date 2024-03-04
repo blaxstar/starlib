@@ -75,7 +75,7 @@ package net.blaxstar.starlib.io {
         private var _auth_value:String;
         private var _is_async:Boolean;
         private var _is_http_request:Boolean;
-        private var dataFormat:String;
+        private var _pending_delegates:Array;
 
         // TODO: class documentation, EXPOSE LISTENERS PUBLICLY
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
@@ -89,6 +89,7 @@ package net.blaxstar.starlib.io {
                 this._port = port;
             }
             _query_path = "";
+            _pending_delegates = [];
             _connection = new Connection(this);
 
             super();
@@ -115,6 +116,26 @@ package net.blaxstar.starlib.io {
                 _http_request_data = [];
             }
             _http_request_data.push(data);
+        }
+
+        public function add_connect_listener(delegate:Function):void {
+            _connection.on_connect_signal.add(delegate);
+        }
+
+        public function add_progress_listener(delegate:Function):void {
+            _connection.on_progress_signal.add(delegate);
+        }
+
+        public function add_close_listener(delegate:Function):void {
+            _connection.on_close_signal.add(delegate);
+        }
+
+        public function add_io_error_listener(delegate:Function):void {
+            _connection.on_io_error_signal.add(delegate);
+        }
+
+        public function add_complete_listener(delegate:Function):void {
+            _connection.on_complete_signal.add(delegate);
         }
 
         // * GETTERS & SETTERS * //

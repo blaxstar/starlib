@@ -30,13 +30,12 @@ package net.blaxstar.starlib.components {
         private var _function_queue:Vector.<Function>;
         private var _param_queue:Vector.<Array>;
         private var _dropshadow_filter:DropShadowFilter;
+        private var _id_:uint;
+        private var _enabled_:Boolean;
+        private var _is_showing_bounds_:Boolean;
 
-        protected var _id_:uint;
         protected var _width_:Number;
         protected var _height_:Number;
-        protected var _enabled_:Boolean;
-        protected var _is_showing_bounds_:Boolean;
-
         public var on_enter_frame_signal:NativeSignal;
         public var on_resize_signal:NativeSignal;
         public var on_draw_signal:Signal;
@@ -89,17 +88,19 @@ package net.blaxstar.starlib.components {
                 _resizeEvent_ = new Event(Event.RESIZE);
                 on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
             }
-            if (!on_draw_signal)
+            if (!on_draw_signal) {
                 on_draw_signal = new Signal();
+            }
+
             add_children();
             on_added_signal.addOnce(on_added);
-            on_enter_frame_signal.add(check_queue);
+            //on_enter_frame_signal.add(check_queue);
             // TODO: update theme on all components when theme is changed.
             // Style.ON_THEME_UPDATE.add(draw);
         }
 
         protected function on_added(e:Event):void {
-            draw();
+
         }
 
         /**
@@ -135,7 +136,7 @@ package net.blaxstar.starlib.components {
          */
         public function add_children():void {
             // trace('on added triggered from ' + this.toString());
-            commit();
+            draw();
         }
 
         /**
@@ -143,11 +144,15 @@ package net.blaxstar.starlib.components {
          */
         public function draw(e:Event = null):void {
             // dispatches a DRAW event
-            // onEnterFrame.remove(draw);
+            on_enter_frame_signal.remove(draw);
             update_skin();
-            if (isShowingBounds)
+            if (isShowingBounds) {
                 updateBounds();
-            on_draw_signal.dispatch();
+            }
+        /**
+         * * some components will need to dispatch resize as the components use custom _width_ and _height_ properties. if used in a container, these components width & height properties will report back erroneously if the custom width & height values are not updated. i can dispatch events, but i'm looking for a way to cut costs on that.
+         * TODO: maybe convert all resize dispatches to native signals, and make override dispatch event. gotta test if nativesignal is faster or not...
+         */
         }
 
         /** END INTERFACE ===================== */
@@ -246,10 +251,10 @@ package net.blaxstar.starlib.components {
         public function set isShowingBounds(value:Boolean):void {
             var g:Graphics = this.graphics;
 
-            if (value == true && _width_) {
-                if (_is_showing_bounds_)
+            if (value == true && _width_ > 0 && _height_ > 0) {
+                if (_is_showing_bounds_) {
                     return;
-                else {
+                } else {
                     g.lineStyle(1, 0xFF0000, 0.8, true);
                     g.drawRect(0, 0, _width_, _height_);
                     _is_showing_bounds_ = true;

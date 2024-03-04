@@ -12,6 +12,7 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.utils.StringUtil;
     import net.blaxstar.starlib.debug.console.DebugConsole;
     import net.blaxstar.starlib.debug.DebugDaemon;
+    import com.sociodox.utils.Base64;
 
     /**
      * ...
@@ -33,12 +34,16 @@ package net.blaxstar.starlib.networking {
         private var _api_endpoint:URL;
         private var _connection:Connection;
 
+        // * testing
+        public var fake_signal:Signal;
+
         // constructor
         public function APIRequestManager(endpoint_path:String = "http://localhost", port:uint = 3000) {
 
             _api_endpoint = new URL(endpoint_path, port);
             _api_endpoint.name = "server";
             _backlog = new Vector.<Object>();
+            fake_signal ||= new Signal();
         }
 
         /**
@@ -63,11 +68,12 @@ package net.blaxstar.starlib.networking {
             _api_endpoint.query_path = "/search"
             _api_endpoint.add_query_variable("q", 123);
             _api_endpoint.http_method = request_method;
-
+            //_api_endpoint.add_complete_listener(test_on_complete);
             if (data) {
                 _api_endpoint.add_http_request_data(data);
             }
-            _api_endpoint.connect();
+            // * _api_endpoint.connect();
+            fake_connect();
         }
 
         public function establish_secure_connection(endpoint:String, data:Object = null, on_complete:Function = null, on_error:Function = null):Boolean {
@@ -88,6 +94,17 @@ package net.blaxstar.starlib.networking {
                 _api_endpoint.connect();
                 return true;
 
+            }
+        }
+
+        private function fake_connect():void {
+            var response:ByteArray = new ByteArray();
+            response.writeUTFBytes("c2hhd3R5c2hhcGVkbGlrZWFwaXhhcm1vbQ==");
+            var decoded_response:String = Base64.decode(response.toString()).toString();
+            if (decoded_response == "shawtyshapedlikeapixarmom") {
+                fake_signal.dispatch(decoded_response);
+            } else {
+                fake_signal.dispatch(null);
             }
         }
 

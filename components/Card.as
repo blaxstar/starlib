@@ -78,6 +78,7 @@ package net.blaxstar.starlib.components {
             super.addChild(_card_background);
             super.addChild(_component_container);
             super.addChild(_option_container);
+            _component_container.addEventListener(Event.RESIZE, on_component_resize);
             apply_shadow();
 
             super.add_children();
@@ -99,12 +100,17 @@ package net.blaxstar.starlib.components {
                 if (totalH > MIN_HEIGHT) {
                     _height_ = totalH;
                 }
+                dispatchEvent(new Event(Event.RESIZE));
             }
 
             draw_background();
             _option_container.move(PADDING, _height_ - PADDING - _option_container.height - PADDING);
 
             super.draw();
+        }
+
+        private function on_component_resize(e:Event = null):void {
+            commit();
         }
 
         /** END INTERFACE ===================== */
@@ -152,7 +158,7 @@ package net.blaxstar.starlib.components {
             draw_background();
         }
 
-        public function highlight_region(x: uint, y:uint, width:uint, height:uint):void {
+        public function highlight_region(x:uint, y:uint, width:uint, height:uint):void {
             _region_highlighted = true;
             _highlight_region ||= new Rectangle();
             _highlight_region.x = x;
@@ -163,9 +169,9 @@ package net.blaxstar.starlib.components {
         }
 
         public function clear_highlight():void {
-          _highlight_region = null;
-          _region_highlighted = false;
-          draw_background();
+            _highlight_region = null;
+            _region_highlighted = false;
+            draw_background();
         }
 
         private function draw_background():void {
@@ -176,8 +182,8 @@ package net.blaxstar.starlib.components {
             g.drawRoundRect(0, 0, _width_, _height_, 7);
 
             if (_region_highlighted && _highlight_region != null) {
-              g.beginFill(Style.SECONDARY.value);
-              g.drawRoundRect(_highlight_region.x, _highlight_region.y, _highlight_region.width, _highlight_region.height, 7);
+                g.beginFill(Style.SECONDARY.value);
+                g.drawRoundRect(_highlight_region.x, _highlight_region.y, _highlight_region.width, _highlight_region.height, 7);
             }
 
             g.endFill();
@@ -193,7 +199,7 @@ package net.blaxstar.starlib.components {
 
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
-            draw();
+            commit();
         }
 
         public function set draggable(val:Boolean):void {

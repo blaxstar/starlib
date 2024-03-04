@@ -1,200 +1,199 @@
 package net.blaxstar.starlib.components {
-  import flash.display.DisplayObject;
-  import flash.display.DisplayObjectContainer;
-  import flash.events.Event;
-  import flash.geom.Rectangle;
+    import flash.display.DisplayObject;
+    import flash.display.DisplayObjectContainer;
+    import flash.events.Event;
+    import flash.geom.Rectangle;
+    import net.blaxstar.starlib.math.Arithmetic;
 
-  public class VerticalBox extends Component {
-    public static const LEFT:String = "left";
-    public static const RIGHT:String = "right";
-    public static const CENTER:String = "center";
-    public static const NONE:String = "none";
+    public class VerticalBox extends Component {
+        public static const LEFT:String = "left";
+        public static const RIGHT:String = "right";
+        public static const CENTER:String = "center";
+        public static const NONE:String = "none";
 
-    protected var _spacing_:Number = 5;
+        protected var _spacing_:Number = 5;
 
-    private var _alignment:String = NONE;
+        private var _alignment:String = NONE;
 
-    /**
-     * Constructor
-     * @param parent The parent DisplayObjectContainer on which to add this PushButton.
-     * @param xpos The x position to place this component.
-     * @param ypos The y position to place this component.
-     */
-    public function VerticalBox(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
-      super(parent, xpos, ypos);
-    }
-
-    /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
-
-    /**
-     * initializes the component by adding all the children
-     * and committing the visual changes to be written on the next frame.
-     * created to be overridden.
-     */
-    override public function init():void {
-      _width_ = _height_ = PADDING;
-      super.init();
-    }
-
-    /**
-     * (re)draws the component and applies any pending visual changes.
-     */
-    override public function draw(e:Event = null):void {
-      super.draw();
-      var ypos:Number = 0;
-      _width_ = _height_ = 0;
-
-      for (var i:int = 0; i < numChildren; i++) {
-        var child:DisplayObject = getChildAt(i);
-        child.y = ypos;
-        ypos += child.height;
-        ypos += _spacing_;
-        _width_ = Math.max(_width_, child.width);
-      }
-
-      _height_ += ypos;
-      align();
-    }
-
-    /** END INTERFACE ===================== */
-
-    /**
-     * Sets element's y positions based on alignment value.
-     */
-    protected function align():void {
-      if (_alignment != NONE) {
-        for (var i:int = 0; i < numChildren; i++) {
-          var child:DisplayObject = getChildAt(i);
-          if (_alignment == LEFT) {
-            child.x = 0;
-          }
-          else if (_alignment == RIGHT) {
-            child.x = _width_ - child.width;
-          }
-          else if (_alignment == CENTER) {
-            child.x = (_width_ - child.width) / 2;
-          }
+        /**
+         * Constructor
+         * @param parent The parent DisplayObjectContainer on which to add this PushButton.
+         * @param xpos The x position to place this component.
+         * @param ypos The y position to place this component.
+         */
+        public function VerticalBox(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
+            super(parent, xpos, ypos);
         }
-      }
-      on_resize_signal.dispatch(_resizeEvent_);
-    }
 
-    /**
-     * override of addChild to force layout.
-     */
-    override public function addChild(child:DisplayObject):DisplayObject {
-      super.addChild(child);
-      if (child is Component)
-        (child as Component).on_resize_signal.add(onComponentResize);
-      else
-        child.addEventListener(Event.RESIZE, onComponentResize);
-      commit();
-      return child;
-    }
+        /**
+         * override of addChild to force layout.
+         */
+        override public function addChild(child:DisplayObject):DisplayObject {
+            super.addChild(child);
 
-    /**
-     * override of addChildAt to force layout.
-     */
-    override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
-      super.addChildAt(child, index);
-      if (child is Component)
-        Component(child).on_resize_signal.add(onComponentResize);
-      else
-        child.addEventListener(Event.RESIZE, onComponentResize);
-      commit();
-      return child;
-    }
+            if (child is Component) {
+                (child as Component).on_resize_signal.add(on_component_resize);
+            } else {
+                child.addEventListener(Event.RESIZE, on_component_resize);
+            }
 
-    /**
-     * override of removeChild to force layout.
-     */
-    override public function removeChild(child:DisplayObject):DisplayObject {
-      super.removeChild(child);
-      if (child is Component)
-        Component(child).on_resize_signal.remove(onComponentResize);
-      else
-        child.removeEventListener(Event.RESIZE, onComponentResize);
-      commit();
-      return child;
-    }
+            draw();
+            return child;
+        }
 
-    /**
-     * override of removeChild to force layout.
-     */
-    override public function removeChildAt(index:int):DisplayObject {
-      var child:DisplayObject = super.removeChildAt(index);
-      if (child is Component)
-        Component(child).on_resize_signal.remove(onComponentResize);
-      else
-        child.removeEventListener(Event.RESIZE, onComponentResize);
-      commit();
-      return child;
-    }
+        /**
+         * override of addChildAt to force layout.
+         */
+        override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
+            super.addChildAt(child, index);
 
-    /**
-     * internal handler for resize event of any attached component. Will redo the layout based on new size.
-     */
-    protected function onComponentResize(event:Event = null):void {
-      commit();
-    }
+            if (child is Component) {
+                Component(child).on_resize_signal.add(on_component_resize);
+            } else {
+                child.addEventListener(Event.RESIZE, on_component_resize);
+            }
 
-    public function set maskThreshold(value:Number):void {
-      if (_height_ > value) {
-        cacheAsBitmap = true;
-        scrollRect = new Rectangle(0, 0, _width_, value);
-      }
-      else
-        queue_function(arguments.callee, value);
-    }
+            draw();
+            return child;
+        }
 
-    /**
-     * sets the max amount of items that can be shown at once in this verticalbox.
-     * @param value
-     * @return void
-     */
-    public function set max_visible(value:Number):void {
-      if (value > numChildren) {
-        queue_function(arguments.callee, value);
-        return;
-      }
-      var lastChild:DisplayObject = getChildAt(value - 1);
-      cacheAsBitmap = true;
-      scrollRect = new Rectangle(0, 0, _width_, lastChild.y + lastChild.height);
-    }
+        /**
+         * override of removeChild to force layout.
+         */
+        override public function removeChild(child:DisplayObject):DisplayObject {
+            super.removeChild(child);
 
-    /**
-     *  getter and setter for the spacing between each subcomponent.
-     */
-    public function set spacing(pixel_spacing:Number):void {
-      _spacing_ = pixel_spacing;
-      commit();
-    }
+            if (child is Component) {
+                Component(child).on_resize_signal.remove(on_component_resize);
+            } else {
+                child.removeEventListener(Event.RESIZE, on_component_resize);
+            }
 
-    public function get spacing():Number {
-      return _spacing_;
-    }
+            draw();
+            return child;
+        }
 
-    /**
-     * getter and setter for the horizontal alignment of components in the box (left, right, center).
-     */
-    public function set alignment(value:String):void {
-      _alignment = value;
-      commit();
-    }
+        /**
+         * override of removeChild to force layout.
+         */
+        override public function removeChildAt(index:int):DisplayObject {
+            var child:DisplayObject = super.removeChildAt(index);
 
-    public function get alignment():String {
-      return _alignment;
-    }
+            if (child is Component) {
+                Component(child).on_resize_signal.remove(on_component_resize);
+            } else {
+                child.removeEventListener(Event.RESIZE, on_component_resize);
+            }
 
-    override public function destroy():void {
+            draw();
+            return child;
+        }
 
-      for (var i:uint = 0; i < numChildren; i++) {
-        var child:DisplayObject = getChildAt(i);
-        if (child is Component)
-          Component(child).on_resize_signal.remove(onComponentResize);
-        else
-          child.removeEventListener(Event.RESIZE, onComponentResize);
-      }
+        /**
+         * internal handler for resize event of any attached component. Will redo the layout based on new size.
+         */
+        protected function on_component_resize(event:Event = null):void {
+            commit();
+        }
+
+        /**
+         * Sets element's y positions based on alignment value.
+         */
+        protected function align():void {
+            if (_alignment != NONE) {
+                for (var i:int = 0; i < numChildren; i++) {
+                    var child:DisplayObject = getChildAt(i);
+                    if (_alignment == LEFT) {
+                        child.x = 0;
+                    } else if (_alignment == RIGHT) {
+                        child.x = _width_ - child.width;
+                    } else if (_alignment == CENTER) {
+                        child.x = (_width_ - child.width) / 2;
+                    }
+                }
+            }
+        }
+
+        /**
+         * (re)draws the component and applies any pending visual changes.
+         */
+        override public function draw(e:Event = null):void {
+            super.draw(e);
+            _width_ = _height_ = 0;
+            var ypos:Number = 0;
+            var child:DisplayObject;
+
+            for (var i:int = 0; i < numChildren; i++) {
+                child = getChildAt(i);
+                child.y = ypos;
+                ypos += child.height;
+                ypos += _spacing_;
+                _height_ += child.height;
+                _width_ = Math.max(_width_, child.width);
+            }
+
+            align();
+            _height_ += _spacing_ * (numChildren - 1);
+
+            dispatchEvent(new Event(Event.RESIZE));
+        }
+
+        public function set maskThreshold(value:Number):void {
+            if (_height_ > value) {
+                cacheAsBitmap = true;
+                scrollRect = new Rectangle(0, 0, _width_, value);
+            } else
+                queue_function(arguments.callee, value);
+        }
+
+        /**
+         * sets the max amount of items that can be shown at once in this verticalbox.
+         * @param value
+         * @return void
+         */
+        public function set max_visible(value:Number):void {
+            if (value > numChildren) {
+                queue_function(arguments.callee, value);
+                return;
+            }
+            var last_child:DisplayObject = getChildAt(value - 1);
+            cacheAsBitmap = true;
+            scrollRect = new Rectangle(0, 0, _width_, last_child.y + last_child.height);
+        }
+
+        /**
+         *  getter and setter for the spacing between each subcomponent.
+         */
+        public function set spacing(pixel_spacing:Number):void {
+            _spacing_ = pixel_spacing;
+            commit();
+        }
+
+        public function get spacing():Number {
+            return _spacing_;
+        }
+
+        /**
+         * getter and setter for the horizontal alignment of components in the box (left, right, center).
+         */
+        public function set alignment(value:String):void {
+            _alignment = value;
+            commit();
+        }
+
+        public function get alignment():String {
+            return _alignment;
+        }
+
+        override public function destroy():void {
+
+            for (var i:uint = 0; i < numChildren; i++) {
+                var child:DisplayObject = getChildAt(i);
+                if (child is Component)
+                    Component(child).on_resize_signal.remove(on_component_resize);
+                else
+                    child.removeEventListener(Event.RESIZE, on_component_resize);
+            }
+        }
     }
-  }
 }
