@@ -105,6 +105,7 @@ package net.blaxstar.starlib.components {
             }
 
             drawBG();
+            dispatchEvent(new Event(Event.RESIZE));
 
             _onMouseDown.add(onMouseDown);
             _onRollOver.add(onRollOver);

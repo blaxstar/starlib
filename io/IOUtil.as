@@ -24,19 +24,19 @@ package net.blaxstar.starlib.io {
          * @param	onProgress Function to call every time the loader progresses.
          * @param	onError Function to call if the loader encounters an error.
          */
-        static public function loadExternalDisplayObject(url:String, onComplete:Function, onProgress:Function = null, onError:Function = null):void {
+        static public function loadExternalDisplayObject(url:String, on_complete:Function, on_progress:Function = null, on_error:Function = null):void {
             var displayObjectLoader:Loader = new Loader();
 
-            displayObjectLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
-            if (onProgress != null)
-                displayObjectLoader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, onProgress);
-            if (onError != null)
-                displayObjectLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onError);
+            displayObjectLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, on_complete);
+            if (on_progress != null)
+                displayObjectLoader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, on_progress);
+            if (on_error != null)
+                displayObjectLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, on_error);
 
             displayObjectLoader.load(new URLRequest(url));
         }
 
-        static public function exportFile(target:*, filename:String, fileExtension:String = "", outputDirectory:String = "", onComplete:Function = null, filemode:String = FileMode.UPDATE):void {
+        static public function exportFile(target:*, filename:String, fileExtension:String = "", outputDirectory:String = "", on_complete:Function = null, filemode:String = FileMode.UPDATE):void {
             var packedBytes:ByteArray = new ByteArray();
             var stream:FileStream = new FileStream();
             var file:File = new File(File.applicationDirectory.nativePath);
@@ -53,8 +53,8 @@ package net.blaxstar.starlib.io {
             stream.open(file, filemode);
             stream.writeBytes(packedBytes);
             stream.close();
-            if (onComplete) {
-                onComplete.call();
+            if (on_complete) {
+                on_complete.apply(null, [0]);
             } else {
                 printf("file write sucessful! %s%s @ %s", filename, fileExtension, outputDirectory);
             }

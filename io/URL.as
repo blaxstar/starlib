@@ -7,6 +7,11 @@ package net.blaxstar.starlib.io {
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.filesystem.File;
     import thirdparty.org.osflash.signals.Signal;
+    import flash.filesystem.FileStream;
+    import flash.filesystem.FileMode;
+    import flash.utils.ByteArray;
+    import net.blaxstar.starlib.utils.StringUtil;
+    import flash.events.ProgressEvent;
 
     /**
      * TODO: documentation
@@ -69,6 +74,9 @@ package net.blaxstar.starlib.io {
         private var _port:uint;
         private var _is_using_port:Boolean;
         private var _connection:Connection;
+        private var _local_file:File;
+        private var _filestream:FileStream;
+        private var _is_local:Boolean;
         private var _http_request_data:Array;
         private var _http_request_method:String;
         private var _auth_type:String;
@@ -79,7 +87,7 @@ package net.blaxstar.starlib.io {
 
         // TODO: class documentation, EXPOSE LISTENERS PUBLICLY
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
-        public function URL(endpoint:String = null, port:uint = undefined) {
+        public function URL(endpoint:String = null, port:uint = undefined, local:Boolean = false) {
 
             if (endpoint) {
                 this._endpoint = endpoint;
@@ -88,6 +96,12 @@ package net.blaxstar.starlib.io {
             if (port) {
                 this._port = port;
             }
+
+            if (local) {
+              _is_local = local;
+              _local_file = new File(_endpoint);
+            }
+
             _query_path = "";
             _pending_delegates = [];
             _connection = new Connection(this);
@@ -98,6 +112,28 @@ package net.blaxstar.starlib.io {
         // * PUBLIC * //
         public function connect():void {
             _connection.connect();
+        }
+
+        /**
+         *
+         * @param filepath the full local filepath for the file to load.
+         * @param on_complete a callback function that expects a bytearray.
+         */
+        public function load_local(on_complete:Function):void {
+          if (!test_path_local) {
+            DebugDaemon.write_error("could not load file: local file path does not exist! path: %s", _endpoint);
+            return;
+          }
+
+          var data:ByteArray = new ByteArray();
+
+          _filestream ||= new FileStream();
+          //_filestream.addEventListener(ProgressEvent.PROGRESS, on_local_file_progress);
+          _filestream.open(_local_file, FileMode.READ);
+          _filestream.readBytes(data);
+          _filestream.close();
+
+          on_complete(data);
         }
 
         public function close_connection():void {
@@ -142,6 +178,14 @@ package net.blaxstar.starlib.io {
 
         public function get test_path_local():Boolean {
             return new File().resolvePath(endpoint).exists;
+        }
+
+        public function get filesize():int {
+          if (!_is_local || !StringUtil.is_valid_filepath(endpoint)) {
+            return -1;
+          } else {
+            return _local_file.size;
+          }
         }
 
         public function get connection():Connection {

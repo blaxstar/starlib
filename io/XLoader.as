@@ -21,19 +21,19 @@ package net.blaxstar.starlib.io {
     public class XLoader {
         public const ON_ERROR:Signal = new Signal(String, String);
         public const ON_PROGRESS:Signal = new Signal(Number);
-        public const ON_COMPLETE:Signal = new Signal(URL, ByteArray);
+        public const ON_COMPLETE:Signal = new Signal(ByteArray);
         public const ON_COMPLETE_GRAPHIC:Signal = new Signal(Object);
         private const _DIALOG_LOADER:File = File.documentsDirectory;
 
         private var _data:Vector.<ByteArray>;
-        private var _queued_urls:Vector.<URL>;
+        private var _queued_urls:Array;
         private var _loader_index:uint;
         private var _total_loaded:Number;
         private var _overall_total:Number;
 
         public function XLoader() {
             _data = new Vector.<ByteArray>;
-            _queued_urls = new Vector.<URL>;
+            _queued_urls = [];
         }
 
         /**
@@ -61,7 +61,7 @@ package net.blaxstar.starlib.io {
          */
         public function queue_files(... urls):void {
             if (!_queued_urls) {
-                _queued_urls = new Vector.<URL>();
+                _queued_urls = [];
             } else if (_queued_urls.length == 0) {
                 _total_loaded = _loader_index = 0;
             }
@@ -96,9 +96,8 @@ package net.blaxstar.starlib.io {
                 current_item.addEventListener(IOErrorEvent.IO_ERROR, on_io_error);
                 current_item.addEventListener(SecurityErrorEvent.SECURITY_ERROR, on_security_error);
                 current_item.addEventListener(ProgressEvent.PROGRESS, on_progress);
-                current_item.addEventListener(Event.COMPLETE, on_complete);
                 current_item.dataFormat = current_item.data_format;
-                current_item.connect();
+                current_item.load_local(on_complete);
             } else {
                 IOUtil.loadExternalDisplayObject(current_item.endpoint, on_complete_graphic, on_progress, on_io_error);
             }
@@ -145,18 +144,9 @@ package net.blaxstar.starlib.io {
             dispatch_overall_progress();
         }
 
-        private function on_complete(e:Event):void {
-            var target:URL = e.target as URL;
-            target.close();
-
-            if (target.data_format == URL.DATA_FORMAT_TEXT) {
-                var ba:ByteArray = new ByteArray();
-                ba.writeUTFBytes(target.data);
-                ba.position = 0;
-                target.data = ba;
-            }
-            _total_loaded += target.bytesLoaded;
-            ON_COMPLETE.dispatch(target, target.data);
+        private function on_complete(bytes:ByteArray):void {
+            _total_loaded += bytes.bytesAvailable;
+            ON_COMPLETE.dispatch(bytes);
             prepare_next();
         }
 

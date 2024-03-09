@@ -88,11 +88,11 @@ package net.blaxstar.starlib.components {
          * (re)draws the component and applies any pending visual changes.
          */
         override public function draw(e:Event = null):void {
-            // auto resize if enabled, and there are children present
-
+            // auto resize if enabled
             if (_auto_resize) {
-                var totalW:Number = (PADDING * 4) + Math.max(_component_container.width, _option_container.width);
-                var totalH:Number = (PADDING * 4) + _component_container.height + _option_container.height;
+                var totalW:Number = (PADDING * 2) + Math.max(_component_container.width, _option_container.width);
+                var totalH:Number = (PADDING * 3) +
+                _component_container.height + _option_container.height;
 
                 if (totalW > MIN_WIDTH) {
                     _width_ = totalW;
@@ -100,12 +100,10 @@ package net.blaxstar.starlib.components {
                 if (totalH > MIN_HEIGHT) {
                     _height_ = totalH;
                 }
-                dispatchEvent(new Event(Event.RESIZE));
             }
-
+            dispatchEvent(new Event(Event.RESIZE));
             draw_background();
-            _option_container.move(PADDING, _height_ - PADDING - _option_container.height - PADDING);
-
+            _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
             super.draw();
         }
 
@@ -113,7 +111,6 @@ package net.blaxstar.starlib.components {
             commit();
         }
 
-        /** END INTERFACE ===================== */
         override public function update_skin():void {
             draw_background();
         }

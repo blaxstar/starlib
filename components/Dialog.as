@@ -27,11 +27,11 @@ package net.blaxstar.starlib.components {
          */
         private var _dialog_card:Card;
         private var _mask:Sprite;
-
+        private var _child_dialog_vector:Vector.<Dialog>;
         private var _component_container:VerticalBox;
         private var _text_container:VerticalBox;
         private var _option_container:HorizontalBox;
-        private var _prev_parent:DisplayObjectContainer;
+        private var _prev_parent_container:DisplayObjectContainer;
         private var _title_textfield:PlainText;
         private var _message_textfield:PlainText;
         private var _title_string:String;
@@ -56,11 +56,13 @@ package net.blaxstar.starlib.components {
          * created to be overridden.
          */
         override public function init():void {
+          _width_ = MIN_WIDTH;
+            _height_ = MIN_HEIGHT;
             super.init();
         }
 
         override protected function on_added(e:Event):void {
-            _prev_parent = parent;
+            _prev_parent_container = parent;
         }
 
         /**
@@ -86,7 +88,7 @@ package net.blaxstar.starlib.components {
             _message_textfield.text = _message_string;
             _dialog_card.draggable = false;
             this.draggable = true;
-            _dialog_card.auto_resize = true;
+            _dialog_card.auto_resize = false;
 
             _dialog_card.add_child_native(_text_container);
             _text_container.addChild(_title_textfield);
@@ -110,18 +112,17 @@ package net.blaxstar.starlib.components {
             }
 
             if (_auto_resize) {
-                _width_ = _dialog_card.width;
-                _height_ = _dialog_card.height;
+                _width_ = (PADDING * 2) + Math.max(_text_container.width, _component_container.width, _option_container.width);
+                _height_ = (PADDING * 3) + _text_container.height + _component_container.height + _option_container.height;
+                _dialog_card.set_size(_width_, _height_);
+                _text_container.move(PADDING, PADDING);
+                _component_container.move(PADDING, _text_container.y + _text_container.height);
+                _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
                 dispatchEvent(new Event(Event.RESIZE));
-                _component_container.isShowingBounds = true;
-                _text_container.isShowingBounds = true;
-                _option_container.isShowingBounds = true;
             } else {
-                _width_ = _dialog_card.width;
-                _height_ = _dialog_card.height;
+                _dialog_card.set_size(_width_, _height_);
                 _component_container.move(PADDING, _text_container.y + _text_container.height + PADDING);
                 _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
-
                 super.draw(e);
             }
 
@@ -157,10 +158,33 @@ package net.blaxstar.starlib.components {
             return b;
         }
 
+        public function push_dialog(dialog:Dialog):void {
+          if (!_child_dialog_vector) {
+            _child_dialog_vector = new Vector.<Dialog>();
+          }
+
+          _child_dialog_vector.push(dialog);
+          dialog.move(this.x + PADDING, this.y + PADDING);
+          enabled = false;
+          dialog.open();
+        }
+
+        public function pop_dialog():Dialog {
+          return _child_dialog_vector.pop();
+        }
+
         override public function addChild(child:DisplayObject):DisplayObject {
             return _component_container.addChild(child);
         }
 
+        override public function move(x_position:Number, y_position:Number):void {
+          if (_child_dialog_vector && _child_dialog_vector.length) {
+            for (var i:int = 0; i < _child_dialog_vector.length; i++) {
+              _child_dialog_vector[i].move(x_position + PADDING, y_position + PADDING);
+            }
+          }
+          super.move(x_position, y_position);
+        }
         override public function set_size(w:Number, h:Number):void {
             _dialog_card.set_size(w, h);
             super.set_size(w, h);
@@ -252,8 +276,8 @@ package net.blaxstar.starlib.components {
         }
 
         public function open():void {
-            if (_prev_parent != null) {
-                _prev_parent.addChild(this);
+            if (_prev_parent_container != null) {
+                _prev_parent_container.addChild(this);
             }
         }
 
@@ -263,7 +287,6 @@ package net.blaxstar.starlib.components {
 
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
-            _dialog_card.auto_resize = val;
             commit();
         }
 

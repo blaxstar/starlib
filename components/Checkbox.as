@@ -141,8 +141,8 @@ package net.blaxstar.starlib.components {
       commit();
     }
 
-    override public function destroy(e:Event = null):void {
-      super.destroy(e);
+    override public function destroy():void {
+      super.destroy();
       _onClick.remove(onClick);
     }
   }

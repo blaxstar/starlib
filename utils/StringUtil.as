@@ -19,6 +19,10 @@ package net.blaxstar.starlib.utils {
     }
 
     static public function is_valid_filepath(filepath:String):Boolean {
+      if (is_empty_or_null(filepath)) {
+        return false;
+      }
+
       var filepath_expression:RegExp = /^(?:file:\/\/)?(?:[a-zA-Z]:|~[a-zA-Z0-9]+)(?:\\|\/)[^\n\\/]+(?:\\|\/)[^\n\\/]+/i;
 
       return filepath_expression.test(filepath);
