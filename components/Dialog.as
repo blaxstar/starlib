@@ -56,7 +56,7 @@ package net.blaxstar.starlib.components {
          * created to be overridden.
          */
         override public function init():void {
-          _width_ = MIN_WIDTH;
+            _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
             super.init();
         }
@@ -143,9 +143,9 @@ package net.blaxstar.starlib.components {
             return c;
         }
 
-        public function add_button(name:String, action:Function = null, emphasis:uint = Button.DEPRESSED):Button {
+        public function add_button(name:String, action:Function = null, emphasis:uint = Button.GROUNDED):Button {
 
-            var b:Button = new Button(_dialog_card.option_container, 0, 0, name);
+            var b:Button = new Button(_dialog_card.option_container, 0, 0, name.toUpperCase());
 
             if (action != null) {
                 b.addClickListener(action);
@@ -159,18 +159,18 @@ package net.blaxstar.starlib.components {
         }
 
         public function push_dialog(dialog:Dialog):void {
-          if (!_child_dialog_vector) {
-            _child_dialog_vector = new Vector.<Dialog>();
-          }
+            if (!_child_dialog_vector) {
+                _child_dialog_vector = new Vector.<Dialog>();
+            }
 
-          _child_dialog_vector.push(dialog);
-          dialog.move(this.x + PADDING, this.y + PADDING);
-          enabled = false;
-          dialog.open();
+            _child_dialog_vector.push(dialog);
+            dialog.move(this.x + PADDING, this.y + PADDING);
+            enabled = false;
+            dialog.open();
         }
 
         public function pop_dialog():Dialog {
-          return _child_dialog_vector.pop();
+            return _child_dialog_vector.pop();
         }
 
         override public function addChild(child:DisplayObject):DisplayObject {
@@ -178,13 +178,14 @@ package net.blaxstar.starlib.components {
         }
 
         override public function move(x_position:Number, y_position:Number):void {
-          if (_child_dialog_vector && _child_dialog_vector.length) {
-            for (var i:int = 0; i < _child_dialog_vector.length; i++) {
-              _child_dialog_vector[i].move(x_position + PADDING, y_position + PADDING);
+            if (_child_dialog_vector && _child_dialog_vector.length) {
+                for (var i:int = 0; i < _child_dialog_vector.length; i++) {
+                    _child_dialog_vector[i].move(x_position + PADDING, y_position + PADDING);
+                }
             }
-          }
-          super.move(x_position, y_position);
+            super.move(x_position, y_position);
         }
+
         override public function set_size(w:Number, h:Number):void {
             _dialog_card.set_size(w, h);
             super.set_size(w, h);

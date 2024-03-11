@@ -31,10 +31,11 @@ package net.blaxstar.starlib.components {
         private var _label:PlainText;
         private var _labelString:String;
         private var _background:Component;
-        private var _backgroundOutline:Component;
-        private var _glowColor:RGBA;
+        private var _background_outline:Component;
+        private var _glow_color:RGBA;
+        private var _icon_color:RGBA;
         private var _using_icon:Boolean;
-        private var _displayIcon:Icon;
+        private var _display_icon:Icon;
         private var _data:Object;
 
         private var _onRollOver:NativeSignal;
@@ -78,12 +79,13 @@ package net.blaxstar.starlib.components {
          */
         override public function add_children():void {
             _background = new Component(this);
-            _backgroundOutline = new Component(this);
+            _background_outline = new Component(this);
             _label = new PlainText(this, 0, 0, _labelString);
             _background.width = _width_;
             _background.height = _height_;
             _label.format(Font.BUTTON);
-            _glowColor = Style.GLOW;
+            _glow_color = Style.GLOW;
+            _icon_color = Style.TEXT;
             TweenPlugin.activate([TintPlugin]);
             commit();
         }
@@ -96,12 +98,12 @@ package net.blaxstar.starlib.components {
             if (!_using_icon) {
                 _width_ = _label.width + (PADDING * 2);
                 _height_ = _label.height + (PADDING * 2);
-                _background.width = _backgroundOutline.width = _width_;
-                _background.height = _backgroundOutline.height = _height_;
+                _background.width = _background_outline.width = _width_;
+                _background.height = _background_outline.height = _height_;
                 _label.move((_width_ / 2) - (_label.width / 2), (_height_ / 2) - (_label.height / 2));
             } else {
-                _background.width = _backgroundOutline.width = _width_;
-                _background.height = _backgroundOutline.height = _height_;
+                _background.width = _background_outline.width = _width_;
+                _background.height = _background_outline.height = _height_;
             }
 
             drawBG();
@@ -117,7 +119,6 @@ package net.blaxstar.starlib.components {
         // public
         override public function update_skin():void {
             drawBG();
-            drawBGOutline();
         }
 
         public function addClickListener(delegate:Function):void {
@@ -130,16 +131,18 @@ package net.blaxstar.starlib.components {
 
         private function drawBG():void {
             _background.graphics.clear();
-            _backgroundOutline.graphics.clear();
+            _background_outline.graphics.clear();
             filters = [];
 
             fillBG();
-            if (_style != DEPRESSED)
+            if (_style != DEPRESSED) {
                 drawBGOutline();
+            }
+
         }
 
         private function fillBG():void {
-            _background.graphics.beginFill(_glowColor.value);
+            _background.graphics.beginFill(_glow_color.value);
             if (!_using_icon)
                 _background.graphics.drawRoundRect(0, 0, _width_, _height_, 7);
             else
@@ -150,11 +153,11 @@ package net.blaxstar.starlib.components {
         }
 
         private function drawBGOutline():void {
-            _backgroundOutline.graphics.lineStyle(2, Style.SECONDARY.value, 1, true);
+            _background_outline.graphics.lineStyle(1, Style.SECONDARY.value, 1, true);
             if (!_using_icon)
-                _backgroundOutline.graphics.drawRoundRect(0, 0, _width_, _height_, 6);
+                _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 6);
             else
-                _backgroundOutline.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
+                _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
         }
 
         // getters/setters
@@ -162,22 +165,23 @@ package net.blaxstar.starlib.components {
         public function set icon(val:String):void {
             _using_icon = true;
             removeChild(_label);
-            _displayIcon = new Icon(this);
-            _displayIcon.setSVGXML(val);
-            _displayIcon.addEventListener('iconLoaded', onIconLoaded);
+            _display_icon = new Icon(this);
+            _display_icon.setSVGXML(val);
+            _display_icon.addEventListener('iconLoaded', on_icon_loaded);
             _width_ = 32;
             _height_ = 32;
-            _style = GROUNDED;
+            _style = DEPRESSED;
             draw();
         }
 
-        private function onIconLoaded(event:Event):void {
-            _displayIcon.removeEventListener('iconLoaded', onIconLoaded);
-            _displayIcon.move(((_width_ / 2) - (_displayIcon.width / 2)), ((_height_ / 2) - (_displayIcon.height / 2)));
+        private function on_icon_loaded(event:Event):void {
+            _display_icon.removeEventListener('iconLoaded', on_icon_loaded);
+            _display_icon.move(((_width_ / 2) - (_display_icon.width / 2)), ((_height_ / 2) - (_display_icon.height / 2)));
+            _display_icon.set_color(_icon_color.to_hex_string());
         }
 
         public function get_icon():Icon {
-            return _displayIcon;
+            return _display_icon;
         }
 
         public function get style():uint {
@@ -199,7 +203,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set glowColor(val:RGBA):void {
-            _glowColor = val;
+            _glow_color = val;
             commit();
         }
 
@@ -221,14 +225,14 @@ package net.blaxstar.starlib.components {
             _onMouseDown.remove(onMouseDown);
             _onMouseUp.add(onMouseUp);
             _onRollOut.add(onMouseUp);
-            TweenLite.to(_background, 0.3, {tint: _glowColor.shade().value});
+            TweenLite.to(_background, 0.3, {tint: _glow_color.shade().value});
         }
 
         private function onMouseUp(e:MouseEvent = null):void {
             _onMouseUp.remove(onMouseUp);
             _onRollOut.remove(onMouseUp);
             _onMouseDown.add(onMouseDown);
-            TweenLite.to(_background, 0.3, {tint: _glowColor.value});
+            TweenLite.to(_background, 0.3, {tint: _glow_color.value});
         }
 
         private function onRollOver(e:MouseEvent = null):void {

@@ -76,10 +76,7 @@ package net.blaxstar.starlib.components {
             _text_field.autoSize = TextFieldAutoSize.NONE;
             _text_field.defaultTextFormat = _text_format;
             _text_field.embedFonts = true;
-            _text_field.antiAliasType = AntiAliasType.ADVANCED;
-            _text_field.gridFitType = GridFitType.SUBPIXEL;
             _text_field.selectable = true;
-            _text_field.sharpness = 300;
             _text_field.border = false;
             _text_field.background = false;
             _text_field.height = 30;
@@ -99,15 +96,16 @@ package net.blaxstar.starlib.components {
             _on_defocus = new NativeSignal(_text_field, FocusEvent.FOCUS_OUT, FocusEvent);
 
             // TODO (dyxribo, STARCOMPS-11): use keydown listeners in favor of change event in InputTextField
-            _on_text_update = new NativeSignal(_text_field, Event.CHANGE, Event);
+            //_on_text_update = new NativeSignal(_text_field, KeyboardEvent.KEY_DOWN, Event);
             _on_focus.add(onFocus);
-            _on_text_update.add(onTextChange);
+            //_on_text_update.add(onTextChange);
 
             super.add_children();
 
         }
 
         override public function draw(e:Event = null):void {
+            // determine text color based on current field status
             if (_text_field.text == _hint_text || _text_field.text.length < 1) {
                 if (_is_hinting) {
                     if (Style.CURRENT_THEME == Style.DARK) {
@@ -126,10 +124,11 @@ package net.blaxstar.starlib.components {
             } else {
                 _text_field.textColor = Style.TEXT.value;
             }
-
+            // set the text
             _text_field.text = _textfield_string;
+            // set height, width is adjustable manually only
             _text_field.height = _text_field.textHeight + 4;
-
+            // update the underline if applicable, just in case width changes
             if (_showing_underline) {
                 update_underline();
             } else {
@@ -137,7 +136,7 @@ package net.blaxstar.starlib.components {
                 _text_field.height = _height_;
             }
 
-            on_draw_signal.dispatch();
+            dispatchEvent(new Event(Event.RESIZE));
         }
 
         override public function addChild(child:DisplayObject):DisplayObject {
@@ -218,6 +217,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function get text():String {
+            _textfield_string = _text_field.text;
             return _textfield_string;
         }
 
@@ -282,6 +282,9 @@ package net.blaxstar.starlib.components {
                 _suggestion_list.width = _width_;
                 _suggestion_limit = 5;
                 _suggestion_iterator_index = 0;
+                if (!_input_engine) {
+                    _input_engine = new InputEngine();
+                }
                 _input_engine.add_keyboard_delegate(on_key_press);
             } else {
                 if (_suggestion_list != null) {
@@ -442,7 +445,7 @@ package net.blaxstar.starlib.components {
             }
             _textfield_string = _text_field.text;
             commit();
-            on_resize_signal.dispatch(_resizeEvent_);
+            //on_resize_signal.dispatch(_resizeEvent_);
         }
 
         override public function destroy():void {

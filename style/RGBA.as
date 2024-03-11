@@ -45,6 +45,10 @@ package net.blaxstar.starlib.style {
             return rgba;
         }
 
+        public function to_hex_string():String {
+            return this._combined_value.toString(16);
+        }
+
         public function get red():uint {
             return _red;
         }

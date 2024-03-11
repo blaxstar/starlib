@@ -20,6 +20,7 @@ package net.blaxstar.starlib.components {
 
         static public const X3_DOT_MENU:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 16q-.625 0-1.062-.438Q8.5 15.125 8.5 14.5t.438-1.062Q9.375 13 10 13t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 16 10 16Zm0-4.5q-.625 0-1.062-.438Q8.5 10.625 8.5 10t.438-1.062Q9.375 8.5 10 8.5t1.062.438q.438.437.438 1.062t-.438 1.062q-.437.438-1.062.438ZM10 7q-.625 0-1.062-.438Q8.5 6.125 8.5 5.5t.438-1.062Q9.375 4 10 4t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 7 10 7Z"/></svg>';
         static public const ACCESSIBILITY:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 5.5q-.729 0-1.24-.51-.51-.511-.51-1.24t.51-1.24Q9.271 2 10 2t1.24.51q.51.511.51 1.24t-.51 1.24q-.511.51-1.24.51ZM7.5 17.75V8.104q-1.146-.083-2.26-.333-1.115-.25-2.24-.542l.375-1.396Q5 6.271 6.656 6.51q1.656.24 3.344.24t3.344-.24q1.656-.239 3.281-.677L17 7.229q-1.125.292-2.24.542-1.114.25-2.26.333v9.646H11l-.188-4.625H9.208L9 17.75Z"/></svg>';
+        static public const SEARCH:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M765-144 526-383q-30 22-65.792 34.5T384.035-336Q284-336 214-406t-70-170q0-100 70-170t170-70q100 0 170 70t70 170.035q0 40.381-12.5 76.173T577-434l239 239-51 51ZM384-408q70 0 119-49t49-119q0-70-49-119t-119-49q-70 0-119 49t-49 119q0 70 49 119t119 49Z"/></svg>';
         static public const BACKUP_CLOUD:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M5 16q-1.667 0-2.833-1.177Q1 13.646 1 11.979q0-1.583 1.073-2.739Q3.146 8.083 4.729 8q.479-1.792 1.948-2.896Q8.146 4 10 4q2.229 0 3.865 1.427Q15.5 6.854 15.5 9q1.458 0 2.479 1.021Q19 11.042 19 12.479q0 1.459-1.021 2.49Q16.958 16 15.5 16h-4.75q-.625 0-1.062-.438-.438-.437-.438-1.062v-3.625l-1.188 1.187L7 11l3-3 3 3-1.062 1.062-1.188-1.187V14.5h4.75q.833 0 1.417-.583.583-.584.583-1.417 0-.833-.583-1.417-.584-.583-1.417-.583H14V9q0-1.521-1.198-2.51Q11.604 5.5 10 5.5q-1.625 0-2.75 1.177T5.896 9.5H5q-1.042 0-1.771.729Q2.5 10.958 2.5 12q0 1.042.729 1.771.729.729 1.771.729h2.75V16Zm5-5.125Z"/></svg>';
         static public const BOOKMARK:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M5.917 14.812 10 13.083l4.083 1.729V4.25H5.917ZM4.167 17.5v-15h11.666v15L10 14.979Zm1.75-13.25h8.166H10Z"/></svg>';
         static public const BUG_REPORT:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 17q-1.25 0-2.271-.677T6.292 14.5H4V13h2v-1.25H4v-1.5h2V9H4V7.5h2.292q.166-.542.541-.979.375-.438.855-.771L6 4.062 7.062 3l2.105 2.083q.416-.104.843-.104.428 0 .844.104L12.938 3 14 4.062 12.312 5.75q.48.333.834.771.354.437.562.979H16V9h-2v1.25h2v1.5h-2V13h2v1.5h-2.292q-.416 1.146-1.437 1.823Q11.25 17 10 17Zm0-1.5q1.021 0 1.74-.729.718-.729.76-1.771V9q.042-1.042-.698-1.771-.74-.729-1.781-.729-1.063 0-1.781.729Q7.521 7.958 7.5 9v4q-.021 1.042.708 1.771.73.729 1.792.729ZM8.5 13h3v-1.5h-3Zm0-2.5h3V9h-3Zm1.5.542Z"/></svg>';
@@ -68,8 +69,8 @@ package net.blaxstar.starlib.components {
 
         private var _src:String;
         private var _doc:SVGDocument;
-        private var _isRendered:Boolean;
-        private var _whRatio:Number;
+        private var _is_rendered:Boolean;
+        private var _width_height_ratio:Number;
 
         public function Icon(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, url:String = '') {
             if (!StringUtil.is_empty_or_null(url))
@@ -101,12 +102,12 @@ package net.blaxstar.starlib.components {
         private function init2(e:SVGEvent):void {
             _doc.removeEventListener(SVGEvent.RENDERED, init2);
             dispatchEvent(new Event('iconLoaded'));
-            _isRendered = true;
+            _is_rendered = true;
             add_children();
             on_added_signal.addOnce(draw);
             _width_ = _doc.width;
             _height_ = _doc.height;
-            _whRatio = _height_ / _width_;
+            _width_height_ratio = _height_ / _width_;
         }
 
         /**
@@ -140,13 +141,13 @@ package net.blaxstar.starlib.components {
             var s:StyleDeclaration = new StyleDeclaration();
             _src = '';
             _doc.clear();
-            _isRendered = false;
+            _is_rendered = false;
             _doc.autoAlign = true;
             _doc.parse(svgString);
         }
 
         override public function set_size(w:Number, h:Number):void {
-            if (!_isRendered) {
+            if (!_is_rendered) {
                 queue_function(arguments.callee, w, h);
             }
             super.set_size(w, h);
@@ -165,7 +166,7 @@ package net.blaxstar.starlib.components {
                 return;
             _src = val;
             _doc.clear();
-            _isRendered = false;
+            _is_rendered = false;
             _doc.load(_src);
         }
     }
