@@ -30,21 +30,11 @@ package net.blaxstar.starlib.components {
             super(parent, xpos, ypos);
         }
 
-        /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
-
-        /**
-         * initializes the component by adding all the children
-         * and committing the visual changes to be written on the next frame.
-         * created to be overridden.
-         */
         override public function init():void {
             mouseEnabled = mouseChildren = false;
             super.init();
         }
 
-        /**
-         * initializes and adds all required children of the component.
-         */
         override public function add_children():void {
             _width_ = DEFAULT_WIDTH;
             _height_ = DEFAULT_HEIGHT;
@@ -62,14 +52,12 @@ package net.blaxstar.starlib.components {
             _textfield.autoSize = TextFieldAutoSize.LEFT;
             _textfield.text = _textfield_string;
             _textfield.textColor = Style.TEXT.value;
+            cacheAsBitmap = _textfield.cacheAsBitmap = true;
 
             addChild(_textfield);
             super.add_children();
         }
 
-        /**
-         * (re)draws the component and applies any pending visual changes.
-         */
         override public function draw(e:Event = null):void {
             super.draw(e);
             _textfield.text = _textfield_string;
@@ -80,11 +68,10 @@ package net.blaxstar.starlib.components {
                 _height_ = _textfield.height = 18;
             } else {
                 _textfield.width = _width_;
+                _height_ = _textfield.height;
             }
 
         }
-
-        /** END INTERFACE ===================== */
 
         override public function update_skin():void {
             if (!_colorOverwritten) {

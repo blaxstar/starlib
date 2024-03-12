@@ -233,10 +233,11 @@ package net.blaxstar.starlib.components {
 
         public function set hint_text(val:String):void {
             if (StringUtil.is_empty_or_null(val)) {
-                _hint_text = "enter text";
-                return;
+                _hint_text = "enter text...";
+            } else {
+              _hint_text = val;
             }
-            _hint_text = val;
+
             show_hint_text();
         }
 

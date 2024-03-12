@@ -229,11 +229,11 @@ package net.blaxstar.starlib.components {
         }
 
         override public function set x(value:Number):void {
-            super.x = Arithmetic.round(value);
+            super.x = int(value);
         }
 
         override public function set y(value:Number):void {
-            super.y = Arithmetic.round(value);
+            super.y = int(value);
         }
 
         public function get padding():uint {

@@ -14,7 +14,7 @@ package net.blaxstar.starlib.components {
 
     /**
      * Card class, a component inspired by Google's Material Card. It can be used as a layout container for components.
-     * @author SnaiLegacy
+     * @author Deron Decamp (decamp.deron@gmail.com)
      */
     public class Card extends Component {
         static private const MIN_WIDTH:uint = 200;
@@ -43,13 +43,6 @@ package net.blaxstar.starlib.components {
             super(parent);
         }
 
-        /** INTERFACE net.blaxstar.starlib.components.IComponent ===================== */
-
-        /**
-         * initializes the component by adding all the children
-         * and committing the visual changes to be written on the next frame.
-         * created to be overridden.
-         */
         override public function init():void {
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
@@ -62,9 +55,6 @@ package net.blaxstar.starlib.components {
             super.init();
         }
 
-        /**
-         * initializes and adds all required children of the component.
-         */
         override public function add_children():void {
 
             _component_container.width = 30;
@@ -78,15 +68,13 @@ package net.blaxstar.starlib.components {
             super.addChild(_card_background);
             super.addChild(_component_container);
             super.addChild(_option_container);
+            _component_container.move(PADDING,PADDING);
             _component_container.addEventListener(Event.RESIZE, on_component_resize);
             apply_shadow();
 
             super.add_children();
         }
 
-        /**
-         * (re)draws the component and applies any pending visual changes.
-         */
         override public function draw(e:Event = null):void {
             // auto resize if enabled
             if (_auto_resize) {
@@ -115,7 +103,11 @@ package net.blaxstar.starlib.components {
             draw_background();
         }
 
-        // adds child to card, nesting it inside a layout container (Vertical Box).
+        /**
+         * adds child to card, nesting it inside a layout container (Vertical Box).
+         * @param child
+         * @return
+         */
         public function add_child_native(child:DisplayObject):flash.display.DisplayObject {
             return super.addChild(child);
         }
