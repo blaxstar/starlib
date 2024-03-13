@@ -94,9 +94,9 @@ package net.blaxstar.starlib.components {
 
             _doc = new SVGDocument();
             _doc.addEventListener(SVGEvent.RENDERED, init2);
-            if (_src)
+            if (_src) {
                 _doc.load(_src);
-
+            }
         }
 
         private function init2(e:SVGEvent):void {
@@ -116,6 +116,7 @@ package net.blaxstar.starlib.components {
         override public function add_children():void {
             addChild(_doc);
             super.add_children();
+            cacheAsBitmap = true;
         }
 
         /**

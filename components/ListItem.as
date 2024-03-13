@@ -17,7 +17,7 @@ package net.blaxstar.starlib.components {
      * @author ...
      */
     public class ListItem extends Component {
-        private const MIN_HEIGHT:uint = 50;
+        private const MIN_HEIGHT:uint = 20;
         private const MIN_WIDTH:uint = 100;
 
         private const PADDING:uint = 7;
@@ -33,6 +33,7 @@ package net.blaxstar.starlib.components {
         private var _fill_color:uint;
         private var _target_list:List;
         private var _in_cache:Boolean;
+        private var _is_glowing:Boolean;
         private var _on_click_signal:NativeSignal;
         private var _on_rollover_signal:NativeSignal;
         private var _on_rollout_signal:NativeSignal;
@@ -70,7 +71,9 @@ package net.blaxstar.starlib.components {
             _label.mouseChildren = false;
             _label.mouseEnabled = _label.doubleClickEnabled = true;
             _label.format(_text_format);
-
+            _fill_color = Style.GLOW.value;
+            on_rollover.add(on_item_rollover);
+            on_rollout.add(on_item_rollout);
             addChildAt(_background, 0);
 
             super.add_children();
@@ -82,15 +85,30 @@ package net.blaxstar.starlib.components {
         override public function draw(e:Event = null):void {
             var g:Graphics = _background.graphics;
             g.clear();
-            g.beginFill(0, 0);
-            g.drawRect(0, 0, _width_, _height_);
+            if (_is_glowing) {
+                g.beginFill(1, _fill_color);
+            } else {
+                g.beginFill(0, 0);
+            }
+            g.drawRect(0, 0, (parent) ? parent.width : _width_, _height_);
             g.endFill();
 
             _label.text = _label_string;
-            _label.move((_width_ / 2) - (_label.width / 2), (_height_ / 2) - (_label.height / 2));
         }
 
-        /** END INTERFACE ===================== */
+        private function on_item_rollover(e:MouseEvent):void {
+            on_rollover.remove(on_item_rollover);
+            on_rollout.add(on_item_rollout);
+            _is_glowing = true;
+            commit();
+        }
+
+        private function on_item_rollout(e:MouseEvent):void {
+            on_rollout.remove(on_item_rollout);
+            on_rollover.add(on_item_rollover);
+            _is_glowing = false;
+            commit();
+        }
 
         public function get label_component():PlainText {
             return _label;
@@ -133,6 +151,15 @@ package net.blaxstar.starlib.components {
 
         public function set in_cache(value:Boolean):void {
             _in_cache = value;
+        }
+
+        public function get is_glowing():Boolean {
+            return _is_glowing;
+        }
+
+        public function set is_glowing(value:Boolean):void {
+            _is_glowing = value;
+            commit();
         }
 
         override public function destroy():void {
