@@ -23,12 +23,20 @@ package net.blaxstar.starlib.style {
             _black_text_compatible = Arithmetic.color_is_bright(_combined_value);
         }
 
+        /**
+         * lightens the current RGBA color by 50% and returns the result.
+         * @return RGBA result of the lightened RGBA color.
+         */
         public function tint():RGBA {
             var tinted:RGBA = new RGBA(_red + (255 - _red) * 0.5, _green + (255 - _green) * 0.5, _blue + (255 - _blue) * 0.5);
 
             return tinted;
         }
 
+        /**
+         * darkens the current RGBA color by 50% and returns the result.
+         * @return RGBA result of the darkened RGBA color.
+         */
         public function shade():RGBA {
             var shaded:RGBA = new RGBA(_red * 0.5, _green * 0.5, _blue * 0.5);
 

@@ -106,11 +106,11 @@ package net.blaxstar.starlib.components {
                 _background.height = _background_outline.height = _height_;
             }
 
-            drawBG();
+            draw_bg();
             dispatchEvent(new Event(Event.RESIZE));
 
-            _onMouseDown.add(onMouseDown);
-            _onRollOver.add(onRollOver);
+            _onMouseDown.add(on_mouse_down);
+            _onRollOver.add(on_roll_over);
             super.draw();
         }
 
@@ -118,10 +118,10 @@ package net.blaxstar.starlib.components {
 
         // public
         override public function update_skin():void {
-            drawBG();
+            draw_bg();
         }
 
-        public function addClickListener(delegate:Function):void {
+        public function add_click_listener(delegate:Function):void {
             if (!_onMouseClick)
                 _onMouseClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
             _onMouseClick.add(delegate);
@@ -129,35 +129,38 @@ package net.blaxstar.starlib.components {
 
         // private
 
-        private function drawBG():void {
+        private function draw_bg():void {
             _background.graphics.clear();
             _background_outline.graphics.clear();
             filters = [];
 
-            fillBG();
+            fill_bg();
             if (_style != DEPRESSED) {
-                drawBGOutline();
+                draw_bg_outline();
             }
 
         }
 
-        private function fillBG():void {
+        private function fill_bg():void {
             _background.graphics.beginFill(_glow_color.value);
-            if (!_using_icon)
+            if (!_using_icon) {
                 _background.graphics.drawRoundRect(0, 0, _width_, _height_, 7);
-            else
+            } else {
                 _background.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
+            }
             _background.graphics.endFill();
             _background.alpha = 0;
 
         }
 
-        private function drawBGOutline():void {
+        private function draw_bg_outline():void {
             _background_outline.graphics.lineStyle(1, Style.SECONDARY.value, 1, true);
-            if (!_using_icon)
+
+            if (!_using_icon) {
                 _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 6);
-            else
+            } else {
                 _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
+            }
         }
 
         // getters/setters
@@ -167,7 +170,7 @@ package net.blaxstar.starlib.components {
             removeChild(_label);
             _display_icon = new Icon(this);
             _display_icon.setSVGXML(val);
-            _display_icon.addEventListener('iconLoaded', on_icon_loaded);
+            _display_icon.addEventListener(Icon.ICON_LOADED, on_icon_loaded);
             _width_ = 32;
             _height_ = 32;
             _style = DEPRESSED;
@@ -175,7 +178,7 @@ package net.blaxstar.starlib.components {
         }
 
         private function on_icon_loaded(event:Event):void {
-            _display_icon.removeEventListener('iconLoaded', on_icon_loaded);
+            _display_icon.removeEventListener(Icon.ICON_LOADED, on_icon_loaded);
             _display_icon.move(((_width_ / 2) - (_display_icon.width / 2)), ((_height_ / 2) - (_display_icon.height / 2)));
             _display_icon.set_color(_icon_color.to_hex_string());
         }
@@ -202,7 +205,7 @@ package net.blaxstar.starlib.components {
             commit();
         }
 
-        public function set glowColor(val:RGBA):void {
+        public function set glow_color(val:RGBA):void {
             _glow_color = val;
             commit();
         }
@@ -221,29 +224,29 @@ package net.blaxstar.starlib.components {
 
         // delegate functions
 
-        private function onMouseDown(e:MouseEvent = null):void {
-            _onMouseDown.remove(onMouseDown);
-            _onMouseUp.add(onMouseUp);
-            _onRollOut.add(onMouseUp);
+        private function on_mouse_down(e:MouseEvent = null):void {
+            _onMouseDown.remove(on_mouse_down);
+            _onMouseUp.add(on_mouse_up);
+            _onRollOut.add(on_mouse_up);
             TweenLite.to(_background, 0.3, {tint: _glow_color.shade().value});
         }
 
-        private function onMouseUp(e:MouseEvent = null):void {
-            _onMouseUp.remove(onMouseUp);
-            _onRollOut.remove(onMouseUp);
-            _onMouseDown.add(onMouseDown);
+        private function on_mouse_up(e:MouseEvent = null):void {
+            _onMouseUp.remove(on_mouse_up);
+            _onRollOut.remove(on_mouse_up);
+            _onMouseDown.add(on_mouse_down);
             TweenLite.to(_background, 0.3, {tint: _glow_color.value});
         }
 
-        private function onRollOver(e:MouseEvent = null):void {
-            _onRollOver.remove(onRollOver);
-            _onRollOut.add(onRollOut);
+        private function on_roll_over(e:MouseEvent = null):void {
+            _onRollOver.remove(on_roll_over);
+            _onRollOut.add(on_roll_out);
             TweenLite.to(_background, 0.3, {alpha: .1});
         }
 
-        private function onRollOut(e:MouseEvent = null):void {
-            _onRollOut.remove(onRollOut);
-            _onRollOver.add(onRollOver);
+        private function on_roll_out(e:MouseEvent = null):void {
+            _onRollOut.remove(on_roll_out);
+            _onRollOver.add(on_roll_over);
             TweenLite.to(_background, 0.3, {alpha: 0});
         }
 

@@ -11,6 +11,7 @@ package net.blaxstar.starlib.components {
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.display.Graphics;
+    import net.blaxstar.starlib.style.RGBA;
 
     /**
      * ...
@@ -30,7 +31,7 @@ package net.blaxstar.starlib.components {
         private var _label_string:String;
         private var _text_format:TextFormat;
         private var _background:Sprite;
-        private var _fill_color:uint;
+        private var _glow_color:RGBA;
         private var _target_list:List;
         private var _in_cache:Boolean;
         private var _is_glowing:Boolean;
@@ -71,7 +72,7 @@ package net.blaxstar.starlib.components {
             _label.mouseChildren = false;
             _label.mouseEnabled = _label.doubleClickEnabled = true;
             _label.format(_text_format);
-            _fill_color = Style.GLOW.value;
+            _glow_color = Style.SURFACE.tint();
             on_rollover.add(on_item_rollover);
             on_rollout.add(on_item_rollout);
             addChildAt(_background, 0);
@@ -86,11 +87,11 @@ package net.blaxstar.starlib.components {
             var g:Graphics = _background.graphics;
             g.clear();
             if (_is_glowing) {
-                g.beginFill(1, _fill_color);
+                g.beginFill(_glow_color.value, 0.3);
             } else {
                 g.beginFill(0, 0);
             }
-            g.drawRect(0, 0, (parent) ? parent.width : _width_, _height_);
+            g.drawRoundRect(0, 0, _width_, _height_,7);
             g.endFill();
 
             _label.text = _label_string;
@@ -139,6 +140,7 @@ package net.blaxstar.starlib.components {
         public function set label(val:String):void {
             this.name = _label_string = val;
             commit();
+            dispatchEvent(new Event(Event.RESIZE));
         }
 
         public function get label():String {

@@ -17,8 +17,8 @@ package net.blaxstar.starlib.components {
      * @author Deron Decamp (decamp.deron@gmail.com)
      */
     public class Card extends Component {
-        static private const MIN_WIDTH:uint = 200;
-        static private const MIN_HEIGHT:uint = 200;
+        static protected const MIN_WIDTH:uint = 200;
+        static protected const MIN_HEIGHT:uint = 200;
 
         private var _card_background:Sprite;
         private var _component_container:VerticalBox;
@@ -163,7 +163,7 @@ package net.blaxstar.starlib.components {
             draw_background();
         }
 
-        private function draw_background():void {
+        protected function draw_background():void {
             var g:Graphics = _card_background.graphics;
             g.clear();
             g.beginFill((!_color_overriden ? Style.SURFACE.value : _override_color.value), (!_color_overriden ? 1 : _override_color.alpha));
@@ -184,6 +184,10 @@ package net.blaxstar.starlib.components {
 
         public function set mask_threshold(val:Number):void {
             _component_container.maskThreshold = val;
+        }
+
+        public function get auto_resize():Boolean {
+            return _auto_resize;
         }
 
         public function set auto_resize(val:Boolean):void {

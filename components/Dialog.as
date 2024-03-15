@@ -148,7 +148,7 @@ package net.blaxstar.starlib.components {
             var b:Button = new Button(_dialog_card.option_container, 0, 0, name.toUpperCase());
 
             if (action != null) {
-                b.addClickListener(action);
+                b.add_click_listener(action);
             }
 
             b.style = emphasis;
