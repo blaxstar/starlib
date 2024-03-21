@@ -146,7 +146,7 @@ package net.blaxstar.starlib.components {
             // dispatches a DRAW event
             on_enter_frame_signal.remove(draw);
             update_skin();
-            if (isShowingBounds) {
+            if (is_showing_bounds) {
                 updateBounds();
             }
         /**
@@ -244,11 +244,11 @@ package net.blaxstar.starlib.components {
             return _id_;
         }
 
-        public function get isShowingBounds():Boolean {
+        public function get is_showing_bounds():Boolean {
             return _is_showing_bounds_;
         }
 
-        public function set isShowingBounds(value:Boolean):void {
+        public function set is_showing_bounds(value:Boolean):void {
             var g:Graphics = this.graphics;
 
             if (value == true && _width_ > 0 && _height_ > 0) {
@@ -274,7 +274,7 @@ package net.blaxstar.starlib.components {
         protected function updateBounds(e:Event = null):void {
             graphics.clear();
             _is_showing_bounds_ = false;
-            isShowingBounds = true;
+            is_showing_bounds = true;
         }
 
         public function set enabled(val:Boolean):void {

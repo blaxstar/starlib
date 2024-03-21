@@ -53,6 +53,7 @@ package net.blaxstar.starlib.components {
             _textfield.text = _textfield_string;
             _textfield.textColor = Style.TEXT.value;
             cacheAsBitmap = _textfield.cacheAsBitmap = true;
+            //is_showing_bounds = true;
 
             addChild(_textfield);
             super.add_children();
@@ -64,13 +65,13 @@ package net.blaxstar.starlib.components {
 
             if (!_textfield.multiline) {
                 _width_ = _textfield.width;
-                dispatchEvent(new Event(Event.RESIZE));
+
                 _height_ = _textfield.height = 18;
             } else {
                 _textfield.width = _width_;
                 _height_ = _textfield.height;
             }
-
+            dispatchEvent(new Event(Event.RESIZE));
         }
 
         override public function update_skin():void {
@@ -125,6 +126,10 @@ package net.blaxstar.starlib.components {
 
         public function get text_height():Number {
             return _textfield.textHeight;
+        }
+
+        public function get multiline():Boolean {
+            return _textfield.multiline;
         }
 
         public function set multiline(val:Boolean):void {

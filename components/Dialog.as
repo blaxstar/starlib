@@ -28,6 +28,7 @@ package net.blaxstar.starlib.components {
         private var _dialog_card:Card;
         private var _mask:Sprite;
         private var _child_dialog_vector:Vector.<Dialog>;
+        private var _currently_active_dialog:Dialog
         private var _component_container:VerticalBox;
         private var _text_container:VerticalBox;
         private var _option_container:HorizontalBox;
@@ -118,7 +119,7 @@ package net.blaxstar.starlib.components {
                 _text_container.move(PADDING, PADDING);
                 _component_container.move(PADDING, _text_container.y + _text_container.height);
                 _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
-                dispatchEvent(new Event(Event.RESIZE));
+
             } else {
                 _dialog_card.set_size(_width_, _height_);
                 _component_container.move(PADDING, _text_container.y + _text_container.height + PADDING);
@@ -130,17 +131,12 @@ package net.blaxstar.starlib.components {
             _mask.graphics.beginFill(0xff0000);
             _mask.graphics.drawRoundRect(0, 0, _width_, _height_, 7);
             _mask.graphics.endFill();
+            dispatchEvent(new Event(Event.RESIZE));
 
         }
 
         private function on_card_resize(e:Event = null):void {
             commit();
-        }
-
-        public function add_component(val:DisplayObject):DisplayObject {
-            var c:DisplayObject = _dialog_card.add_child_to_container(val);
-            commit();
-            return c;
         }
 
         public function add_button(name:String, action:Function = null, emphasis:uint = Button.GROUNDED):Button {
@@ -152,7 +148,6 @@ package net.blaxstar.starlib.components {
             }
 
             b.style = emphasis;
-
             commit();
 
             return b;
@@ -164,13 +159,23 @@ package net.blaxstar.starlib.components {
             }
 
             _child_dialog_vector.push(dialog);
+            _currently_active_dialog = dialog;
             dialog.move(this.x + PADDING, this.y + PADDING);
             enabled = false;
+            parent.addChild(dialog);
             dialog.open();
         }
 
         public function pop_dialog():Dialog {
-            return _child_dialog_vector.pop();
+            var d:Dialog = _child_dialog_vector.pop();
+            d.close();
+            if (_child_dialog_vector.length > 0) {
+              _currently_active_dialog = _child_dialog_vector[_child_dialog_vector.length-1];
+            } else {
+              _currently_active_dialog = this;
+              enabled = true;
+            }
+            return d;
         }
 
         override public function addChild(child:DisplayObject):DisplayObject {
@@ -270,6 +275,12 @@ package net.blaxstar.starlib.components {
         }
 
         public function close(e:Event = null):void {
+            if (_child_dialog_vector && _child_dialog_vector.length > 0) {
+              for (var i:int = _child_dialog_vector.length - 1; i > -1; i--) {
+                pop_dialog();
+              }
+            }
+
             if (parent) {
                 parent.removeChild(this);
                 _on_close.dispatch();
@@ -288,7 +299,7 @@ package net.blaxstar.starlib.components {
 
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
-            commit();
+            draw();
         }
 
         public function get active():Boolean {

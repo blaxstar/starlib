@@ -51,13 +51,13 @@ package net.blaxstar.starlib.components {
       _width_ = _height_ = _size;
 
       _checkOutline.graphics.beginFill(0, 0);
-      _checkOutline.graphics.lineStyle(1, Style.SECONDARY.value, 2, false);
-      _checkOutline.graphics.drawRect(0, 0, _size, _size);
+      _checkOutline.graphics.lineStyle(2, Style.SECONDARY.value, 2, false);
+      _checkOutline.graphics.drawRoundRect(0, 0, _size, _size, 7);
       _checkOutline.graphics.endFill();
 
       var g:Graphics = _checkSquare.graphics;
       g.beginFill(Style.SECONDARY.value);
-      g.drawRect(4, 4, _width_ - 8, _height_ - 8);
+      g.drawRoundRect(PADDING/2, PADDING/2, _size - PADDING, _size - PADDING, 7);
       g.endFill();
 
       if (_checked)
@@ -107,6 +107,19 @@ package net.blaxstar.starlib.components {
 
     public function set value(val:Object):void {
       _value = val;
+    }
+
+    public function get size():uint {
+      return _size;
+    }
+
+    public function set size(value:uint):void {
+      if (value < 18) {
+        _size = 18;
+      } else {
+        _size = value;
+      }
+      commit();
     }
 
     public function get group():uint {

@@ -27,14 +27,15 @@ package net.blaxstar.starlib.components {
         // public
         public var linkage_id:uint;
         // private
-        private var _label:PlainText;
-        private var _label_string:String;
-        private var _text_format:TextFormat;
+        protected var _label:PlainText;
+        protected var _label_string:String;
+        protected var _text_format:TextFormat;
+        protected var _glow_color:RGBA;
+        protected var _is_glowing:Boolean;
+        protected var _is_rounded:Boolean;
         private var _background:Sprite;
-        private var _glow_color:RGBA;
         private var _target_list:List;
         private var _in_cache:Boolean;
-        private var _is_glowing:Boolean;
         private var _on_click_signal:NativeSignal;
         private var _on_rollover_signal:NativeSignal;
         private var _on_rollout_signal:NativeSignal;
@@ -77,13 +78,15 @@ package net.blaxstar.starlib.components {
             on_rollout.add(on_item_rollout);
             addChildAt(_background, 0);
 
-            super.add_children();
+            draw();
         }
 
         /**
          * (re)draws the component and applies any pending visual changes.
          */
         override public function draw(e:Event = null):void {
+            _label.text = _label_string;
+
             var g:Graphics = _background.graphics;
             g.clear();
             if (_is_glowing) {
@@ -91,20 +94,25 @@ package net.blaxstar.starlib.components {
             } else {
                 g.beginFill(0, 0);
             }
-            g.drawRoundRect(0, 0, _width_, _height_,7);
+            if (_is_rounded) {
+              g.drawRoundRect(0, 0, _width_, _height_,7);
+            } else {
+              g.drawRect(0, 0, _width_, _height_);
+            }
             g.endFill();
 
-            _label.text = _label_string;
+            super.draw();
+            dispatchEvent(new Event(Event.RESIZE));
         }
 
-        private function on_item_rollover(e:MouseEvent):void {
+        protected function on_item_rollover(e:MouseEvent):void {
             on_rollover.remove(on_item_rollover);
             on_rollout.add(on_item_rollout);
             _is_glowing = true;
             commit();
         }
 
-        private function on_item_rollout(e:MouseEvent):void {
+        protected function on_item_rollout(e:MouseEvent):void {
             on_rollout.remove(on_item_rollout);
             on_rollover.add(on_item_rollover);
             _is_glowing = false;
@@ -140,7 +148,6 @@ package net.blaxstar.starlib.components {
         public function set label(val:String):void {
             this.name = _label_string = val;
             commit();
-            dispatchEvent(new Event(Event.RESIZE));
         }
 
         public function get label():String {
