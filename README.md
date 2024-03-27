@@ -11,11 +11,9 @@ libraries used:
 
 PREVIEW
 ========
-a stepper at the top left, next to a dialog which holds plaintext, a verticalbox of multiple heart SVG icons, a chip, a dropdown, a scrollbar, and two buttons in 2 different styles:
+_example of plaintext, dialog card, input textfield, checkbox, and button in the `GROUNDED` style, being used in an application_ 
+![image](https://github.com/blaxstar/starlib/assets/6477128/a2de3bb1-9510-4ae5-a625-93cad6914854)
 
-<img width="406" alt="image" src="https://user-images.githubusercontent.com/6477128/222831645-c7d3bc74-a080-401f-806c-6a06133223df.png">
-
-"completed" components
 =======================
 
 * Input textfield
