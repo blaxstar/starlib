@@ -9,12 +9,13 @@ libraries used:
 * [Tweenlite](https://github.com/greensock/GreenSock-AS3) (most animations)
 * [AS3SVGRenderer](https://github.com/lucaslorentz/AS3SVGRenderer) (for Icon component)
 
-PREVIEW
-========
+## PREVIEW
 _example of plaintext, dialog card, input textfield, checkbox, and button in the `GROUNDED` style, being used in an application_ 
 ![image](https://github.com/blaxstar/starlib/assets/6477128/a2de3bb1-9510-4ae5-a625-93cad6914854)
 
-=======================
+
+
+## "completed" components
 
 * Input textfield
 * Button
