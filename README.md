@@ -10,9 +10,8 @@ libraries used:
 * [AS3SVGRenderer](https://github.com/lucaslorentz/AS3SVGRenderer) (for Icon component)
 
 ## PREVIEW
-_example of plaintext, dialog card, input textfield, checkbox, and button in the `GROUNDED` style, being used in an application_ 
-![image](https://github.com/blaxstar/starlib/assets/6477128/a2de3bb1-9510-4ae5-a625-93cad6914854)
-
+_example of components in use: Card, Dialog, Button, Plaintext, DropDown, Icon, VerticalBox, HorizontalBox, LED, Uint Stepper, Divider, ProgressBar, Chip_ 
+![STARLIB](https://github.com/blaxstar/starlib/assets/6477128/b49ea5b1-e74b-4cd3-b771-84a33c7a4a9e)
 
 
 ## "completed" components
@@ -26,7 +25,7 @@ _example of plaintext, dialog card, input textfield, checkbox, and button in the
 * Dialog
 * Card
 * List
-* Scrollbar Control
+~~* Scrollbar Control~~ (currently broken)
 * Autocomplete / suggestions
 * Uint stepper
 * Chip
