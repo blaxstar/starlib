@@ -9,14 +9,12 @@ libraries used:
 * [Tweenlite](https://github.com/greensock/GreenSock-AS3) (most animations)
 * [AS3SVGRenderer](https://github.com/lucaslorentz/AS3SVGRenderer) (for Icon component)
 
-PREVIEW
-========
-a stepper at the top left, next to a dialog which holds plaintext, a verticalbox of multiple heart SVG icons, a chip, a dropdown, a scrollbar, and two buttons in 2 different styles:
+## PREVIEW
+_example of components in use: Card, Dialog, Button, Plaintext, DropDown, Icon, VerticalBox, HorizontalBox, LED, Uint Stepper, Divider, ProgressBar, Chip_ 
+![STARLIB](https://github.com/blaxstar/starlib/assets/6477128/b49ea5b1-e74b-4cd3-b771-84a33c7a4a9e)
 
-<img width="406" alt="image" src="https://user-images.githubusercontent.com/6477128/222831645-c7d3bc74-a080-401f-806c-6a06133223df.png">
 
-"completed" components
-=======================
+## "completed" components
 
 * Input textfield
 * Button
@@ -27,7 +25,7 @@ a stepper at the top left, next to a dialog which holds plaintext, a verticalbox
 * Dialog
 * Card
 * List
-* Scrollbar Control
+~~* Scrollbar Control~~ (currently broken)
 * Autocomplete / suggestions
 * Uint stepper
 * Chip
