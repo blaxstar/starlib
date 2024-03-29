@@ -75,6 +75,7 @@ package net.blaxstar.starlib.components {
             }
 
             _height_ = _background_card.height = _item_container.height;
+            _background_card.width = _list_width;
             deselect_all_items();
             super.draw();
         }
@@ -118,6 +119,7 @@ package net.blaxstar.starlib.components {
 
                 if (itemStringArray[i] is String) {
                     var new_list_item:ListItem = new ListItem(null, 0, 0, itemStringArray[i]);
+                    new_list_item.width = _list_width;
                     add_item(new_list_item);
 
                     if (listener) {
@@ -260,7 +262,6 @@ package net.blaxstar.starlib.components {
 
         private function select_item(list_item:ListItem):void {
             _background_card.mouseChildren = false;
-            _background_card.highlight_region(list_item.x, list_item.y, list_item.width, list_item.height);
         }
 
         / * GETTERS, SETTERS * /;

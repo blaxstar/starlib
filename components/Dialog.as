@@ -15,7 +15,7 @@ package net.blaxstar.starlib.components {
      */
     public class Dialog extends Component {
         static private const MIN_WIDTH:uint = 200;
-        static private const MIN_HEIGHT:uint = 200;
+        static private const MIN_HEIGHT:uint = 300;
         static public const OPTION_EMPHASIS_LOW:uint = 0;
         static public const OPTION_EMPHASIS_HIGH:uint = 1;
         /* TODO:
@@ -86,6 +86,8 @@ package net.blaxstar.starlib.components {
 
             _title_textfield.enabled = false;
             _title_textfield.text = _title_string;
+            _message_textfield.multiline = true;
+            _message_textfield.width = 300;
             _message_textfield.text = _message_string;
             _dialog_card.draggable = false;
             this.draggable = true;
@@ -114,7 +116,7 @@ package net.blaxstar.starlib.components {
 
             if (_auto_resize) {
                 _width_ = (PADDING * 2) + Math.max(_text_container.width, _component_container.width, _option_container.width);
-                _height_ = (PADDING * 3) + _text_container.height + _component_container.height + _option_container.height;
+                _height_ = (PADDING * 4) + _text_container.height + _component_container.height + _option_container.height;
                 _dialog_card.set_size(_width_, _height_);
                 _text_container.move(PADDING, PADDING);
                 _component_container.move(PADDING, _text_container.y + _text_container.height);
@@ -180,6 +182,10 @@ package net.blaxstar.starlib.components {
 
         override public function addChild(child:DisplayObject):DisplayObject {
             return _component_container.addChild(child);
+        }
+
+        public function add_child_native(child:DisplayObject):DisplayObject {
+          return super.addChild(child);
         }
 
         override public function move(x_position:Number, y_position:Number):void {

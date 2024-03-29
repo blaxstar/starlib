@@ -43,9 +43,12 @@ package net.blaxstar.starlib.components {
 
       addChild(_chip_surface);
       addChild(_layout_box);
-      draw_surface();
-      draw_icon();
+      _layout_box.addChild(_chip_label);
+      _layout_box.addChild(_close_button);
+
       draw_label();
+      draw_icon();
+      draw_surface();
 
       apply_shadow();
       setChildIndex(_chip_surface, 0);
@@ -53,11 +56,10 @@ package net.blaxstar.starlib.components {
     }
 
     private function draw_icon():void {
-      _close_button.icon = Icon.CLOSE;
+      _close_button.icon = Icon.DELETE;
       _close_button.get_icon().set_color('#' + Style.TEXT.value.toString(16));
-      _close_button.set_size(16, 16);
+      //_close_button.set_size(16, 16);
       _close_button.on_click.add(remove_chip);
-      addChild(_close_button);
     }
 
     private function remove_chip(e:MouseEvent):void {
@@ -67,17 +69,17 @@ package net.blaxstar.starlib.components {
 
     private function draw_label():void {
       _chip_label.text = _label_text;
-      _chip_label.width = MAX_WIDTH;
+      //_chip_label.width = MAX_WIDTH;
       _chip_label.color = Style.TEXT.value;
-
-      _layout_box.addChild(_chip_label);
     }
 
     private function draw_surface():void {
+      _width_ = _layout_box.width + PADDING;
       var g:Graphics = _chip_surface.graphics;
       g.beginFill(Style.SECONDARY.value);
-      g.drawRoundRectComplex(0, 0, _width_ + PADDING, _height_, _corner_radius, _corner_radius, _corner_radius, _corner_radius);
+      g.drawRoundRectComplex(0, 0, _width_, _height_, _corner_radius, _corner_radius, _corner_radius, _corner_radius);
       g.endFill();
+      dispatchEvent(new Event(Event.RESIZE));
     }
 
     override public function draw(e:Event = null):void {
@@ -85,11 +87,22 @@ package net.blaxstar.starlib.components {
       _layout_box.alignment = HorizontalBox.CENTER;
       _width_ = _layout_box.width;
       _layout_box.x = PADDING;
-      _layout_box.y = 5;
 
-      draw_surface();
       draw_label();
+      draw_surface();
       super.draw();
+    }
+
+    public function get label_string():String {
+      return _chip_label.text;
+    }
+
+    public function set data(val:Object):void {
+      _data = val;
+    }
+
+    public function get data():Object {
+      return _data;
     }
   }
 }

@@ -34,6 +34,7 @@ package net.blaxstar.starlib.components {
       update_skin();
       _downButton.on_click.add(stepDown);
       _upButton.on_click.add(stepUp);
+      is_showing_bounds = true;
       super.add_children();
     }
 
@@ -43,11 +44,7 @@ package net.blaxstar.starlib.components {
       _width_ = _box.width;
       _height_ = _box.height;
       super.draw();
-    }
-
-    override public function update_skin():void {
-      _downButton.get_icon().set_color(Style.SECONDARY.value.toString());
-      _upButton.get_icon().set_color(Style.SECONDARY.value.toString());
+      dispatchEvent(new Event(Event.RESIZE));
     }
 
     private function stepUp(e:MouseEvent):void {

@@ -49,14 +49,14 @@ package net.blaxstar.starlib.components {
             _displayLabel.width = _width_;
 
             _dropdownButton = new Button(this, _displayLabel.width, 0);
-            _dropdownButton.icon = Icon.EXPAND_DOWN;
+            _dropdownButton.icon = Icon.EXPAND_DOWN_CIRCLED;
             _dropdownButton.set_size(MIN_HEIGHT, MIN_HEIGHT);
 
             var buttonIcon:Icon = _dropdownButton.get_icon();
             buttonIcon.set_color(Style.TEXT.value.toString(16));
             _dropdownButton.on_click.add(onClick);
 
-            _list_component ||= new List(null, 0, _displayLabel.height - 2);
+            _list_component ||= new List(null, 0, _displayLabel.height + PADDING);
             _list_component.visible = false;
             _list_component.width = _displayLabel.width;
             _list_component.add_delegate_to_all(onListItemClick);
@@ -96,7 +96,7 @@ package net.blaxstar.starlib.components {
             }
 
             _displayLabel.text = _labelText;
-
+            dispatchEvent(new Event(Event.RESIZE));
             super.draw(e);
         }
 
@@ -106,7 +106,7 @@ package net.blaxstar.starlib.components {
             g.clear();
             g.lineStyle(2, Style.SECONDARY.value);
             g.beginFill(Style.SURFACE.value, 1);
-            g.drawRoundRect(0, 0, _width_, MIN_HEIGHT, 7, 7);
+            g.drawRoundRect(0, 0, _width_ + _dropdownButton.width, MIN_HEIGHT, 7, 7);
             g.endFill();
             if (!_labelFill.parent) {
                 addChild(_labelFill);

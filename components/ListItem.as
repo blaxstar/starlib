@@ -58,6 +58,7 @@ package net.blaxstar.starlib.components {
         override public function init():void {
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
+            _is_rounded = true;
             _text_format = Font.SUBTITLE_1;
             mouseChildren = false;
             buttonMode = useHandCursor = true;
@@ -71,7 +72,7 @@ package net.blaxstar.starlib.components {
             _background = new Sprite();
             _label = new PlainText(this, 0, 0, _label_string);
             _label.mouseChildren = false;
-            _label.mouseEnabled = _label.doubleClickEnabled = true;
+            _label.mouseEnabled = true;
             _label.format(_text_format);
             _glow_color = Style.SURFACE.tint();
             on_rollover.add(on_item_rollover);

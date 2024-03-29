@@ -117,7 +117,7 @@ package net.blaxstar.starlib.components {
          * (re)draws the componentS and applies any pending visual changes.
          */
         override public function draw(e:Event = null):void {
-
+            super.draw(e);
             var xpos:Number = 0;
             _width_ = _height_ = 0;
             var child:DisplayObject;
@@ -133,7 +133,6 @@ package net.blaxstar.starlib.components {
 
             align();
             _width_ += _spacing_ * (numChildren - 1);
-            super.draw(e);
             dispatchEvent(new Event(Event.RESIZE));
         }
 

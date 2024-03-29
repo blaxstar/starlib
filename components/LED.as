@@ -69,7 +69,7 @@ package net.blaxstar.starlib.components {
       g.endFill();
     }
 
-    public function flash():void {
+    public function toggle():void {
       if (_is_on)
         turn_off();
       else
@@ -101,7 +101,7 @@ package net.blaxstar.starlib.components {
         clearInterval(_flash_interval);
       }
       else {
-        _flash_interval = setInterval(flash, 1000);
+        _flash_interval = setInterval(toggle, 1000);
       }
       _is_flashing = val;
       draw();

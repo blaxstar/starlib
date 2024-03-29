@@ -33,7 +33,7 @@ package net.blaxstar.starlib.components {
     override public function init():void {
       _width_ = START_WIDTH;
       _height_ = START_HEIGHT;
-      _percentLoaded = 1;
+      _percentLoaded = 0;
       _track = new Sprite();
       _trackFill = new Sprite();
       drawTrack();

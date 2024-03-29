@@ -108,6 +108,8 @@ package net.blaxstar.starlib.components {
             _width_ = _doc.width;
             _height_ = _doc.height;
             _width_height_ratio = _height_ / _width_;
+            set_color();
+            dispatchEvent(new Event(Event.RESIZE));
         }
 
         /**
@@ -144,6 +146,7 @@ package net.blaxstar.starlib.components {
             _doc.clear();
             _is_rendered = false;
             _doc.autoAlign = true;
+            _doc.addEventListener(SVGEvent.RENDERED, init2);
             _doc.parse(svgString);
         }
 

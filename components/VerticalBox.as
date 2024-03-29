@@ -6,6 +6,7 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.math.Arithmetic;
 
     public class VerticalBox extends Component {
+        private static const MIN_HEIGHT:uint = 50;
         public static const LEFT:String = "left";
         public static const RIGHT:String = "right";
         public static const CENTER:String = "center";
@@ -134,6 +135,9 @@ package net.blaxstar.starlib.components {
 
             align();
             _height_ += _spacing_ * (numChildren - 1);
+            if (_height_ < MIN_HEIGHT) {
+              _height_ = MIN_HEIGHT;
+            }
 
             dispatchEvent(new Event(Event.RESIZE));
         }

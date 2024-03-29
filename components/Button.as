@@ -87,7 +87,7 @@ package net.blaxstar.starlib.components {
             _glow_color = Style.GLOW;
             _icon_color = Style.TEXT;
             TweenPlugin.activate([TintPlugin]);
-            commit();
+            draw();
         }
 
         /**

@@ -77,6 +77,7 @@ import flash.display.StageScaleMode;
 			main.stage.color = BACKGROUND.value;
 			main.stage.align = StageAlign.TOP_LEFT;
 			main.stage.scaleMode = StageScaleMode.NO_SCALE;
+      Font.init();
 		}
 
     /**
