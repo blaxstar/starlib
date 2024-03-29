@@ -36,6 +36,7 @@ _example of components in use: Card, Dialog, Button, Plaintext, DropDown, Icon, 
 
 These classes still need work, but the ones listed are at least usable for most projects.
 they currently only support proprietary light and dark themes. will be updated as time goes on. 
+Feel free to take a look at the `Example.as` file in the root of this repo, which was used for the gif example above. It's fairly well commented.
 
 COMING NEXT
 ============
