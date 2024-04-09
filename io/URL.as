@@ -1,17 +1,14 @@
 package net.blaxstar.starlib.io {
-    import net.blaxstar.starlib.debug.DebugDaemon;
-    import flash.net.URLLoader;
-
-    import net.blaxstar.starlib.networking.Connection;
-
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.filesystem.File;
-    import thirdparty.org.osflash.signals.Signal;
-    import flash.filesystem.FileStream;
     import flash.filesystem.FileMode;
+    import flash.filesystem.FileStream;
+    import flash.net.URLLoader;
     import flash.utils.ByteArray;
+
+    import net.blaxstar.starlib.debug.DebugDaemon;
+    import net.blaxstar.starlib.networking.APIRequest;
+    import net.blaxstar.starlib.networking.Connection;
     import net.blaxstar.starlib.utils.StringUtil;
-    import flash.events.ProgressEvent;
 
     /**
      * TODO: documentation
@@ -68,8 +65,7 @@ package net.blaxstar.starlib.io {
 
         // * CLASS PROPERTIES * //
         private var _name:String;
-        private var _endpoint:String;
-        private var _query_path:String;
+        private var _local_endpoint:String;
         private var _data_format:String;
         private var _port:uint;
         private var _is_using_port:Boolean;
@@ -77,32 +73,19 @@ package net.blaxstar.starlib.io {
         private var _local_file:File;
         private var _filestream:FileStream;
         private var _is_local:Boolean;
-        private var _http_request_data:Array;
-        private var _http_request_method:String;
-        private var _auth_type:String;
-        private var _auth_value:String;
         private var _is_async:Boolean;
-        private var _is_http_request:Boolean;
         private var _pending_delegates:Array;
+        private var _request_data:APIRequest;
 
         // TODO: class documentation, EXPOSE LISTENERS PUBLICLY
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
-        public function URL(endpoint:String = null, port:uint = undefined, local:Boolean = false) {
-
-            if (endpoint) {
-                this._endpoint = endpoint;
-            }
-
-            if (port) {
-                this._port = port;
-            }
+        public function URL(local:Boolean = false) {
 
             if (local) {
-              _is_local = local;
-              _local_file = new File(_endpoint);
+                _is_local = local;
+                _local_file = new File();
             }
 
-            _query_path = "";
             _pending_delegates = [];
             _connection = new Connection(this);
 
@@ -111,6 +94,7 @@ package net.blaxstar.starlib.io {
 
         // * PUBLIC * //
         public function connect():void {
+            _connection.set_request_variables(_request_data.request_variables_compiled);
             _connection.connect();
         }
 
@@ -120,38 +104,38 @@ package net.blaxstar.starlib.io {
          * @param on_complete a callback function that expects a bytearray.
          */
         public function load_local(on_complete:Function):void {
-          if (!test_path_local) {
-            DebugDaemon.write_error("could not load file: local file path does not exist! path: %s", _endpoint);
-            return;
-          }
+            if (!test_path_local) {
+                DebugDaemon.write_error("could not load file: local file path does not exist! path: %s", _local_endpoint);
+                return;
+            }
 
-          var data:ByteArray = new ByteArray();
+            var data:ByteArray = new ByteArray();
 
-          _filestream ||= new FileStream();
-          //_filestream.addEventListener(ProgressEvent.PROGRESS, on_local_file_progress);
-          _filestream.open(_local_file, FileMode.READ);
-          _filestream.readBytes(data);
-          _filestream.close();
+            _filestream ||= new FileStream();
+            //_filestream.addEventListener(ProgressEvent.PROGRESS, on_local_file_progress);
+            _filestream.open(_local_file, FileMode.READ);
+            _filestream.readBytes(data);
+            _filestream.close();
 
-          on_complete(data);
+            on_complete(data);
         }
 
         public function close_connection():void {
             _connection.close();
         }
 
+        public function set_request_data(request:APIRequest):URL {
+            _request_data = request;
+            return this;
+        }
+
         public function add_query_variable(key:Object, val:Object):void {
-            if (_data_format !== DATA_FORMAT_VARIABLES) {
-                DebugDaemon.write_warning("request vars added to request without expected_data_type being set!");
-            }
-            _connection.add_http_request_variable(key, val);
+            _request_data.add_request_variable(key, val);
+
         }
 
         public function add_http_request_data(data:*):void {
-            if (!_http_request_data) {
-                _http_request_data = [];
-            }
-            _http_request_data.push(data);
+            _request_data.add_body_data(data);
         }
 
         public function add_connect_listener(delegate:Function):void {
@@ -181,11 +165,11 @@ package net.blaxstar.starlib.io {
         }
 
         public function get filesize():int {
-          if (!_is_local || !StringUtil.is_valid_filepath(endpoint)) {
-            return -1;
-          } else {
-            return _local_file.size;
-          }
+            if (!_is_local || !StringUtil.is_valid_filepath(endpoint)) {
+                return -1;
+            } else {
+                return _local_file.size;
+            }
         }
 
         public function get connection():Connection {
@@ -193,50 +177,47 @@ package net.blaxstar.starlib.io {
         }
 
         public function get name():String {
-            return _name;
+            if (_is_local)
+                return _name;
+            return _request_data.name;
         }
 
         public function set name(value:String):void {
-            _name = value;
+            if (_is_local)
+                _name = value;
+            _request_data.name = value;
         }
 
         public function get endpoint():String {
-            return _endpoint;
+            if (_is_local)
+                return _local_endpoint;
+            return _request_data.endpoint;
         }
 
         public function set endpoint(value:String):void {
-            _endpoint = value;
+            if (_is_local)
+                _local_endpoint = value;
+            _request_data.endpoint = value;
         }
 
         public function get query_path():String {
-            return _query_path;
+            return _request_data.query_path;
         }
 
         public function set query_path(value:String):void {
-            _query_path = value;
+            _request_data.endpoint = value;
         }
 
         public function get http_request_data():Array {
-            return _http_request_data;
-        }
-
-        public function set http_request_data(... rest):void {
-
-            if (!_http_request_data) {
-                _http_request_data = [];
-            }
-
-            for (var i:int = 0; i < rest.length; i++) {
-                _http_request_data.push(rest[i]);
-            }
+            return _request_data.body_data;
         }
 
         public function set auth_type(value:String):void {
-            _auth_type = value;
+            _request_data.auth_type = value;
         }
 
         public function get auth_type():String {
-            return _auth_type;
+            return _request_data.auth_type;
         }
 
         /**
@@ -244,19 +225,23 @@ package net.blaxstar.starlib.io {
          * @param value
          */
         public function set auth_value(value:String):void {
-            _auth_value = value;
+            _request_data.auth_value = value;
         }
 
         public function get auth_value():String {
-            return _auth_value;
+            return _request_data.auth_value;
         }
 
         public function get port():uint {
-            return _port;
+            if (_is_local)
+                return _port;
+            return _request_data.port;
         }
 
         public function set port(value:uint):void {
-            _port = value;
+            if (_is_local)
+                _port = value;
+            _request_data.port = value;
         }
 
         public function get use_port():Boolean {
@@ -268,32 +253,31 @@ package net.blaxstar.starlib.io {
         }
 
         public function get http_method():String {
-            return _http_request_method;
+            return _request_data.http_method;
         }
 
         public function set http_method(value:String):void {
-            _http_request_method = value;
+            _request_data.http_method = value;
         }
 
         public function get data_format():String {
-            return _data_format;
+            if (_is_local)
+                return _data_format;
+            return _request_data.content_type_header;
         }
 
         public function set data_format(value:String):void {
-            _data_format = value;
+            if (_is_local) {
+                _data_format = value;
+            } else {
+                _request_data.content_type_header = value;
+            }
+
             if (_data_format !== DATA_FORMAT_GRAPHICS) {
                 super.dataFormat = _data_format;
             } else {
                 super.dataFormat = DATA_FORMAT_BINARY;
             }
-        }
-
-        public function get is_http_request():Boolean {
-            return _is_http_request;
-        }
-
-        public function set is_http_request(value:Boolean):void {
-            _is_http_request = value;
         }
 
         public function get is_async():Boolean {

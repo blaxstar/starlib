@@ -1,18 +1,12 @@
 package net.blaxstar.starlib.networking {
 
-    import thirdparty.org.osflash.signals.Signal;
-    import net.blaxstar.starlib.io.URL;
     import flash.events.Event;
-    import flash.filesystem.FileStream;
-    import flash.filesystem.File;
-    import flash.filesystem.FileMode;
-    import net.blaxstar.starlib.io.XLoader;
     import flash.utils.ByteArray;
-    import flash.html.script.Package;
-    import net.blaxstar.starlib.utils.StringUtil;
-    import net.blaxstar.starlib.debug.console.DebugConsole;
+
     import net.blaxstar.starlib.debug.DebugDaemon;
-    import com.sociodox.utils.Base64;
+    import net.blaxstar.starlib.io.URL;
+
+    import thirdparty.org.osflash.signals.Signal;
 
     /**
      * ...
@@ -40,12 +34,49 @@ package net.blaxstar.starlib.networking {
         // constructor
         public function APIRequestManager(endpoint_path:String = "http://localhost", port:uint = 3000) {
 
-            _api_endpoint = new URL(endpoint_path, port);
-            _api_endpoint.name = "server";
+            _api_endpoint = new URL();
             _backlog = new Vector.<Object>();
             fake_signal ||= new Signal();
         }
 
+        public function build_https_request(
+          endpoint:String,
+          name:String="server",
+          request_method:String = "GET",
+          content_type_header:String = "variables",
+          query_path:String = "",
+          query_variables:Object = null,
+          body_data:Object = null,
+          auth_type:String = "basic",
+          auth_value:String = ""):APIRequest {
+
+            var api_request:APIRequest = new APIRequest();
+
+            api_request.endpoint = endpoint;
+            api_request.http_method = request_method;
+            api_request.content_type_header = content_type_header;
+            api_request.query_path = query_path;
+            
+            if (body_data) {
+
+              for (var item:Object in body_data) {
+                api_request.add_body_data(body_data[item]);
+              }
+            }
+
+            if (query_variables) {
+
+              for (var v:String in query_variables) {
+                api_request.add_request_variable(v, body_data[v]);
+              }
+            }
+            
+            api_request.auth_type = auth_type;
+            api_request.auth_value = auth_value;
+            api_request.port = 443;
+            _api_endpoint.is_async = true;
+          return api_request;
+        }
         /**
          *
          * @param host
@@ -53,27 +84,18 @@ package net.blaxstar.starlib.networking {
          * @param endpoint_path
          * @param data
          */
-        public function send_https_request(endpoint:String, request_method:String = "GET", data:Object = null, auth_type:String = "NONE", auth_value:String = null):void {
+        public function send(request:APIRequest):void {
 
             if (_backlog.length > 0 || _api_endpoint.connection.busy) {
-                _backlog.push({"endpoint": endpoint, "request_method": request_method, "data": data, "auth_type": auth_type, "auth_value": auth_value});
+                _backlog.push(request);
+                return;
+            } else {
+              _api_endpoint.set_request_data(request);
             }
 
-            _api_endpoint.endpoint = endpoint;
-            _api_endpoint.use_port = true;
-            _api_endpoint.port = 443;
-            _api_endpoint.is_http_request = true;
-            _api_endpoint.is_async = true;
-            _api_endpoint.data_format = URL.DATA_FORMAT_TEXT;
-            _api_endpoint.query_path = "/search"
-            _api_endpoint.add_query_variable("q", 123);
-            _api_endpoint.http_method = request_method;
             //_api_endpoint.add_complete_listener(test_on_complete);
-            if (data) {
-                _api_endpoint.add_http_request_data(data);
-            }
-            // * _api_endpoint.connect();
-            fake_connect();
+            
+            _api_endpoint.connect();
         }
 
         public function establish_secure_connection(endpoint:String, data:Object = null, on_complete:Function = null, on_error:Function = null):Boolean {
@@ -83,7 +105,6 @@ package net.blaxstar.starlib.networking {
             } else {
                 _api_endpoint.endpoint = endpoint;
                 _api_endpoint.use_port = true;
-                _api_endpoint.is_http_request = false;
                 _api_endpoint.is_async = false;
                 _api_endpoint.data_format = URL.DATA_FORMAT_BINARY;
 
@@ -97,17 +118,6 @@ package net.blaxstar.starlib.networking {
             }
         }
 
-        private function fake_connect():void {
-            var response:ByteArray = new ByteArray();
-            response.writeUTFBytes("c2hhd3R5c2hhcGVkbGlrZWFwaXhhcm1vbQ==");
-            var decoded_response:String = Base64.decode(response.toString()).toString();
-            if (decoded_response == "shawtyshapedlikeapixarmom") {
-                fake_signal.dispatch(decoded_response);
-            } else {
-                fake_signal.dispatch(null);
-            }
-        }
-
         private function test_on_complete(incoming_bytes:ByteArray):void {
             DebugDaemon.write_debug("bytes loaded from response: %s", incoming_bytes)
         }
@@ -117,8 +127,8 @@ package net.blaxstar.starlib.networking {
             if (!_connection || _backlog.length == 0) {
                 return;
             }
-            var next_request:Object = _backlog.splice(0, 1)[0];
-            send_https_request(next_request.endpoint, next_request.request_method, next_request.data, next_request.auth_type, next_request.auth_value);
+            var next_request:APIRequest = _backlog.splice(0, 1)[0] as APIRequest;
+            send(next_request);
         }
 
         public function get endpoint_name():String {

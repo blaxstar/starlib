@@ -1,12 +1,9 @@
 package net.blaxstar.starlib.networking {
     import flash.events.Event;
     import flash.events.IOErrorEvent;
-    import flash.events.TimerEvent;
+    import flash.events.ProgressEvent;
     import flash.net.SecureSocket;
-    import flash.net.URLRequest;
-    import flash.net.URLVariables;
     import flash.utils.ByteArray;
-    import flash.utils.Dictionary;
     import flash.utils.Timer;
 
     import net.blaxstar.starlib.debug.DebugDaemon;
@@ -15,10 +12,8 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPackFlags;
     import net.blaxstar.starlib.utils.StringUtil;
 
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import flash.events.ProgressEvent;
     import thirdparty.org.osflash.signals.Signal;
-    import flash.net.Socket;
+    import thirdparty.org.osflash.signals.natives.NativeSignal;
 
     /**
      * TODO: documentation
@@ -28,12 +23,13 @@ package net.blaxstar.starlib.networking {
         // const
         static private const _REQUEST_TIMEOUT:uint = 7000;
         static private const _TIMEOUT_REPS:uint = 2;
+        private const _CARRIAGE_RETURN_LINE_FEED:String = String.fromCharCode(13);
 
         // vars
         private var _socket:SecureSocket;
         private var _msgpack:MsgPack;
         private var _http_request_config:URL;
-        private var _http_request_vars:Dictionary;
+        private var _http_request_vars:String;
         private var _num_request_vars:int;
         private var _timeout_timer:Timer;
         private var _chunked_response_holder:ByteArray;
@@ -85,20 +81,8 @@ package net.blaxstar.starlib.networking {
 
         }
 
-        /**
-         * add a key value pair to be added as url request variables.
-         * @param key
-         * @param val
-         */
-        public function add_http_request_variable(key:Object, val:Object):void {
-            if (!_http_request_vars) {
-                _http_request_vars = new Dictionary(true);
-                _num_request_vars = 0;
-            }
-
-            _http_request_vars[key] = val;
-            _num_request_vars++;
-
+        public function set_request_variables(request_vars_compiled:String):void {
+            _http_request_vars = request_vars_compiled;
         }
 
         private function config_socket():void {
@@ -126,8 +110,8 @@ package net.blaxstar.starlib.networking {
             if (_num_request_vars) {
                 _http_request_config.query_path = _http_request_config.query_path.concat("?");
 
-                for (var rvkey:Object in _http_request_vars) {
-                    _http_request_config.query_path = _http_request_config.query_path.concat(String(rvkey) + "=" + String(_http_request_vars[rvkey]) + "&");
+                if (!StringUtil.is_empty_or_null(_http_request_vars)) {
+                    _http_request_config.query_path = _http_request_config.query_path.concat(_http_request_vars);
                 }
 
                 _http_request_config.query_path = _http_request_config.query_path.substr(0, _http_request_config.query_path.length - 1);
@@ -142,15 +126,11 @@ package net.blaxstar.starlib.networking {
             if (_http_request_config.auth_type == URL.AUTH_BASIC) {
                 header = header.concat("Authorization: Basic " + _http_request_config.auth_value + "\r\n");
             } else if (_http_request_config.auth_type == URL.AUTH_TOKEN) {
-                header = header.concat("Authorization: Bearer 6" + _http_request_config.auth_value + "\r\n");
+                header = header.concat("Authorization: Bearer " + _http_request_config.auth_value + "\r\n");
             }
 
-            if (_http_request_config.is_async) {
-                header = header.concat("Connection: keep-alive" + "\r\n");
-            } else {
-                header = header.concat("Connection: keep-alive" + "\r\n");
-            }
-
+            // TODO: currently, all responses are returned as 'chunked', which means `Connection: close` terminates too early, before all the data from the request comes in. the work around for now is to keep it set to `Connection: keep-alive`, and check for the termination of the data in the on_progress method. for synchronous streams, we will skip this check. will look into any possible solutions later.
+            header = header.concat("Connection: keep-alive" + "\r\n");
             header = header.concat("\r\n");
 
             return header;
@@ -175,17 +155,23 @@ package net.blaxstar.starlib.networking {
 
         private function on_progress(e:ProgressEvent):void {
             var current_chunk:ByteArray = new ByteArray();
+
+            // we'll write the current chunk to its own byte array so we can process it individually. this will be used in both sync and async cases.
+            _socket.readBytes(current_chunk, current_chunk.length, _socket.bytesAvailable);
+            
             if (_http_request_config.is_async) {
-                while (_socket.bytesAvailable > 0) {
-                    _socket.readBytes(current_chunk);
-                }
+                // for async requests, especially for http responses, we'll add the chunks to a big bytearray and process them all at once when its all loaded in
+                current_chunk.readBytes(_chunked_response_holder, _chunked_response_holder.length);
+                // convert the current chunk to a string so we can check if it contains a termination sequence
                 var chunk_string:String = current_chunk.toString();
-                if (chunk_string == "0\r\n\r\n" || chunk_string == "\r\n\r\n" || chunk_string == "") {
+                // the termination sequence can be either of these i think depending on the server, i'm just checking both to make sure
+                if (chunk_string.indexOf("0\r\n\r\n") != -1 || chunk_string.indexOf("\r\n\r\n") != -1) {
+                    // close the connection and dispatch the response data
+                    DebugDaemon.write_debug("caughtend");
                     close();
+                    active = false;
                     on_complete_signal.dispatch(_chunked_response_holder);
-                } else {
-                    current_chunk.readBytes(_chunked_response_holder, _chunked_response_holder.length);
-                }
+                }                   
             } else {
                 // TODO: continuous byte stream for online gameplay and other synchronous transmissions
                 /**
@@ -194,9 +180,8 @@ package net.blaxstar.starlib.networking {
                  *
                  * * where `X` is the number of info sub-frames. sub-frames can be sent as parts of a bigger subframe, or a single subframe. this function (or maybe a helper function) can be tasked with organizing the data and putting it together to be loaded into memory for the application.
                  */
-                _socket.readBytes(current_chunk, current_chunk.length, _socket.bytesAvailable);
-                process_response_subframes(current_chunk);
             }
+            process_response_subframes(current_chunk);
         }
 
         /**
@@ -204,7 +189,8 @@ package net.blaxstar.starlib.networking {
          * @param subframes the data to process, in subframe format.
          */
         private function process_response_subframes(subframes:ByteArray):void {
-            var string_data:Object = subframes.readUTFBytes(subframes.length);
+            subframes.position = 0;
+            var string_data:String = subframes.readUTFBytes(subframes.length);
             DebugDaemon.write_debug("incoming subframe: %s", string_data);
         }
 
@@ -230,12 +216,6 @@ package net.blaxstar.starlib.networking {
             }
             // * set busy status to false, since we sent what we need
             busy = false;
-            // * we only need to set active to false if the connection is async
-            if (_http_request_config.is_async) {
-                active = false;
-            } else {
-                active = true;
-            }
 
         }
 
