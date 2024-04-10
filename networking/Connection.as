@@ -204,10 +204,10 @@ package net.blaxstar.starlib.networking {
                 // the termination sequence can be either of these i think depending on the server, i'm just checking both to make sure
                 if (chunk_string.indexOf("0\r\n\r\n") != -1 || chunk_string.indexOf("\r\n\r\n") != -1) {
                     // close the connection and dispatch the response data
-                    DebugDaemon.write_debug("caughtend");
                     close();
                     active = false;
                     on_complete_signal.dispatch(_chunked_response_holder);
+                    _chunked_response_holder.clear();
                 }
             } else {
                 // TODO: continuous byte stream for online gameplay and other synchronous transmissions
@@ -228,7 +228,7 @@ package net.blaxstar.starlib.networking {
         private function process_response_subframes(subframes:ByteArray):void {
             subframes.position = 0;
             var string_data:String = subframes.readUTFBytes(subframes.length);
-            DebugDaemon.write_debug("incoming subframe: %s", string_data);
+            //DebugDaemon.write_debug("incoming subframe: %s", string_data);
         }
 
         private function on_connect(e:Event):void {

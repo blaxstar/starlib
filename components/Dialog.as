@@ -198,6 +198,10 @@ package net.blaxstar.starlib.components {
             super.move(x_position, y_position);
         }
 
+        public function set message_color(color:uint):void {
+            _message_textfield.color = color;
+        }
+
         override public function set_size(w:Number, h:Number):void {
             _dialog_card.set_size(w, h);
             super.set_size(w, h);

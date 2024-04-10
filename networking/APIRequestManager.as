@@ -20,7 +20,7 @@ package net.blaxstar.starlib.networking {
         public const ON_ERROR:Signal = new Signal(String);
         public const ON_CONNECT:Signal = new Signal();
         public const ON_DISCONNECT:Signal = new Signal();
-        public const on_result_signal:Signal = new Signal(String);
+        public const on_result_signal:Signal = new Signal();
 
         // vars
         // -private
@@ -85,7 +85,7 @@ package net.blaxstar.starlib.networking {
                 _api_endpoint.set_request_data(request);
             }
 
-            //_api_endpoint.add_complete_listener(test_on_complete);
+            _api_endpoint.add_complete_listener(on_request_complete);
 
             _api_endpoint.connect();
         }
@@ -110,8 +110,8 @@ package net.blaxstar.starlib.networking {
             }
         }
 
-        private function test_on_complete(incoming_bytes:ByteArray):void {
-            DebugDaemon.write_debug("bytes loaded from response: %s", incoming_bytes)
+        private function on_request_complete(incoming_bytes:ByteArray):void {
+            on_result_signal.dispatch(incoming_bytes);
         }
 
         private function send_next():void {
