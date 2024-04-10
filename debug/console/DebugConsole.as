@@ -138,7 +138,7 @@ package net.blaxstar.starlib.debug.console {
         private function init():void {
             _filePath = File.applicationDirectory.nativePath;
             _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
-            _save_file.data_format = URL.DATA_FORMAT_TEXT;
+            _save_file.content_type = URL.DATA_FORMAT_TEXT;
             _loader = new XLoader();
             _data = new Dictionary();
             init_default_commands();

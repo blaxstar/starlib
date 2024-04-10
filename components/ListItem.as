@@ -36,6 +36,7 @@ package net.blaxstar.starlib.components {
         private var _background:Sprite;
         private var _target_list:List;
         private var _in_cache:Boolean;
+        private var _fill_parent:Boolean;
         private var _on_click_signal:NativeSignal;
         private var _on_rollover_signal:NativeSignal;
         private var _on_rollout_signal:NativeSignal;
@@ -90,15 +91,18 @@ package net.blaxstar.starlib.components {
 
             var g:Graphics = _background.graphics;
             g.clear();
+            if (_fill_parent && parent) {
+                _width_ = parent.width;
+            }
             if (_is_glowing) {
                 g.beginFill(_glow_color.value, 0.3);
             } else {
                 g.beginFill(0, 0);
             }
             if (_is_rounded) {
-              g.drawRoundRect(0, 0, _width_, _height_,7);
+                g.drawRoundRect(0, 0, _width_, _height_, 7);
             } else {
-              g.drawRect(0, 0, _width_, _height_);
+                g.drawRect(0, 0, _width_, _height_);
             }
             g.endFill();
 
@@ -169,6 +173,11 @@ package net.blaxstar.starlib.components {
 
         public function set is_glowing(value:Boolean):void {
             _is_glowing = value;
+            commit();
+        }
+
+        public function set fill_parent(value:Boolean):void {
+            _fill_parent = value;
             commit();
         }
 

@@ -56,8 +56,9 @@ package net.blaxstar.starlib.components {
         private var _typed_chars:uint;
 
         // TODO (dyxribo, STARCOMPS-3): add icon support to InputTextField
-        public function InputTextField(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, hintText:String = "") {
+        public function InputTextField(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, hintText:String = "type something") {
             _hint_text = _textfield_string = hintText;
+            _is_hinting = true;
             super(parent, xpos, ypos);
         }
 
@@ -95,6 +96,7 @@ package net.blaxstar.starlib.components {
             _on_focus = new NativeSignal(_text_field, FocusEvent.FOCUS_IN, FocusEvent);
             _on_defocus = new NativeSignal(_text_field, FocusEvent.FOCUS_OUT, FocusEvent);
 
+
             // TODO (dyxribo, STARCOMPS-11): use keydown listeners in favor of change event in InputTextField
             //_on_text_update = new NativeSignal(_text_field, KeyboardEvent.KEY_DOWN, Event);
             _on_focus.add(onFocus);
@@ -106,26 +108,22 @@ package net.blaxstar.starlib.components {
 
         override public function draw(e:Event = null):void {
             // determine text color based on current field status
-            if (_text_field.text == _hint_text || _text_field.text.length < 1) {
-                if (_is_hinting) {
-                    if (Style.CURRENT_THEME == Style.DARK) {
-                        _text_field.textColor = Style.TEXT.shade().value;
-                    } else {
-                        _text_field.textColor = Style.TEXT.tint().value;
-                    }
-                    _text_field.text = _hint_text;
+            if (_is_hinting) {
+                if (Style.CURRENT_THEME == Style.DARK) {
+                    _text_field.textColor = Style.TEXT.shade().value;
                 } else {
-                    if (Style.CURRENT_THEME == Style.DARK) {
-                        _text_field.textColor = Style.TEXT.shade().value;
-                    } else {
-                        _text_field.textColor = Style.TEXT.tint().value;
-                    }
+                    _text_field.textColor = Style.TEXT.tint().value;
                 }
+                _text_field.text = _hint_text;
             } else {
                 _text_field.textColor = Style.TEXT.value;
+                if (_is_password_field) {
+                    _text_field.displayAsPassword = true;
+                }
+                // set the text
+                _text_field.text = _textfield_string;
             }
-            // set the text
-            _text_field.text = _textfield_string;
+
             // set height, width is adjustable manually only
             _text_field.height = _text_field.textHeight + 4;
             // update the underline if applicable, just in case width changes
@@ -235,7 +233,7 @@ package net.blaxstar.starlib.components {
             if (StringUtil.is_empty_or_null(val)) {
                 _hint_text = "enter text...";
             } else {
-              _hint_text = val;
+                _hint_text = val;
             }
 
             show_hint_text();
@@ -329,6 +327,7 @@ package net.blaxstar.starlib.components {
 
         public function set display_as_password(val:Boolean):void {
             _is_password_field = val;
+            commit();
         }
 
         public function set restrict(value:String):void {
@@ -388,12 +387,13 @@ package net.blaxstar.starlib.components {
 
         private function onFocus(e:FocusEvent):void {
             _on_focus.remove(onFocus);
-            _is_hinting = false;
-            if (_text_field.text == _hint_text) {
+
+            if (_is_hinting) {
+                _is_hinting = false;
+                _textfield_string = "";
                 _text_field.text = "";
-                if (_is_password_field) {
-                    _text_field.displayAsPassword = true;
-                }
+            } else {
+                _text_field.setSelection(0, _text_field.text.length);
             }
 
             if (_showing_underline) {
@@ -406,7 +406,8 @@ package net.blaxstar.starlib.components {
                     addChild(_suggestion_list);
                 show_suggestions();
             }
-            commit();
+
+            draw();
             _on_defocus.add(onDeFocus);
         }
 
@@ -416,6 +417,8 @@ package net.blaxstar.starlib.components {
 
             if (_text_field.text == "") {
                 show_hint_text();
+            } else {
+                _textfield_string = _text_field.text;
             }
 
             if (_showing_underline) {
@@ -430,6 +433,7 @@ package net.blaxstar.starlib.components {
             if (_is_password_field) {
                 _text_field.displayAsPassword = false;
             }
+            _text_field.text = _hint_text;
             _is_hinting = true;
             commit();
         }
@@ -444,8 +448,6 @@ package net.blaxstar.starlib.components {
                     removeChild(_suggestion_list);
                 }
             }
-            _textfield_string = _text_field.text;
-            commit();
             //on_resize_signal.dispatch(_resizeEvent_);
         }
 

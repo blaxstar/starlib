@@ -36,6 +36,8 @@ package net.blaxstar.starlib.networking {
         private var _active:Boolean
         private var _is_busy:Boolean;
         private var _compress:Boolean;
+        private var _bytes_loaded:uint;
+        private var _bytes_total:int;
 
         public var on_connect_signal:NativeSignal;
         public var on_progress_signal:NativeSignal;
@@ -56,6 +58,10 @@ package net.blaxstar.starlib.networking {
                 DebugDaemon.write_error("SecureSocket is not supported on this system! Secure connections cannot be made, so NO connections will be made. Cancelling connection request.");
                 return;
             }
+
+            // (re)set bytes_loaded and bytes_total
+            _bytes_loaded = 0;
+            _bytes_total = -1;
 
             // * verify host string and port number
             if (StringUtil.is_empty_or_null(_http_request_config.endpoint) || _http_request_config.port > 65535) {
@@ -123,6 +129,27 @@ package net.blaxstar.starlib.networking {
             header = header.concat("Accept: text/html\r\n");
             header = header.concat("Accept-Charset: utf-8\r\n");
 
+            var content_type_string:String;
+
+            switch (_http_request_config.content_type) {
+                case URL.DATA_FORMAT_VARIABLES:
+                default:
+                    content_type_string = "x-www-form-urlencoded";
+                    break;
+                case URL.DATA_FORMAT_TEXT:
+                    content_type_string = "text/plain";
+                    break;
+                case URL.DATA_FORMAT_BINARY:
+                    content_type_string = "application/octet-stream";
+                    break;
+                case URL.DATA_FORMAT_GRAPHICS:
+                    break;
+            }
+
+            header = header.concat("Content-Type: " + content_type_string + "\r\n");
+
+
+
             if (_http_request_config.auth_type == URL.AUTH_BASIC) {
                 header = header.concat("Authorization: Basic " + _http_request_config.auth_value + "\r\n");
             } else if (_http_request_config.auth_type == URL.AUTH_TOKEN) {
@@ -140,9 +167,9 @@ package net.blaxstar.starlib.networking {
             var data_bytes:ByteArray = new ByteArray();
 
             for (var i:int = 0; i < _http_request_config.http_request_data.length; i++) {
-                if (_http_request_config.data_format == URL.DATA_FORMAT_TEXT) {
+                if (_http_request_config.content_type == URL.DATA_FORMAT_TEXT) {
                     data_bytes.writeUTFBytes(_http_request_config.http_request_data[i])
-                } else if (_http_request_config.data_format == URL.DATA_FORMAT_BINARY) {
+                } else if (_http_request_config.content_type == URL.DATA_FORMAT_BINARY) {
                     data_bytes.writeBytes(_http_request_config.http_request_data[i]);
                 }
             }
@@ -158,12 +185,22 @@ package net.blaxstar.starlib.networking {
 
             // we'll write the current chunk to its own byte array so we can process it individually. this will be used in both sync and async cases.
             _socket.readBytes(current_chunk, current_chunk.length, _socket.bytesAvailable);
-            
+
             if (_http_request_config.is_async) {
                 // for async requests, especially for http responses, we'll add the chunks to a big bytearray and process them all at once when its all loaded in
                 current_chunk.readBytes(_chunked_response_holder, _chunked_response_holder.length);
-                // convert the current chunk to a string so we can check if it contains a termination sequence
+                _bytes_loaded += current_chunk.length;
+                // convert the current chunk to a string so we can check if it contains a termination sequence, and also look out for the content-length header
                 var chunk_string:String = current_chunk.toString();
+                // checking for content length so we can provide bytes_total
+                if (!bytes_total) {
+                    if (chunk_string.indexOf("Content-Length:")) {
+                        var content_length_header_regex:RegExp = / /g;
+                        var total_bytes:int = parseInt(String(chunk_string.match(content_length_header_regex)[0]).split(": ")[1]);
+                        DebugDaemon.write_debug("total bytes: %s", total_bytes);
+                    }
+                }
+
                 // the termination sequence can be either of these i think depending on the server, i'm just checking both to make sure
                 if (chunk_string.indexOf("0\r\n\r\n") != -1 || chunk_string.indexOf("\r\n\r\n") != -1) {
                     // close the connection and dispatch the response data
@@ -171,7 +208,7 @@ package net.blaxstar.starlib.networking {
                     close();
                     active = false;
                     on_complete_signal.dispatch(_chunked_response_holder);
-                }                   
+                }
             } else {
                 // TODO: continuous byte stream for online gameplay and other synchronous transmissions
                 /**
@@ -196,8 +233,10 @@ package net.blaxstar.starlib.networking {
 
         private function on_connect(e:Event):void {
             DebugDaemon.write_success("Connection successful to host %s:%i!", _http_request_config.endpoint, _http_request_config.port);
-            // * build the header to be sent along with the request
-            _socket.writeUTFBytes(build_header());
+            // * build the header to be sent along with the request, but only if its an async request (not a persistent connection)
+            if (_http_request_config.is_async) {
+                _socket.writeUTFBytes(build_header());
+            }
             // * we'll only send something if there's data to send
             if (_http_request_config.http_request_data && _http_request_config.http_request_data.length > 0) {
                 // * check if http method is one of the 6 allowed options
@@ -245,6 +284,14 @@ package net.blaxstar.starlib.networking {
 
         public function set busy(value:Boolean):void {
             _is_busy = value;
+        }
+
+        public function get bytes_loaded():int {
+            return _bytes_loaded;
+        }
+
+        public function get bytes_total():int {
+            return _bytes_total;
         }
 
     }

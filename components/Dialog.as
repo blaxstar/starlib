@@ -8,6 +8,7 @@ package net.blaxstar.starlib.components {
     import flash.display.Sprite;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.events.MouseEvent;
+    import net.blaxstar.starlib.style.Style;
 
     /**
      * ...
@@ -172,10 +173,10 @@ package net.blaxstar.starlib.components {
             var d:Dialog = _child_dialog_vector.pop();
             d.close();
             if (_child_dialog_vector.length > 0) {
-              _currently_active_dialog = _child_dialog_vector[_child_dialog_vector.length-1];
+                _currently_active_dialog = _child_dialog_vector[_child_dialog_vector.length - 1];
             } else {
-              _currently_active_dialog = this;
-              enabled = true;
+                _currently_active_dialog = this;
+                enabled = true;
             }
             return d;
         }
@@ -185,7 +186,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function add_child_native(child:DisplayObject):DisplayObject {
-          return super.addChild(child);
+            return super.addChild(child);
         }
 
         override public function move(x_position:Number, y_position:Number):void {
@@ -275,16 +276,24 @@ package net.blaxstar.starlib.components {
             _draggable = val;
 
             if (_draggable) {
-                _on_mouse_down_signal ||= new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
+                _title_textfield.enabled = true;
+
+                if (Style.CURRENT_THEME == Style.DARK) {
+                    _title_textfield.color = Style.TEXT.shade().value;
+                } else {
+                    _title_textfield.color = Style.TEXT.tint().value;
+                }
+
+                _on_mouse_down_signal ||= new NativeSignal(_title_textfield, MouseEvent.MOUSE_DOWN, MouseEvent);
                 _on_mouse_down_signal.add(on_mouse_down);
             }
         }
 
         public function close(e:Event = null):void {
             if (_child_dialog_vector && _child_dialog_vector.length > 0) {
-              for (var i:int = _child_dialog_vector.length - 1; i > -1; i--) {
-                pop_dialog();
-              }
+                for (var i:int = _child_dialog_vector.length - 1; i > -1; i--) {
+                    pop_dialog();
+                }
             }
 
             if (parent) {

@@ -9,17 +9,19 @@ package net.blaxstar.starlib.io {
     import net.blaxstar.starlib.networking.APIRequest;
     import net.blaxstar.starlib.networking.Connection;
     import net.blaxstar.starlib.utils.StringUtil;
+    import flash.events.EventDispatcher;
 
     /**
      * TODO: documentation
      * @author Deron D. (SnaiLegacy)
      */
-    public class URL extends URLLoader {
+    public class URL extends EventDispatcher {
         // * URL DATA FORMATS * //
-        public static const DATA_FORMAT_BINARY:String = "binary";
+        public static const DATA_FORMAT_BINARY:String = "application/octet-stream";
         static public const DATA_FORMAT_GRAPHICS:String = 'graphics';
         public static const DATA_FORMAT_TEXT:String = "text";
         public static const DATA_FORMAT_VARIABLES:String = "variables";
+        public static const DATA_FORMAT_JSON:String = "json";
 
         // * HTTP REQUEST METHODS * //
         /**
@@ -76,6 +78,7 @@ package net.blaxstar.starlib.io {
         private var _is_async:Boolean;
         private var _pending_delegates:Array;
         private var _request_data:APIRequest;
+        private var _local_file_data:ByteArray;
 
         // TODO: class documentation, EXPOSE LISTENERS PUBLICLY
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
@@ -83,7 +86,7 @@ package net.blaxstar.starlib.io {
 
             if (local) {
                 _is_local = local;
-                _local_file = new File();
+                _local_file_data = new ByteArray();
             }
 
             _pending_delegates = [];
@@ -103,7 +106,7 @@ package net.blaxstar.starlib.io {
          * @param filepath the full local filepath for the file to load.
          * @param on_complete a callback function that expects a bytearray.
          */
-        public function load_local(on_complete:Function):void {
+        public function load_local_file(on_complete:Function):void {
             if (!test_path_local) {
                 DebugDaemon.write_error("could not load file: local file path does not exist! path: %s", _local_endpoint);
                 return;
@@ -161,11 +164,25 @@ package net.blaxstar.starlib.io {
         // * GETTERS & SETTERS * //
 
         public function get test_path_local():Boolean {
-            return new File().resolvePath(endpoint).exists;
+            return _local_file.exists;
+        }
+
+        public function get bytes_loaded():uint {
+            if (_is_local) {
+                return _local_file.data.bytesAvailable;
+            }
+            return _connection.bytes_loaded;
+        }
+
+        public function get bytes_total():int {
+            if (_is_local) {
+                return filesize;
+            }
+            return _connection.bytes_total;
         }
 
         public function get filesize():int {
-            if (!_is_local || !StringUtil.is_valid_filepath(endpoint)) {
+            if (!_is_local || !StringUtil.is_valid_filepath(endpoint) || !_local_file) {
                 return -1;
             } else {
                 return _local_file.size;
@@ -177,26 +194,37 @@ package net.blaxstar.starlib.io {
         }
 
         public function get name():String {
-            if (_is_local)
+            if (_is_local) {
                 return _name;
+            }
+
             return _request_data.name;
         }
 
         public function set name(value:String):void {
-            if (_is_local)
+            if (_is_local) {
                 _name = value;
+                return;
+            }
+
             _request_data.name = value;
         }
 
         public function get endpoint():String {
-            if (_is_local)
+            if (_is_local) {
                 return _local_endpoint;
+            }
+
             return _request_data.endpoint;
         }
 
         public function set endpoint(value:String):void {
-            if (_is_local)
+            if (_is_local) {
                 _local_endpoint = value;
+                _local_file = new File(_local_endpoint);
+                return;
+            }
+
             _request_data.endpoint = value;
         }
 
@@ -260,23 +288,17 @@ package net.blaxstar.starlib.io {
             _request_data.http_method = value;
         }
 
-        public function get data_format():String {
+        public function get content_type():String {
             if (_is_local)
                 return _data_format;
             return _request_data.content_type_header;
         }
 
-        public function set data_format(value:String):void {
+        public function set content_type(value:String):void {
             if (_is_local) {
                 _data_format = value;
             } else {
                 _request_data.content_type_header = value;
-            }
-
-            if (_data_format !== DATA_FORMAT_GRAPHICS) {
-                super.dataFormat = _data_format;
-            } else {
-                super.dataFormat = DATA_FORMAT_BINARY;
             }
         }
 

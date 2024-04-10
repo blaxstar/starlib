@@ -39,16 +39,7 @@ package net.blaxstar.starlib.networking {
             fake_signal ||= new Signal();
         }
 
-        public function build_https_request(
-          endpoint:String,
-          name:String="server",
-          request_method:String = "GET",
-          content_type_header:String = "variables",
-          query_path:String = "",
-          query_variables:Object = null,
-          body_data:Object = null,
-          auth_type:String = "basic",
-          auth_value:String = ""):APIRequest {
+        public function build_https_request(endpoint:String, name:String = "server", request_method:String = "GET", content_type_header:String = "variables", query_path:String = "", query_variables:Object = null, body_data:Object = null, auth_type:String = "basic", auth_value:String = ""):APIRequest {
 
             var api_request:APIRequest = new APIRequest();
 
@@ -56,27 +47,28 @@ package net.blaxstar.starlib.networking {
             api_request.http_method = request_method;
             api_request.content_type_header = content_type_header;
             api_request.query_path = query_path;
-            
+
             if (body_data) {
 
-              for (var item:Object in body_data) {
-                api_request.add_body_data(body_data[item]);
-              }
+                for (var item:Object in body_data) {
+                    api_request.add_body_data(body_data[item]);
+                }
             }
 
             if (query_variables) {
 
-              for (var v:String in query_variables) {
-                api_request.add_request_variable(v, body_data[v]);
-              }
+                for (var v:String in query_variables) {
+                    api_request.add_request_variable(v, body_data[v]);
+                }
             }
-            
+
             api_request.auth_type = auth_type;
             api_request.auth_value = auth_value;
             api_request.port = 443;
             _api_endpoint.is_async = true;
-          return api_request;
+            return api_request;
         }
+
         /**
          *
          * @param host
@@ -90,11 +82,11 @@ package net.blaxstar.starlib.networking {
                 _backlog.push(request);
                 return;
             } else {
-              _api_endpoint.set_request_data(request);
+                _api_endpoint.set_request_data(request);
             }
 
             //_api_endpoint.add_complete_listener(test_on_complete);
-            
+
             _api_endpoint.connect();
         }
 
@@ -106,7 +98,7 @@ package net.blaxstar.starlib.networking {
                 _api_endpoint.endpoint = endpoint;
                 _api_endpoint.use_port = true;
                 _api_endpoint.is_async = false;
-                _api_endpoint.data_format = URL.DATA_FORMAT_BINARY;
+                _api_endpoint.content_type = URL.DATA_FORMAT_BINARY;
 
 
                 if (data) {
@@ -148,11 +140,11 @@ package net.blaxstar.starlib.networking {
         }
 
         public function get data_format():String {
-            return _api_endpoint.data_format;
+            return _api_endpoint.content_type;
         }
 
         public function set data_format(value:String):void {
-            _api_endpoint.data_format = value;
+            _api_endpoint.content_type = value;
         }
 
         private function on_response(e:Event):void {

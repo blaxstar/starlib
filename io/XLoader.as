@@ -11,6 +11,9 @@ package net.blaxstar.starlib.io {
     import flash.filesystem.File;
     import net.blaxstar.starlib.debug.DebugDaemon;
     import flash.net.FileFilter;
+    import flash.display.Loader;
+    import flash.display.LoaderInfo;
+    import flash.display.BitmapData;
 
     /**
      * an elite loader for loading all kinds of content.
@@ -71,7 +74,8 @@ package net.blaxstar.starlib.io {
 
                 if (current_item is URL) {
                     _queued_urls.push(current_item);
-                    _overall_total += (current_item as URL).bytesTotal;
+                    var total:int = (current_item as URL).bytes_total;
+                    _overall_total += total ? total : 0;
                 } else {
                     DebugDaemon.write_error("could not queue files: one of the parameters is not a URL object (net.blaxstar.starlib.io::URL). got: %s", getQualifiedClassName(current_item));
                 }
@@ -90,17 +94,15 @@ package net.blaxstar.starlib.io {
         // * PRIVATE * /////////////////////////////////////////////////////////////
 
         private function load_next():void {
-            var current_item:URL = _queued_urls[0];
 
-            if (current_item.data_format !== URL.DATA_FORMAT_GRAPHICS) {
-                current_item.addEventListener(IOErrorEvent.IO_ERROR, on_io_error);
-                current_item.addEventListener(SecurityErrorEvent.SECURITY_ERROR, on_security_error);
-                current_item.addEventListener(ProgressEvent.PROGRESS, on_progress);
-                current_item.dataFormat = current_item.data_format;
-                current_item.load_local(on_complete);
-            } else {
-                IOUtil.loadExternalDisplayObject(current_item.endpoint, on_complete_graphic, on_progress, on_io_error);
-            }
+            var current_item:URL = _queued_urls[0];
+            var complete_function:Function = current_item.content_type == URL.DATA_FORMAT_GRAPHICS ? on_complete_graphic : on_complete;
+
+            current_item.add_io_error_listener(on_io_error);
+            current_item.add_progress_listener(on_progress);
+            current_item.add_complete_listener(on_complete);
+            current_item.content_type = current_item.content_type;
+            current_item.load_local_file(complete_function);
         }
 
         private function dispatch_overall_progress():void {
@@ -150,12 +152,23 @@ package net.blaxstar.starlib.io {
             prepare_next();
         }
 
-        private function on_complete_graphic(e:Event):void {
-            var graphic_data:* = e.currentTarget.content;
-            ON_COMPLETE_GRAPHIC.dispatch(graphic_data);
+        private function on_complete_graphic(image_bytes:ByteArray):void {
+            var loader:Loader = new Loader();
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, image_parsing_complete);
+            loader.loadBytes(image_bytes);
+
             if (_queued_urls.length) {
                 prepare_next();
             }
+        }
+
+        private function image_parsing_complete(event:Event):void {
+            LoaderInfo(event.currentTarget).removeEventListener(Event.COMPLETE, image_parsing_complete);
+
+            var loader_info:LoaderInfo = LoaderInfo(event.target);
+            var bitmap_data:BitmapData = new BitmapData(loader_info.width, loader_info.height, false, 0xFFFFFF);
+            bitmap_data.draw(loader_info.loader);
+            ON_COMPLETE_GRAPHIC.dispatch(bitmap_data);
         }
 
         private function prepare_next():void {
