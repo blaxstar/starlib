@@ -20,7 +20,7 @@ package net.blaxstar.starlib.components {
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import net.blaxstar.starlib.debug.DebugDaemon;
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
 
     /**
      * ...
@@ -234,7 +234,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set hint_text(val:String):void {
-            if (StringUtil.is_empty_or_null(val)) {
+            if (Strings.is_empty_or_null(val)) {
                 _hint_text = "enter text...";
             } else {
                 _hint_text = val;

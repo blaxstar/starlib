@@ -1,4 +1,6 @@
 package net.blaxstar.starlib.debug.console.commands {
+  import net.blaxstar.starlib.debug.printf;
+
   public class ConsoleCommand {
     protected var _name:String;
     protected var _delegateFunction:Function;

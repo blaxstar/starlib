@@ -6,7 +6,7 @@ package net.blaxstar.starlib.components {
 
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.style.Style;
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
 
     /**
      * ...
@@ -139,14 +139,14 @@ package net.blaxstar.starlib.components {
                     DebugDaemon.write_error("cannot multi add items to list: an item is of an invalid type!");
                     return;
                 } else if (((items[i] as Array).length !== 2)) {
-                    DebugDaemon.write_error("cannot multi add items to list: one of the parameters are invalid! got: %s", StringUtil.from_array(items[i]));
+                    DebugDaemon.write_error("cannot multi add items to list: one of the parameters are invalid! got: %s", Strings.from_array(items[i]));
                     return;
                 }
 
                 var current_item:Array = items[i];
                 // ...then enforce the tuple type.
                 if (!(current_item[0] is String) || !(current_item[1] is Function)) {
-                    DebugDaemon.write_error("cannot multi add items to list: one of the parameters are invalid! got %s, expected [String, Function]", StringUtil.from_array(current_item));
+                    DebugDaemon.write_error("cannot multi add items to list: one of the parameters are invalid! got %s, expected [String, Function]", Strings.from_array(current_item));
                     return;
                 }
 

@@ -20,24 +20,27 @@ package net.blaxstar.starlib.debug.console {
     import net.blaxstar.starlib.io.URL;
     import net.blaxstar.starlib.io.XLoader;
     import net.blaxstar.starlib.style.Color;
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.org.osflash.signals.Signal;
     import net.blaxstar.starlib.debug.console.commands.PrintCommand;
     import net.blaxstar.starlib.debug.console.commands.EvalObjectCommand;
     import net.blaxstar.starlib.components.Component;
+    import flash.filesystem.FileStream;
+    import flash.filesystem.FileMode;
 
     public class DebugConsole extends Sprite {
         static private const _ON_DICTIONARY_INIT:Signal = new Signal();
 
         static private var _data:Dictionary;
-        private var _save_file:URL;
+        private const _save_file:File = File.applicationStorageDirectory.resolvePath("debugconsole.dat");
+        private var _filestream:FileStream;
         private var _save_bytes:ByteArray;
         private var _filePath:String;
         private var _input_engine:InputEngine;
         private var _input_field:InputTextField;
         private var _loader:XLoader;
-        private var _outputField:PlainText;
+        private var _output_field:PlainText;
         private var _prefixText:PlainText;
         private var _command_history_length:Number;
         private var _current_history_index:int;
@@ -65,7 +68,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function add_input_to_history(command:String):void {
-            var trimmedCommand:String = StringUtil.trim(command);
+            var trimmedCommand:String = Strings.trim(command);
             var commandIndex:int = command_history.indexOf(trimmedCommand);
 
             if (_navigatingHistory && _command_history_length) {
@@ -115,13 +118,21 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function load_save():void {
-            _loader.queue_files(_save_file);
-            _loader.ON_COMPLETE.add(on_save_loaded);
+            _filestream.open(_save_file, FileMode.READ);
+            _data = _filestream.readObject();
+            _filestream.close();
+
+            open_key = _input_engine.keys.TILDE;
+            _command_history_length = command_history.length;
+            _ON_DICTIONARY_INIT.dispatch();
         }
 
         public function write_save(update:Boolean = false):void {
-            pack_bytes();
-            IOUtil.exportFile(_save_bytes.toString(), 'console', '.dat', _filePath, null);
+
+            _filestream.open(_save_file, FileMode.WRITE);
+            _filestream.writeObject(_data);
+            _filestream.close();
+
             load_save();
         }
 
@@ -136,10 +147,7 @@ package net.blaxstar.starlib.debug.console {
 
         // * PRIVATE * /////////////////////////////////////////////////////////////
         private function init():void {
-            _filePath = File.applicationDirectory.nativePath;
-            _save_file = new URL(new File(_filePath + File.separator).resolvePath('console.dat').nativePath);
-            _save_file.content_type = URL.DATA_FORMAT_TEXT;
-            _loader = new XLoader();
+            _filestream = new FileStream();
             _data = new Dictionary();
             init_default_commands();
             _pipeline = new Pipe(command_dictionary);
@@ -168,8 +176,8 @@ package net.blaxstar.starlib.debug.console {
         private function init_text_fields():void {
             _prefixText = new PlainText(this, 0, 0, 'debug | ');
             _prefixText.color = Color.PRODUCT_RED.value;
-            _outputField = new PlainText(this, 0, 0);
-            _outputField.color = Color.PRODUCT_GREEN.value;
+            _output_field = new PlainText(this, 0, 0);
+            _output_field.color = Color.PRODUCT_GREEN.value;
             _input_field = new InputTextField(this, _prefixText.x + _prefixText.text_width, 0, '');
             _input_field.color = Color.EGGSHELL.value;
             _input_field.showing_underline = false;
@@ -207,17 +215,6 @@ package net.blaxstar.starlib.debug.console {
             write_save();
         }
 
-        private function pack_bytes():void {
-
-            if (!_save_bytes) {
-                _save_bytes = new ByteArray();
-            } else {
-                _save_bytes.clear();
-            }
-
-            _save_bytes.writeObject(_data);
-        }
-
         private function clear_history():void {
             _current_history_index = -1;
             _command_history_length = 0;
@@ -237,7 +234,7 @@ package net.blaxstar.starlib.debug.console {
                 outString += rest[i];
             }
 
-            _outputField.text = outString;
+            _output_field.text = outString;
         }
 
         private function resetHistoryNavigation():void {
@@ -334,17 +331,10 @@ package net.blaxstar.starlib.debug.console {
         }
 
         public function get save_exists():Boolean {
-            return _save_file.test_path_local;
+            return _save_file.exists;
         }
 
         // DELEGATES ///////////////////////////////////////
-        private function on_save_loaded(target:URL, data:ByteArray):void {
-            _data = data.readObject() as Dictionary;
-            open_key = _input_engine.keys.TILDE;
-            data.length = 0;
-            _command_history_length = command_history.length;
-            _ON_DICTIONARY_INIT.dispatch();
-        }
 
         private function onKeyPressInConsole(e:KeyboardEvent):void {
             if (e.keyCode == execute_key) {
@@ -388,8 +378,8 @@ package net.blaxstar.starlib.debug.console {
             g.drawRect(0, 0, stage.stageWidth, 60);
             g.endFill();
 
-            _input_field.width = _outputField.width = (stage.stageWidth - (Component.PADDING * 2));
-            _outputField.move(10, _input_field.height);
+            _input_field.width = _output_field.width = (stage.stageWidth - (Component.PADDING * 2));
+            _output_field.move(10, _input_field.height);
             _input_engine.add_keyboard_delegate(onToggleKeyPress, InputEngine.KEYDOWN);
         }
 

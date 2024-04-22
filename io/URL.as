@@ -8,7 +8,7 @@ package net.blaxstar.starlib.io {
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.networking.APIRequest;
     import net.blaxstar.starlib.networking.Connection;
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
     import flash.events.EventDispatcher;
     import flash.utils.Dictionary;
 
@@ -183,7 +183,7 @@ package net.blaxstar.starlib.io {
         }
 
         public function get filesize():int {
-            if (!_is_local || !StringUtil.is_valid_filepath(endpoint) || !_local_file) {
+            if (!_is_local || !Strings.is_valid_filepath(endpoint) || !_local_file) {
                 return -1;
             } else {
                 return _local_file.size;

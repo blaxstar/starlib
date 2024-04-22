@@ -1,5 +1,9 @@
 package net.blaxstar.starlib.utils {
-  public class ObjectUtil {
+  import flash.utils.ByteArray;
+  import avmplus.getQualifiedClassName;
+  import flash.utils.getDefinitionByName;
+
+  public class Objects {
     static public function getObjectClass(obj:*):Class {
         return getDefinitionByName(getQualifiedClassName(obj)) as Class;
     }

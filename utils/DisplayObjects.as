@@ -6,7 +6,7 @@ package net.blaxstar.starlib.utils {
   import flash.display.Sprite;
   import flash.geom.Matrix;
 
-  public class DisplayObjectUtil {
+  public class DisplayObjects {
     static public function setRegistrationPoint(s:Sprite, regx:Number, regy:Number, showRegistration:Boolean):void {
       s.transform.matrix = new Matrix(1, 0, 0, 1, -regx, -regy);
 

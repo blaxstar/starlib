@@ -10,7 +10,7 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.io.URL;
     import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPack;
     import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPackFlags;
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.org.osflash.signals.Signal;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
@@ -65,7 +65,7 @@ package net.blaxstar.starlib.networking {
             _bytes_total = -1;
 
             // * verify host string and port number
-            if (StringUtil.is_empty_or_null(_http_request_config.endpoint) || _http_request_config.port > 65535) {
+            if (Strings.is_empty_or_null(_http_request_config.endpoint) || _http_request_config.port > 65535) {
                 DebugDaemon.write_error("Invalid host address, cancelling connection " + "request. got: '%s:%i'", _http_request_config.endpoint, _http_request_config.port);
                 return;
             }
@@ -117,7 +117,7 @@ package net.blaxstar.starlib.networking {
             if (_num_request_vars) {
                 _http_request_config.query_path = _http_request_config.query_path.concat("?");
 
-                if (!StringUtil.is_empty_or_null(_http_request_vars)) {
+                if (!Strings.is_empty_or_null(_http_request_vars)) {
                     _http_request_config.query_path = _http_request_config.query_path.concat(_http_request_vars);
                 }
 

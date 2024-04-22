@@ -2,7 +2,7 @@ package net.blaxstar.starlib.components {
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
 
-    import net.blaxstar.starlib.utils.StringUtil;
+    import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.com.lorentz.SVG.data.style.StyleDeclaration;
     import thirdparty.com.lorentz.SVG.display.SVGDocument;
@@ -77,7 +77,7 @@ package net.blaxstar.starlib.components {
         private var _width_height_ratio:Number;
 
         public function Icon(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, url:String = '') {
-            if (!StringUtil.is_empty_or_null(url))
+            if (!Strings.is_empty_or_null(url))
                 _src = url;
             super(parent, xpos, ypos);
         }
