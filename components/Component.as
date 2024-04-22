@@ -278,7 +278,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set enabled(val:Boolean):void {
-            _enabled_ = mouseEnabled = mouseChildren = tabEnabled = val;
+            _enabled_ = mouseEnabled = mouseChildren = tabEnabled = tabChildren = val;
 
             alpha = _enabled_ ? 1.0 : 0.5;
         }

@@ -14,6 +14,7 @@ package net.blaxstar.starlib.networking {
 
     import thirdparty.org.osflash.signals.Signal;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import flash.utils.Dictionary;
 
     /**
      * TODO: documentation
@@ -92,7 +93,7 @@ package net.blaxstar.starlib.networking {
         }
 
         private function config_socket():void {
-            _socket.timeout = _REQUEST_TIMEOUT * _TIMEOUT_REPS;
+            _socket.timeout = _REQUEST_TIMEOUT; //* _TIMEOUT_REPS;
             on_connect_signal ||= new NativeSignal(_socket, Event.CONNECT, Event);
             on_progress_signal ||= new NativeSignal(_socket, ProgressEvent.SOCKET_DATA, ProgressEvent);
             on_close_signal ||= new NativeSignal(_socket, Event.CLOSE, Event);
@@ -140,15 +141,21 @@ package net.blaxstar.starlib.networking {
                     content_type_string = "text/plain";
                     break;
                 case URL.DATA_FORMAT_BINARY:
+                case URL.DATA_FORMAT_GRAPHICS:
                     content_type_string = "application/octet-stream";
                     break;
-                case URL.DATA_FORMAT_GRAPHICS:
+                case URL.DATA_FORMAT_JSON:
+                    content_type_string = "application/json";
                     break;
             }
 
-            header = header.concat("Content-Type: " + content_type_string + "\r\n");
+            var body_bytes:ByteArray = new ByteArray();
+            if (_http_request_config.http_request_data && _http_request_config.http_request_data.length) {
+                header = header.concat("Content-Type: " + content_type_string + "\r\n");
 
-
+                body_bytes.writeUTFBytes(build_body());
+                header = header.concat("Content-Length: " + body_bytes.length + "\r\n");
+            }
 
             if (_http_request_config.auth_type == URL.AUTH_BASIC) {
                 header = header.concat("Authorization: Basic " + _http_request_config.auth_value + "\r\n");
@@ -158,23 +165,71 @@ package net.blaxstar.starlib.networking {
 
             // TODO: currently, all responses are returned as 'chunked', which means `Connection: close` terminates too early, before all the data from the request comes in. the work around for now is to keep it set to `Connection: keep-alive`, and check for the termination of the data in the on_progress method. for synchronous streams, we will skip this check. will look into any possible solutions later.
             header = header.concat("Connection: keep-alive" + "\r\n");
+
+            var custom_headers:Dictionary = _http_request_config.custom_headers;
+
+            if (custom_headers) {
+                for (var custom_header:String in custom_headers) {
+                    header = header.concat(custom_header + ": " + custom_headers[custom_header] + "\r\n");
+                    delete custom_headers[custom_header];
+                }
+            }
+
             header = header.concat("\r\n");
+
+            if (_http_request_config.is_async) {
+                header = header.concat(body_bytes.toString());
+            }
 
             return header;
         }
 
         private function build_data_stream():ByteArray {
             var data_bytes:ByteArray = new ByteArray();
+            var body_data:Array = _http_request_config.http_request_data;
+            var content_type:String = _http_request_config.content_type;
 
-            for (var i:int = 0; i < _http_request_config.http_request_data.length; i++) {
-                if (_http_request_config.content_type == URL.DATA_FORMAT_TEXT) {
-                    data_bytes.writeUTFBytes(_http_request_config.http_request_data[i])
-                } else if (_http_request_config.content_type == URL.DATA_FORMAT_BINARY) {
-                    data_bytes.writeBytes(_http_request_config.http_request_data[i]);
+            for (var i:int = 0; i < body_data.length; i++) {
+                if (content_type == URL.DATA_FORMAT_TEXT) {
+                    data_bytes.writeUTFBytes(body_data[i])
+                } else if (content_type == URL.DATA_FORMAT_BINARY) {
+                    data_bytes.writeBytes(body_data[i]);
+                } else if (content_type == URL.DATA_FORMAT_JSON) {
+                    if (body_data.length == 1) {
+                        data_bytes.writeObject(JSON.stringify(body_data[0]));
+                    } else {
+                        for (var j:int = 0; j < body_data.length; i++) {
+                            data_bytes.writeObject(JSON.stringify(body_data[i]));
+                        }
+                    }
                 }
             }
 
             return data_bytes;
+        }
+
+        private function build_body():String {
+            var body:String = "";
+            var body_data:Array = _http_request_config.http_request_data;
+            var content_type:String = _http_request_config.content_type;
+
+            for (var i:int = 0; i < body_data.length; i++) {
+                if (content_type == URL.DATA_FORMAT_JSON) {
+                    if (body_data.length == 1) {
+                        body = body.concat(JSON.stringify(body_data[0]));
+                    } else {
+                        var final_json:Object = {};
+                        for (var j:int = 0; j < body_data.length; i++) {
+                            final_json[i] = JSON.stringify(body_data[i]);
+                        }
+                    }
+                } else {
+                    // TODO: content_type == application/octet-stream => write bytes to bytearray and use .toString() => add to body and return
+                    body = body.concat(String(body_data[i]));
+                }
+            }
+
+            return body;
         }
 
 
@@ -232,6 +287,7 @@ package net.blaxstar.starlib.networking {
         }
 
         private function on_connect(e:Event):void {
+            var full_ting:String = "";
             DebugDaemon.write_success("Connection successful to host %s:%i!", _http_request_config.endpoint, _http_request_config.port);
             // * build the header to be sent along with the request, but only if its an async request (not a persistent connection)
             if (_http_request_config.is_async) {
@@ -241,6 +297,8 @@ package net.blaxstar.starlib.networking {
             if (_http_request_config.http_request_data && _http_request_config.http_request_data.length > 0) {
                 // * check if http method is one of the 6 allowed options
                 if (http_method_is_valid) {
+                    // * if the reqest is async (an http request), the body will have to be a string sent attached to the header
+
                     // * compress the data with msgpack, if _compress is true
                     if (_compress) {
                         var request_data_bytes:ByteArray = new ByteArray();
@@ -249,10 +307,11 @@ package net.blaxstar.starlib.networking {
                     } else {
                         _socket.writeBytes(build_data_stream());
                     }
+
                 }
-                // * now write the data
-                _socket.flush();
             }
+            // * now write the data
+            _socket.flush();
             // * set busy status to false, since we sent what we need
             busy = false;
 
@@ -260,11 +319,11 @@ package net.blaxstar.starlib.networking {
 
         private function on_close(e:Event):void {
             // TODO: handle connection close
-
+            on_close_signal.dispatch();
         }
 
         private function on_io_error(e:IOErrorEvent):void {
-            DebugDaemon.write_debug(e.text);
+            on_io_error_signal.dispatch(e);
         }
 
 

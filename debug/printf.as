@@ -1,12 +1,12 @@
 package net.blaxstar.starlib.debug {
     /**
-     * Writes the string pointed by format to the standard output (flash debugger). If format includes format specifiers (subsequences beginning with %), the additional arguments following format are formatted and inserted in the resulting string replacing their respective specifiers.
-     * 
+     * Writes the string pointed by format to the standard output (as3 debugger). If format includes format specifiers (subsequences beginning with %), the additional arguments following format are formatted and inserted in the resulting string replacing their respective specifiers.
+     *
      * @author Deron Decamp (decamp.deron@gmail.com)
      */
 
     /**
-     * @param	format string that contains the text to be written to the flash debugger. It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.
+     * @param	format string that contains the text to be written to the as3 debugger. It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.
      * @param	rest additional args
      */
     public function printf(format:String, ... rest):String {

@@ -167,9 +167,15 @@ package net.blaxstar.starlib.components {
 
         public function set icon(val:String):void {
             _using_icon = true;
-            removeChild(_label);
-            _display_icon = new Icon(this);
-            _display_icon.setSVGXML(val);
+
+            if (_label && _label.parent) {
+                removeChild(_label);
+            }
+            if (!_display_icon) {
+                _display_icon = new Icon(this);
+            }
+
+            _display_icon.set_svg_xml(val);
             _display_icon.addEventListener(Icon.ICON_LOADED, on_icon_loaded);
             _width_ = 32;
             _height_ = 32;

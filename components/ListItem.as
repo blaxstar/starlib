@@ -12,6 +12,7 @@ package net.blaxstar.starlib.components {
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.display.Graphics;
     import net.blaxstar.starlib.style.RGBA;
+    import net.blaxstar.starlib.math.Arithmetic;
 
     /**
      * ...
@@ -93,17 +94,22 @@ package net.blaxstar.starlib.components {
             g.clear();
             if (_fill_parent && parent) {
                 _width_ = parent.width;
+            } else if (!_fill_parent) {
+                _width_ = Math.max(_width_, _label.width);
             }
+
             if (_is_glowing) {
                 g.beginFill(_glow_color.value, 0.3);
             } else {
                 g.beginFill(0, 0);
             }
+
             if (_is_rounded) {
                 g.drawRoundRect(0, 0, _width_, _height_, 7);
             } else {
                 g.drawRect(0, 0, _width_, _height_);
             }
+
             g.endFill();
 
             super.draw();

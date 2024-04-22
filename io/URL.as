@@ -10,6 +10,7 @@ package net.blaxstar.starlib.io {
     import net.blaxstar.starlib.networking.Connection;
     import net.blaxstar.starlib.utils.StringUtil;
     import flash.events.EventDispatcher;
+    import flash.utils.Dictionary;
 
     /**
      * TODO: documentation
@@ -258,6 +259,10 @@ package net.blaxstar.starlib.io {
 
         public function get auth_value():String {
             return _request_data.auth_value;
+        }
+
+        public function get custom_headers():Dictionary {
+            return _request_data.custom_headers;
         }
 
         public function get port():uint {

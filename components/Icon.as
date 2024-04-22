@@ -11,6 +11,8 @@ package net.blaxstar.starlib.components {
     import thirdparty.com.lorentz.SVG.utils.DisplayUtils;
     import thirdparty.org.osflash.signals.Signal;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import flash.utils.Dictionary;
+    import flash.display.Graphics;
 
     /**
      * ...
@@ -67,6 +69,8 @@ package net.blaxstar.starlib.components {
         static public const YOUTUBE_ADD:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M12.771 14.458q-.542.021-1.042.032-.5.01-.896.01H10q-1.417 0-2.646-.042-1.062-.041-2.094-.104-1.031-.062-1.51-.187-.521-.146-.896-.511-.375-.364-.521-.885-.125-.459-.187-1.104-.063-.646-.104-1.25Q2 9.729 2 9q0-.729.042-1.417.041-.604.104-1.25.062-.645.187-1.104.146-.521.521-.885.375-.365.896-.511.479-.125 1.51-.187 1.032-.063 2.094-.104Q8.583 3.5 10 3.5q1.417 0 2.667.042 1.041.041 2.073.104 1.031.062 1.51.187.521.146.896.511.375.364.521.885.125.459.187 1.104.063.646.104 1.25Q18 8.271 18 9v.292q-.354-.146-.729-.219Q16.896 9 16.5 9q-1.667 0-2.833 1.167Q12.5 11.333 12.5 13q0 .375.073.74.073.364.198.718Zm-4.354-3.104L12.583 9 8.417 6.646ZM15.75 15.5v-1.75H14v-1.5h1.75V10.5h1.5v1.75H19v1.5h-1.75v1.75Z"/></svg>';
         static public const YOUTUBE_SEARCHED:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="m16.938 17-4.98-4.979q-.625.458-1.375.719Q9.833 13 9 13q-.771 0-1.458-.219-.688-.219-1.292-.614l1.104-1.105q.375.188.781.313.407.125.865.125 1.458 0 2.479-1.021Q12.5 9.458 12.5 8q0-1.458-1.021-2.479Q10.458 4.5 9 4.5q-1.458 0-2.479 1.021Q5.5 6.542 5.5 8l1.104-1.062L7.667 8l-2.834 2.833L2 8l1.062-1.062.938.958q.042-2.042 1.49-3.469T9 3q2.083 0 3.542 1.458Q14 5.917 14 8q0 .833-.26 1.583-.261.75-.719 1.375L18 15.938Z"/></svg>';
 
+        static private const _ICON_CACHE:Dictionary = new Dictionary();
+
         private var _src:String;
         private var _doc:SVGDocument;
         private var _is_rendered:Boolean;
@@ -93,22 +97,36 @@ package net.blaxstar.starlib.components {
             _width_ = _height_ = 16;
 
             _doc = new SVGDocument();
-            _doc.addEventListener(SVGEvent.RENDERED, init2);
+            _doc.addEventListener(SVGEvent.RENDERED, on_doc_parse);
             if (_src) {
-                _doc.load(_src);
+                set_svg_xml(_src);
             }
         }
 
-        private function init2(e:SVGEvent):void {
-            _doc.removeEventListener(SVGEvent.RENDERED, init2);
-            dispatchEvent(new Event(ICON_LOADED));
+        private function on_doc_parse(e:SVGEvent = null):void {
+            if (e) {
+                _doc.removeEventListener(SVGEvent.RENDERED, on_doc_parse);
+            }
+
+            if (!doc_in_cache(_src)) {
+                var clone:SVGDocument = _doc.clone() as SVGDocument;
+                clone.autoAlign = true;
+                _ICON_CACHE[src] = clone;
+            }
+
+            if (!_doc.parent) {
+                add_children();
+                on_added_signal.addOnce(draw);
+            }
+
             _is_rendered = true;
-            add_children();
-            on_added_signal.addOnce(draw);
-            _width_ = _doc.width;
-            _height_ = _doc.height;
-            _width_height_ratio = _height_ / _width_;
+
+
+            //_width_ = _doc.width;
+            //_height_ = _doc.height;
+            //_width_height_ratio = _height_ / _width_;
             set_color();
+            dispatchEvent(new Event(ICON_LOADED));
             dispatchEvent(new Event(Event.RESIZE));
         }
 
@@ -140,19 +158,29 @@ package net.blaxstar.starlib.components {
             e.style.setProperty('fill', colorCode);
         }
 
-        public function setSVGXML(svgString:String):void {
-            var s:StyleDeclaration = new StyleDeclaration();
-            _src = '';
-            _doc.clear();
+        public function set_svg_xml(svg_string:String):void {
             _is_rendered = false;
-            _doc.autoAlign = true;
-            _doc.addEventListener(SVGEvent.RENDERED, init2);
-            _doc.parse(svgString);
+            _src = svg_string;
+
+            if (doc_in_cache(src)) {
+                removeChild(_doc);
+                _doc = _ICON_CACHE[src];
+                on_doc_parse(null);
+            } else {
+                _doc.autoAlign = true;
+                _doc.addEventListener(SVGEvent.RENDERED, on_doc_parse);
+                _doc.parse(svg_string);
+            }
+        }
+
+        private function doc_in_cache(src:String):Boolean {
+            return _ICON_CACHE.hasOwnProperty(src);
         }
 
         override public function set_size(w:Number, h:Number):void {
             if (!_is_rendered) {
-                queue_function(arguments.callee, w, h);
+                queue_function(set_size, w, h);
+                return;
             }
             super.set_size(w, h);
         }
@@ -163,15 +191,6 @@ package net.blaxstar.starlib.components {
 
         public function get src():String {
             return _src;
-        }
-
-        public function set src(val:String):void {
-            if (StringUtil.is_empty_or_null(val))
-                return;
-            _src = val;
-            _doc.clear();
-            _is_rendered = false;
-            _doc.load(_src);
         }
     }
 

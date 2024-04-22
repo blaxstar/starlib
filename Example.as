@@ -60,11 +60,11 @@ package {
             var ccheck_icon:Icon = new Icon(h_icon_set);
             var new_content_icon:Icon = new Icon(h_icon_set);
             /** Icon.setSVGXML allows drawing an icon from an SVG XML string. the Icon class has some of these built in from google's material components, so we'll use 5 of those: */
-            heart_icon.setSVGXML(Icon.HEART);
-            download_icon.setSVGXML(Icon.DOWNLOAD);
-            gamepad_icon.setSVGXML(Icon.VG_CONTROLLER);
-            ccheck_icon.setSVGXML(Icon.CHECKMARK_CIRCLED);
-            new_content_icon.setSVGXML(Icon.NEW_CONTENT);
+            heart_icon.set_svg_xml(Icon.HEART);
+            download_icon.set_svg_xml(Icon.DOWNLOAD);
+            gamepad_icon.set_svg_xml(Icon.VG_CONTROLLER);
+            ccheck_icon.set_svg_xml(Icon.CHECKMARK_CIRCLED);
+            new_content_icon.set_svg_xml(Icon.NEW_CONTENT);
             /** the addChild method of the Dialog component automatically adds the object to a child of the Dialog instead, which is actually just a vertical box. same as HorizontalBox above, just vertical. combining these two makes UI layouts much easier to work with! */
             dialog_1.addChild(h_icon_set);
 

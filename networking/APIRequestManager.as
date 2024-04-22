@@ -7,6 +7,7 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.io.URL;
 
     import thirdparty.org.osflash.signals.Signal;
+    import flash.events.IOErrorEvent;
 
     /**
      * ...
@@ -49,10 +50,14 @@ package net.blaxstar.starlib.networking {
             api_request.query_path = query_path;
 
             if (body_data) {
-
-                for (var item:Object in body_data) {
-                    api_request.add_body_data(body_data[item]);
+                if (content_type_header == URL.DATA_FORMAT_JSON) {
+                    api_request.add_body_data(body_data);
+                } else {
+                    for (var item:Object in body_data) {
+                        api_request.add_body_data(body_data[item]);
+                    }
                 }
+
             }
 
             if (query_variables) {
@@ -86,7 +91,10 @@ package net.blaxstar.starlib.networking {
             }
 
             _api_endpoint.add_complete_listener(on_request_complete);
-
+            _api_endpoint.add_io_error_listener(function(error:IOErrorEvent):void {
+                DebugDaemon.write_debug("[APIMAN] ioerror occured: " + error);
+                ON_ERROR.dispatch(error);
+            });
             _api_endpoint.connect();
         }
 

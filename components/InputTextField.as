@@ -119,6 +119,8 @@ package net.blaxstar.starlib.components {
                 _text_field.textColor = Style.TEXT.value;
                 if (_is_password_field) {
                     _text_field.displayAsPassword = true;
+                } else {
+                    _text_field.displayAsPassword = _is_password_field;
                 }
                 // set the text
                 _text_field.text = _textfield_string;
@@ -220,7 +222,9 @@ package net.blaxstar.starlib.components {
         }
 
         public function set text(val:String):void {
-            _is_hinting = false;
+            if (val != "") {
+                _is_hinting = false;
+            }
             _textfield_string = val;
             draw();
         }
@@ -323,6 +327,10 @@ package net.blaxstar.starlib.components {
             }
             _showing_underline = val;
             draw();
+        }
+
+        public function get display_as_password():Boolean {
+            return _is_password_field;
         }
 
         public function set display_as_password(val:Boolean):void {

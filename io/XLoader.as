@@ -148,6 +148,7 @@ package net.blaxstar.starlib.io {
 
         private function on_complete(bytes:ByteArray):void {
             _total_loaded += bytes.bytesAvailable;
+            bytes.position = 0;
             ON_COMPLETE.dispatch(bytes);
             prepare_next();
         }

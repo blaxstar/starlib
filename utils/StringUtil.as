@@ -13,7 +13,7 @@ package net.blaxstar.starlib.utils {
       return (val == "");
     }
 
-    static public function isValidEmail(email:String):Boolean {
+    static public function is_valid_email(email:String):Boolean {
       var emailExpression:RegExp = /([a-z0-9._-]+?)@([a-z0-9.-]+)\.([a-z]{2,4})/i;
       return emailExpression.test(email);
     }
@@ -146,36 +146,42 @@ package net.blaxstar.starlib.utils {
         return aA > bA ? 1 : -1;
     }
 
-    static public function levenshtein(a:String, b:String):int {
+    /**
+     * uses the levenshtein algorithm to determine the difference in two strings.
+     * @param string_a 
+     * @param string_b 
+     * @return an integer denoting how many characters are different in one string than the other.
+     */
+    static public function levenshtein(string_a:String, string_b:String):int {
       var matrix:Array = [];
-      var aLen:int = a.length;
-      var bLen:int = b.length;
+      var string_a_length:int = string_a.length;
+      var string_b_length:int = string_b.length;
 
-      for (var i:int = 0; i <= aLen; i++) {
-        matrix[i] = new Array(bLen + 1);
+      for (var i:int = 0; i <= string_a_length; i++) {
+        matrix[i] = new Array(string_b_length + 1);
         matrix[i][0] = i;
       }
 
-      for (var j:int = 0; j <= bLen; j++) {
+      for (var j:int = 0; j <= string_b_length; j++) {
         matrix[0][j] = j;
       }
 
-      for (i = 1; i <= aLen; i++) {
-        for (j = 1; j <= bLen; j++) {
-          var cost:int = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
+      for (i = 1; i <= string_a_length; i++) {
+        for (j = 1; j <= string_b_length; j++) {
+          var cost:int = (string_a.charAt(i - 1) == string_b.charAt(j - 1)) ? 0 : 1;
           matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
         }
       }
 
-      return matrix[aLen][bLen];
+      return matrix[string_a_length][string_b_length];
     }
 
     static private var mStrings:Object = {};
 
-    static public function formatJSON(serializedJSON:String, useTabs:Boolean = false):String {
+    static public function format_json(serializedJSON:String, useTabs:Boolean = false):String {
       // Save backslashes in strings and strings, so that they were not modified during the formatting.
-      serializedJSON = serializedJSON.replace(/(\\.)/g, formatJSON_SaveString);
-      serializedJSON = serializedJSON.replace(/(".*?"|'.*?')/g, formatJSON_SaveString);
+      serializedJSON = serializedJSON.replace(/(\\.)/g, format_json_save_string);
+      serializedJSON = serializedJSON.replace(/(".*?"|'.*?')/g, format_json_save_string);
       // Remove white spaces
       serializedJSON = serializedJSON.replace(/\s+/, "");
 
@@ -187,14 +193,14 @@ package net.blaxstar.starlib.utils {
         switch (char) {
           case "{":
           case "[":
-            result += char + "\n" + formatJSON_MakeTabs(++ indent, useTabs);
+            result += char + "\n" + format_json_make_tabs(++ indent, useTabs);
             break;
           case "}":
           case "]":
-            result += "\n" + formatJSON_MakeTabs(-- indent, useTabs) + char;
+            result += "\n" + format_json_make_tabs(-- indent, useTabs) + char;
             break;
           case ",":
-            result += ",\n" + formatJSON_MakeTabs(indent, useTabs);
+            result += ",\n" + format_json_make_tabs(indent, useTabs);
             break;
           case ":":
             result += ": ";
@@ -205,19 +211,19 @@ package net.blaxstar.starlib.utils {
         }
       }
 
-      result = result.replace(/\{\s+\}/g, formatJSON_StripWhiteSpace);
-      result = result.replace(/\[\s+\]/g, formatJSON_StripWhiteSpace);
-      result = result.replace(/\[[\d,\s]+?\]/g, formatJSON_StripWhiteSpace);
+      result = result.replace(/\{\s+\}/g, format_json_strip_whitespace);
+      result = result.replace(/\[\s+\]/g, format_json_strip_whitespace);
+      result = result.replace(/\[[\d,\s]+?\]/g, format_json_strip_whitespace);
 
       // restore strings
-      result = result.replace(/\\(\d+)\\/g, formatJSON_RestoreString);
+      result = result.replace(/\\(\d+)\\/g, format_json_restore_string);
       // restore backslashes in strings
-      result = result.replace(/\\(\d+)\\/g, formatJSON_RestoreString);
+      result = result.replace(/\\(\d+)\\/g, format_json_restore_string);
 
       return result;
     }
 
-    static private function formatJSON_SaveString(...args):String {
+    static private function format_json_save_string(...args):String {
       var string:String = args[0];
       var index:uint = uint(args[2]);
 
@@ -226,17 +232,17 @@ package net.blaxstar.starlib.utils {
       return "\\" + args[2] + "\\";
     }
 
-    static private function formatJSON_RestoreString(...args):String {
+    static private function format_json_restore_string(...args):String {
       var index:uint = uint(args[1]);
       return mStrings[index];
     }
 
-    static private function formatJSON_StripWhiteSpace(...args):String {
+    static private function format_json_strip_whitespace(...args):String {
       var value:String = args[0];
       return value.replace(/\s/g, '');
     }
 
-    static private function formatJSON_MakeTabs(count:int, useTabs:Boolean):String {
+    static private function format_json_make_tabs(count:int, useTabs:Boolean):String {
       return new Array(count + 1).join(useTabs ? "\t" : "     ");
     }
   }

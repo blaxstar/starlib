@@ -13,11 +13,12 @@ package net.blaxstar.starlib.networking {
         private var _auth_type:String;
         private var _auth_value:String;
         private var _content_type_header:String;
+        private var _custom_headers:Dictionary;
         private var _http_request_vars:Dictionary;
         private var _num_request_vars:uint;
 
-        public function APIRequest(name:String="server") {
-          _name = name;
+        public function APIRequest(name:String = "server") {
+            _name = name;
         }
 
         /**
@@ -41,6 +42,13 @@ package net.blaxstar.starlib.networking {
 
         }
 
+        public function add_custom_header(header_name:String, header_value:String):void {
+            if (!_custom_headers) {
+                _custom_headers = new Dictionary();
+            }
+            _custom_headers[header_name] = header_value;
+        }
+
         /**
          * adds some data to the body of this request.
          * @param data the data to add.
@@ -53,7 +61,7 @@ package net.blaxstar.starlib.networking {
         }
 
         public function clear_body_data():void {
-          _http_request_data.length = 0;
+            _http_request_data.length = 0;
         }
 
         // * GETTERS & SETTERS * //
@@ -102,20 +110,24 @@ package net.blaxstar.starlib.networking {
             _content_type_header = value;
         }
 
+        public function get custom_headers():Dictionary {
+            return _custom_headers;
+        }
+
         public function get request_variables_compiled():String {
-          var compiled:String = "";
-          var num_appended:uint = 0;
-          for (var s:String in _http_request_vars) {
-            compiled = compiled.concat(s).concat("=").concat(_http_request_vars[s]);
-            if (num_appended < (_num_request_vars-1)) {
-              compiled = compiled.concat("&");
+            var compiled:String = "";
+            var num_appended:uint = 0;
+            for (var s:String in _http_request_vars) {
+                compiled = compiled.concat(s).concat("=").concat(_http_request_vars[s]);
+                if (num_appended < (_num_request_vars - 1)) {
+                    compiled = compiled.concat("&");
+                }
             }
-          }
-          return compiled;
+            return compiled;
         }
 
         public function get body_data():Array {
-          return _http_request_data;
+            return _http_request_data;
         }
 
         public function get query_path():String {
@@ -126,7 +138,7 @@ package net.blaxstar.starlib.networking {
             _query_path = value;
         }
 
-        
+
         public function set auth_type(value:String):void {
             _auth_type = value;
         }

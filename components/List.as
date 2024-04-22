@@ -1,15 +1,12 @@
 package net.blaxstar.starlib.components {
-    import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.utils.Dictionary;
 
-    import net.blaxstar.starlib.style.Style;
     import net.blaxstar.starlib.debug.DebugDaemon;
+    import net.blaxstar.starlib.style.Style;
     import net.blaxstar.starlib.utils.StringUtil;
-    import net.blaxstar.starlib.style.Color;
-    import thirdparty.com.greensock.TweenLite;
 
     /**
      * ...
@@ -48,9 +45,6 @@ package net.blaxstar.starlib.components {
             super.init();
         }
 
-        /**
-         * initializes and adds all required children of the component.
-         */
         override public function add_children():void {
             _item_container = new VerticalBox();
             _item_container.spacing = 0;
@@ -61,22 +55,20 @@ package net.blaxstar.starlib.components {
             _item_container.addEventListener(MouseEvent.RELEASE_OUTSIDE, on_item_rollout);
         }
 
-        /**
-         * (re)draws the component and applies any pending visual changes.
-         */
         override public function draw(e:Event = null):void {
             if (_item_container.numChildren > 0) {
                 _item_container.removeChildren();
             }
 
-            for (var i:uint; i < _items.length; i++) {
+            var number_of_items:uint = _items.length;
+            for (var i:uint; i < number_of_items; i++) {
                 _item_container.addChild(_items[i]);
-                _width_ = Math.max(_list_width, _items[i].label_component.width + PADDING);
+                _width_ = Math.max(_list_width, _items[i].label_component.width);
             }
 
             _height_ = _background_card.height = _item_container.height;
-            _background_card.width = _list_width;
-            deselect_all_items();
+            _background_card.width = _width_;
+            _background_card.height = _item_height * number_of_items;
             super.draw();
         }
 
@@ -86,39 +78,45 @@ package net.blaxstar.starlib.components {
 
         public function add_item(list_item:ListItem):List {
             if (list_item != null) {
-
                 _items.push(list_item);
-                list_item.set_size(_list_width, _item_height + PADDING);
+                list_item.set_size(_list_width, _item_height);
                 list_item.on_resize_signal.add(on_item_resize);
                 list_item.on_rollover.add(on_item_rollover);
                 list_item.on_rollout.add(on_item_rollout);
                 list_item.on_click.add(on_item_click);
                 list_item.mouseChildren = false;
 
-                if (_custom_delegates) {
+                if (_custom_delegates && _custom_delegates.length > 0) {
                     for (var j:uint = 0; j < _custom_delegates.length; j++) {
                         list_item.on_click.add(_custom_delegates[j]);
                     }
                     _item_container.addChild(list_item);
                 }
+
                 draw();
             }
             return this;
         }
 
-        public function add_item_at(li:ListItem, index:uint = 0):List {
-            if (li) {
-                _items.splice(index, 0, li);
+        public function add_item_at(list_item:ListItem, index:uint = 0):List {
+            if (list_item) {
+                _items.splice(index, 0, list_item);
                 commit();
             }
             return this;
         }
 
-        public function multi_add_string_array(itemStringArray:Array, listener:Function = null):void {
-            for (var i:uint = 0; i < itemStringArray.length; i++) {
+        /**
+         * Creates list items from an array of strings, with a single optional listener.
+         * @param item_string_array an array of strings for each label in the list.
+         * @param listener a single listener for handling item clicks with the items created from `item_string_array`.
+         */
+        public function multi_add_string_array(item_string_array:Array, listener:Function = null):void {
+            for (var i:uint = 0; i < item_string_array.length; i++) {
 
-                if (itemStringArray[i] is String) {
-                    var new_list_item:ListItem = new ListItem(null, 0, 0, itemStringArray[i]);
+                if (item_string_array[i] is String) {
+                    var new_list_item:ListItem = new ListItem(null, 0, 0, item_string_array[i]);
+                    _list_width = Math.max(_list_width, new_list_item.width);
                     new_list_item.width = _list_width;
                     add_item(new_list_item);
 
@@ -130,6 +128,7 @@ package net.blaxstar.starlib.components {
         }
 
         /**
+         * Creates list items from an array of tuples.
          * @param items an array of tuples (string,function).
          */
         public function multi_add(items:Array):void {
@@ -245,7 +244,10 @@ package net.blaxstar.starlib.components {
         }
 
         public function deselect_all_items():void {
-            _background_card.clear_highlight();
+            if (_selected_item) {
+                _selected_item.is_glowing = false;
+                _selected_item = null;
+            }
         }
 
         override public function destroy():void {
@@ -261,7 +263,8 @@ package net.blaxstar.starlib.components {
         / * PRIVATE METHODS * /;
 
         private function select_item(list_item:ListItem):void {
-            _background_card.mouseChildren = false;
+            _selected_item = list_item;
+            list_item.is_glowing = true;
         }
 
         / * GETTERS, SETTERS * /;
