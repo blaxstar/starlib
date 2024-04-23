@@ -369,7 +369,7 @@ package net.blaxstar.starlib.components {
 
         private function on_key_press(e:KeyboardEvent):void {
             var pressedKey:uint = e.keyCode;
-            var keyName:String = _input_engine.getKeyName(e.keyCode).toLowerCase();
+            var keyName:String = _input_engine.get_key_name(e.keyCode).toLowerCase();
 
             if (_input_engine.mod_is_down())
                 return;

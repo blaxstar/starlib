@@ -89,11 +89,11 @@
         }
 
         /**
-         * returns the controller that corresponds to `player_id`. if the referenced gamepad is not found, this throws an error.
+         * returns the controller that corresponds to `player_id`. if the referenced gamepad is not found, this returns null.
          * @param player_id the controller's id.
-         * @return a gamepad object for managing a specific controller.
+         * @return a gamepad object for managing a specific controller if found; null otherwise.
          */
-        public function getController(player_id:uint):Gamepad {
+        public function get_controller(player_id:uint):Gamepad {
             // first check the number of gamepads available
             var controllers:uint = num_controllers();
             // if there are none connected (or detected by the system)...
@@ -101,7 +101,8 @@
                 // and the controller with the referenced id doesn't exist...
                 if (player_id > controllers) {
                     // then just throw an error.
-                    DebugDaemon.write_log("controller #%s not detected!", DebugDaemon.ERROR, player_id);
+                    DebugDaemon.write_warning("controller #%s not detected!", player_id);
+                    return null;
                 } else {
                     // otherwise, return the gamepad at the referenced index.
                     // TODO: might need to wildcard the return type.
@@ -136,7 +137,7 @@
          * @param key the keycode to perform a name lookup on.
          * @return name of the key referenced by `key`.
          */
-        public function getKeyName(key:Number):String {
+        public function get_key_name(key:Number):String {
             // key codes 0-7 are reserved and do not represent any physical keys on a typical keyboard.
             if (key <= 7 || !_KEYS.NAMES[key])
                 return "NONE";
@@ -293,11 +294,11 @@
          */
         private function init_gamepad(e:Event = null):void {
             if (stage) {
-                if (!GamepadBus.isInitialized) {
+                if (!GamepadBus.is_initialized) {
                     GamepadBus.initialize(stage, init_gamepad);
                 }
-                while (GamepadBus.hasReadyController()) {
-                    _gamepads.push(GamepadBus.getReadyController());
+                while (GamepadBus.has_ready_controller()) {
+                    _gamepads.push(GamepadBus.get_ready_controller());
                 }
             } else {
                 addEventListener(Event.ADDED_TO_STAGE, init_gamepad);

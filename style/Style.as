@@ -17,7 +17,7 @@ import flash.display.StageScaleMode;
 		static public const DARK:uint = 1;
 
 		static public var CURRENT_THEME:uint = LIGHT;
-		/*
+		/**
 		 * Color that appears most frequently across app screens and components.
 		 */
 		static public var PRIMARY:RGBA;
@@ -73,7 +73,7 @@ import flash.display.StageScaleMode;
      */
 		static public function init(main:DisplayObjectContainer):void
 		{
-			setTheme(DARK);
+			set_theme(DARK);
 			main.stage.color = BACKGROUND.value;
 			main.stage.align = StageAlign.TOP_LEFT;
 			main.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -85,7 +85,7 @@ import flash.display.StageScaleMode;
      * @param style the id of the style to select.
      * @return void
      */
-		static public function setTheme(style:uint):void
+		static public function set_theme(style:uint):void
 		{
 			switch (style)
 			{

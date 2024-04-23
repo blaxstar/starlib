@@ -31,31 +31,31 @@ package net.blaxstar.starlib.debug.console {
             _command_objects = new Vector.<ConsoleCommand>();
             // next we loop through the array of pipe-seperated commands
             for (var i:int = 0; i < _commands.length; i++) {
-                var current_pipeline:String = _commands[i];
-                var cmd_matches:Array = current_pipeline.match(COMMAND);
+                var current_pipe_section:String = _commands[i];
+                var command_format_matches:Array = current_pipe_section.match(COMMAND);
                 // if the current pipe command doesnt match the expected format, then skip it
-                if (!cmd_matches) {
+                if (!command_format_matches) {
                     continue;
                 }
                 // if it does then we can parse the command string and arg strings seperately
-                var cmd:String = current_pipeline.match(COMMAND)[0];
-                var args:Array = current_pipeline.match(SWITCHES);
+                var current_command_name:String = current_pipe_section.match(COMMAND)[0];
+                var current_command_arguments:Array = current_pipe_section.match(SWITCHES);
                 // and then find the command within the command dictionary
-                var current_command:ConsoleCommand = _command_dictionary[cmd] || _command_dictionary[cmd.toLowerCase()];
+                var current_command:ConsoleCommand = _command_dictionary[current_command_name] || _command_dictionary[current_command_name.toLowerCase()];
                 // if we can find it, then we can simply set or push the arguments depending if args were already set manually
                 if (current_command != null) {
                     _command_objects.push(current_command);
 
-                    if (args && args.length) {
+                    if (current_command_arguments && current_command_arguments.length) {
                         if (current_command.argument_array.length) {
-                            current_command.push_args(args);
+                            current_command.push_args(current_command_arguments);
                         } else {
-                            current_command.set_args(args);
+                            current_command.set_args(current_command_arguments);
                         }
                     }
                 } else {
                   // otherwise, the command is not valid, we can skip it
-                    trace("Invalid command: " + cmd);
+                    trace("Invalid command: " + current_command_name);
                 }
             }
 
@@ -78,14 +78,14 @@ package net.blaxstar.starlib.debug.console {
             }
         }
 
-        static private function connect(prev_command:ConsoleCommand, next_command:ConsoleCommand):* {
-            var com1_out:* = prev_command.execute();
-            var all_args:Array = [];
+        static private function connect(command_0:ConsoleCommand, command_1:ConsoleCommand):* {
+            var command_0_output:* = command_0.execute();
+            var piped_arguments:Array = [];
 
-            all_args = next_command.argument_array;
-            all_args.push(com1_out);
+            piped_arguments = command_1.argument_array;
+            piped_arguments.push(command_0_output);
 
-            return next_command.execute();
+            return command_1.execute();
         }
 
         public function get result():* {

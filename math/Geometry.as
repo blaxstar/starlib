@@ -1,79 +1,85 @@
 package net.blaxstar.starlib.math {
+
   import flash.display.DisplayObject;
   import flash.geom.Point;
   import flash.geom.Rectangle;
 
   public class Geometry {
     /**
-     * <b>Checks if a rectangle contains a point.</b>
-     * @param   A Rectangle to use for checking.
-     * @param   B Point to use for checking.
-     * @return
+     * Checks if a rectangle contains a point.
+     * @param rectangle Rectangle to use for checking.
+     * @param point Point to use for checking.
+     * @return true if the rectangle contains the point; false if otherwise
      */
-    static public function rectContainsPoint(A:Rectangle, B:Point):Boolean {
-      return (B.x > A.x)
-        && (B.x < A.x + A.width)
-        && (B.y > A.y)
-        && (B.y < A.y + A.height);
+    static public function rect_contains_point(rectangle:Rectangle, point:Point):Boolean {
+
+      return (point.x > rectangle.x)
+        && (point.x < rectangle.x + rectangle.width)
+        && (point.y > rectangle.y)
+        && (point.y < rectangle.y + rectangle.height);
     }
 
-    static public function localToGlobalRect(rec:Rectangle, targetCoordinateSpace:DisplayObject):Rectangle {
-      var topLeft:Point = targetCoordinateSpace.localToGlobal(rec.topLeft);
-      var bottomRight:Point = targetCoordinateSpace.localToGlobal(rec.bottomRight);
-      var rect:Rectangle = new Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+    static public function local_to_global_rect(local_rectangle:Rectangle, target_coordinate_space:DisplayObject):Rectangle {
+      
+      var top_left:Point = target_coordinate_space.localToGlobal(local_rectangle.topLeft);
+      var bottom_right:Point = target_coordinate_space.localToGlobal(local_rectangle.bottomRight);
 
-      return rect;
+      var global_rect:Rectangle = new Rectangle(top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y);
+
+      return global_rect;
     }
 
-    static public function flipRectangle(rec:Rectangle, scale:int = -1):Rectangle {
-      rec.x = (scale == -1) ? (rec.left - rec.right) - rec.x : (rec.right + rec.width) + rec.x;
-      return rec;
+    static public function flip_rectangle(rectangle:Rectangle, scale_value:int = -1):Rectangle {
+      rectangle.x = (scale_value == -1) ? (rectangle.left - rectangle.right) - rectangle.x : (rectangle.right + rectangle.width) + rectangle.x;
+      return rectangle;
     }
 
     /**
-     * @param rect
-     * @param targetCoordinateSpace
-     * @return
-     *
+     * 
+     * @param rectangle 
+     * @param target_coordinate_space 
+     * @return 
      */
-    static public function globalToLocalRect(rect:Rectangle, targetCoordinateSpace:DisplayObject):Rectangle {
-      var topLeft:Point = rect.topLeft;
-      var bottomRight:Point = rect.bottomRight;
-      topLeft = targetCoordinateSpace.globalToLocal(topLeft);
-      ;
-      bottomRight = targetCoordinateSpace.globalToLocal(bottomRight);
-      return new Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+    static public function global_to_local_rect(rectangle:Rectangle, target_coordinate_space:DisplayObject):Rectangle {
+      var top_left:Point = rectangle.topLeft;
+      var bottom_right:Point = rectangle.bottomRight;
+      top_left = target_coordinate_space.globalToLocal(top_left);
+
+      bottom_right = target_coordinate_space.globalToLocal(bottom_right);
+      return new Rectangle(top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y);
     }
 
-    static public function getRectangleCenter(rec:Rectangle):Point {
-      return new Point((rec.x + rec.width) * .5, (rec.y + rec.height) * .5);
+    static public function get_rectangle_center(rectangle:Rectangle):Point {
+      return new Point((rectangle.x + rectangle.width) * 0.5, (rectangle.y + rectangle.height) * 0.5);
     }
 
     /**
-     *
-     * @param	from
-     * @param	to
-     * @return
+     * 
+     * @param origin_object 
+     * @param destination_object 
+     * @return 
      */
-    static public function getDistanceFrom(from:DisplayObject, to:DisplayObject):Number {
-      if (!from || !to)
+    static public function get_distance_from(origin_object:DisplayObject, destination_object:DisplayObject):Number {
+      if (!origin_object || !destination_object) {
         return 0;
-      return Arithmetic.sqrt(Arithmetic.pow(from.x - to.x, 2) + Arithmetic.pow(from.y - to.y, 2));
-    } // end function
+      }
+      return Arithmetic.sqrt(Arithmetic.pow(origin_object.x - destination_object.x, 2) + Arithmetic.pow(origin_object.y - destination_object.y, 2));
+    } 
 
     /**
      *
-     * @param	colliderSpeed the current speed of the item that will crash.
-     * @param	distanceToTarget the distance from the item that will crash to the item that it will collide into.
-     * @return true if next step is collision; false if otherwise
+     * @param	collider_speed the current speed of the object that will collide.
+     * @param	distance_to_target the distance from the item that will collide to the item that it will collide into.
+     * @return true if next step is collision; false otherwise.
      */
-    static public function fastCollision(colliderSpeed:Number, distanceToTarget:Number):Boolean {
-      var time:Number = distanceToTarget / colliderSpeed;
+    static public function test_fast_collision(collider_speed:Number, distance_to_target:Number):Boolean {
+      var time:Number = distance_to_target / collider_speed;
 
-      if (time < 1)
+      if (time < 1) {
         return true;
-      else
-        return false;
+      }
+
+      return false;
     }
 
   }

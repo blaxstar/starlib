@@ -23,13 +23,13 @@ import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 		/** left shoulder trigger. */
 		public var lt:GamepadTrigger;
 		/** left joystick. */
-		public var leftStick:GamepadJoystick;
+		public var left_stick:GamepadJoystick;
 		/** right shoulder button. */
 		public var rb:GamepadButton;
 		/** right shoulder trigger. */
 		public var rt:GamepadTrigger;
 		/** right joystick. */
-		public var rightStick:GamepadJoystick;
+		public var right_stick:GamepadJoystick;
 		/** directional pad. */
 		public var dpad:GamepadDPadButton;
 
@@ -41,7 +41,7 @@ import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 			super(device);
 		}
 
-		override protected function bindControls():void {
+		override protected function bind_controls():void {
 			var controlMap:Dictionary = new Dictionary();
 			for (var i:uint = 0; i < device.numControls; i++) {
 				var control:GameInputControl = device.getControlAt(i);
@@ -58,8 +58,8 @@ import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 			lt = new GamepadTrigger(this, controlMap['BUTTON_10']);
 			rt = new GamepadTrigger(this, controlMap['BUTTON_11']);
 
-			leftStick = new GamepadJoystick(this, controlMap['AXIS_0'], controlMap['AXIS_1'], controlMap['BUTTON_14']);
-			rightStick = new GamepadJoystick(this, controlMap['AXIS_2'], controlMap['AXIS_3'], controlMap['BUTTON_15']);
+			left_stick = new GamepadJoystick(this, controlMap['AXIS_0'], controlMap['AXIS_1'], controlMap['BUTTON_14']);
+			right_stick = new GamepadJoystick(this, controlMap['AXIS_2'], controlMap['AXIS_3'], controlMap['BUTTON_15']);
 
 			dpad = new GamepadDPadButton(this, controlMap['BUTTON_16'], controlMap['BUTTON_17'], controlMap['BUTTON_18'], controlMap['BUTTON_19']);
 
@@ -76,8 +76,8 @@ import net.blaxstar.starlib.input.gamepad.controls.GamepadTrigger;
 			rb.reset();
 			lt.reset();
 			rt.reset();
-			leftStick.reset();
-			rightStick.reset();
+			left_stick.reset();
+			right_stick.reset();
 			dpad.reset();
 			back.reset();
 			start.reset();

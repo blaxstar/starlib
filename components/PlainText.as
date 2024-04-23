@@ -41,7 +41,7 @@ package net.blaxstar.starlib.components {
 
             _textfield = new TextField();
             _text_format = Font.BODY_2;
-            _textfield.embedFonts = Font.embedFonts;
+            _textfield.embedFonts = Font.embed_fonts;
             _textfield.type = TextFieldType.DYNAMIC;
             _textfield.antiAliasType = AntiAliasType.ADVANCED;
             _textfield.gridFitType = GridFitType.PIXEL;

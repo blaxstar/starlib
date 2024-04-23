@@ -47,7 +47,7 @@ package net.blaxstar.starlib.gui {
             _parent = parent;
             _parent.addChild(this);
             draw();
-            stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE, onWindowResize);
+            stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE, on_window_resize);
         }
 
         public function remove():void {
@@ -96,12 +96,12 @@ package net.blaxstar.starlib.gui {
             addChild(_canvas);
         }
 
-        public function set checkerSize(val:uint):void {
+        public function set checkerbox_size(val:uint):void {
             _checkerbox_size = (val > 0) ? val : DEFAULT_SIZE;
             draw();
         }
 
-        private function onWindowResize(event:NativeWindowBoundsEvent):void {
+        private function on_window_resize(event:NativeWindowBoundsEvent):void {
             draw();
         }
     }

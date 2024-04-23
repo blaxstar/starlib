@@ -79,12 +79,12 @@ package net.blaxstar.starlib.style {
             _black_text_compatible = Arithmetic.color_is_bright(value);
         }
 
-        public function get isBlackTextCompatible():Boolean {
+        public function get is_black_text_compatible():Boolean {
             return _black_text_compatible;
         }
 
-        public function isWhiteTextCompatible():Boolean {
-            return !isBlackTextCompatible;
+        public function is_white_text_compatible():Boolean {
+            return !is_black_text_compatible;
         }
 
         public function get value():uint {

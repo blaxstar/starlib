@@ -46,7 +46,7 @@ package net.blaxstar.starlib.debug.performance {
             if (_update_interval % (_update_frequency * _main.stage.frameRate) == 0) {
                 // this is used to (try and) force gc. 
                 _gc_call_count = 0;
-                force_gc();
+                force_garbage_collector();
                 _current_fps = int(_update_interval * 1000 / (getTimer() - _start_time));
                 _current_memory = int(100 * System.totalMemory / _MEGABYTE) / 100;
                 _update_interval = 0;
@@ -58,7 +58,7 @@ package net.blaxstar.starlib.debug.performance {
          * called just prior to printing the memory report, which ensures
          * _can_report is set to `true`.
          */
-        private static function force_gc():void {
+        private static function force_garbage_collector():void {
             // the first call to System.gc() marks items that are available for collection. the second should sweep them, but the third is for good luck because you can't count on anything being predictably collected.
             _main.addEventListener(Event.ENTER_FRAME, on_gc_timer, false, 0, true);
             _gc_call_count = 0;
@@ -112,7 +112,7 @@ package net.blaxstar.starlib.debug.performance {
          */
         public static function generate_report():void {
             _can_report = true;
-            force_gc();
+            force_garbage_collector();
         }
     }
 }

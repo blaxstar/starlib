@@ -53,12 +53,12 @@ package net.blaxstar.starlib.debug.console {
         public function DebugConsole(stage:Stage) {
             _input_engine = new InputEngine(stage);
             init();
-            addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+            addEventListener(Event.ADDED_TO_STAGE, on_added_to_stage);
         }
 
         // * PUBLIC * //////////////////////////////////////////////////////////////
 
-        public function addCommand(com:ConsoleCommand):void {
+        public function add_command(com:ConsoleCommand):void {
 
             if (!command_dictionary) {
                 _data.command_dictionary = new Dictionary();
@@ -100,7 +100,7 @@ package net.blaxstar.starlib.debug.console {
                 visible = true;
                 stage.stageFocusRect = false;
                 stage.focus = _input_field.input_target;
-                _input_engine.add_keyboard_delegate(onKeyPressInConsole, InputEngine.KEYDOWN);
+                _input_engine.add_keyboard_delegate(on_key_press_in_console, InputEngine.KEYDOWN);
             }
         }
 
@@ -108,12 +108,12 @@ package net.blaxstar.starlib.debug.console {
 
             if (visible) {
                 visible = false;
-                _input_engine.remove_keyboard_delegates(onKeyPressInConsole);
-                resetHistoryNavigation();
+                _input_engine.remove_keyboard_delegates(on_key_press_in_console);
+                reset_history_navigation();
             }
         }
 
-        public function clearConsole():void {
+        public function clear_console():void {
             _input_field.text = "";
         }
 
@@ -181,8 +181,8 @@ package net.blaxstar.starlib.debug.console {
             _input_field = new InputTextField(this, _prefixText.x + _prefixText.text_width, 0, '');
             _input_field.color = Color.EGGSHELL.value;
             _input_field.showing_underline = false;
-            _input_field.addEventListener(FocusEvent.FOCUS_OUT, onConsoleFocusOut);
-            _input_field.addEventListener(Event.CHANGE, onTextFieldChange);
+            _input_field.addEventListener(FocusEvent.FOCUS_OUT, on_console_focus_out);
+            _input_field.addEventListener(Event.CHANGE, on_text_field_change);
         }
 
         private function init_default_commands():void {
@@ -193,12 +193,12 @@ package net.blaxstar.starlib.debug.console {
             var evalcom:ConsoleCommand = new EvalObjectCommand();
             var clhscom:ConsoleCommand = new ConsoleCommand('clearhs', clear_history);
 
-            addCommand(printcom);
-            addCommand(addcom);
-            addCommand(subcom);
-            addCommand(grepcom);
-            addCommand(evalcom);
-            addCommand(clhscom);
+            add_command(printcom);
+            add_command(addcom);
+            add_command(subcom);
+            add_command(grepcom);
+            add_command(evalcom);
+            add_command(clhscom);
 
             EvalObjectCommand.register_object("terminal", this);
         }
@@ -237,16 +237,16 @@ package net.blaxstar.starlib.debug.console {
             _output_field.text = outString;
         }
 
-        private function resetHistoryNavigation():void {
+        private function reset_history_navigation():void {
             _current_history_index = -1;
             _navigatingHistory = false;
-            clearConsole();
+            clear_console();
             _temp_history_save = "";
         }
 
         // * GETTERS, SETTERS * ////////////////////////////////////////////////////
 
-        public function get previousCommand():String {
+        public function get previous_command():String {
 
             if (_current_history_index < 0) {
                 _current_history_index = _command_history_length - 1;
@@ -257,7 +257,7 @@ package net.blaxstar.starlib.debug.console {
             return current_command;
         }
 
-        public function get nextCommand():String {
+        public function get next_command():String {
 
             if (_current_history_index >= _command_history_length - 1) {
                 _current_history_index = -1;
@@ -336,7 +336,7 @@ package net.blaxstar.starlib.debug.console {
 
         // DELEGATES ///////////////////////////////////////
 
-        private function onKeyPressInConsole(e:KeyboardEvent):void {
+        private function on_key_press_in_console(e:KeyboardEvent):void {
             if (e.keyCode == execute_key) {
 
                 if (_input_field.text.replace(" ", "") == "") {
@@ -346,7 +346,7 @@ package net.blaxstar.starlib.debug.console {
                 add_input_to_history(_input_field.text);
                 _pipeline.parse_commands_from_string(_input_field.text);
                 print_to_console(_pipeline.run());
-                resetHistoryNavigation();
+                reset_history_navigation();
 
             } else if (e.keyCode == prev_history_key) {
 
@@ -355,7 +355,7 @@ package net.blaxstar.starlib.debug.console {
                 }
                 var text_length:uint = _input_field.text.length;
                 _navigatingHistory = true;
-                _input_field.text = previousCommand;
+                _input_field.text = previous_command;
                 _input_field.input_target.setSelection(text_length, text_length);
 
             } else if (e.keyCode == next_history_key) {
@@ -367,12 +367,12 @@ package net.blaxstar.starlib.debug.console {
                 }
                 text_length = _input_field.text.length;
                 _navigatingHistory = true;
-                _input_field.text = nextCommand;
+                _input_field.text = next_command;
                 _input_field.input_target.setSelection(text_length, text_length);
             }
         }
 
-        private function onAddedToStage(event:Event):void {
+        private function on_added_to_stage(event:Event):void {
             var g:Graphics = this.graphics;
             g.beginFill(Color.DARK_GREY.value, 1);
             g.drawRect(0, 0, stage.stageWidth, 60);
@@ -380,14 +380,14 @@ package net.blaxstar.starlib.debug.console {
 
             _input_field.width = _output_field.width = (stage.stageWidth - (Component.PADDING * 2));
             _output_field.move(10, _input_field.height);
-            _input_engine.add_keyboard_delegate(onToggleKeyPress, InputEngine.KEYDOWN);
+            _input_engine.add_keyboard_delegate(on_toggle_key_press, InputEngine.KEYDOWN);
         }
 
-        private function onConsoleFocusOut(event:FocusEvent):void {
+        private function on_console_focus_out(event:FocusEvent):void {
             hide_console();
         }
 
-        private function onToggleKeyPress(e:KeyboardEvent):void {
+        private function on_toggle_key_press(e:KeyboardEvent):void {
             if (open_key == e.keyCode) {
 
                 if (!visible) {
@@ -398,7 +398,7 @@ package net.blaxstar.starlib.debug.console {
             }
         }
 
-        private function onTextFieldChange(e:Event):void {
+        private function on_text_field_change(e:Event):void {
             if (!_navigatingHistory) {
                 _temp_history_save = _input_field.text;
             }

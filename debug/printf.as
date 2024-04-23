@@ -21,19 +21,19 @@ package net.blaxstar.starlib.debug {
         };
 
         var to_octal:Function = function(n:Number):String {
-            var retString:String = "";
-            retString = n.toString(8);
-            retString = retString + "0";
-            return retString;
+            var return_string:String = "";
+            return_string = n.toString(8);
+            return_string = return_string + "0";
+            return return_string;
         }
 
         var to_hex:Function = function(n:Number):String {
-            var retString:String = "";
-            retString = n.toString(16).toUpperCase();
-            while (retString.length < 6) {
-                retString = "0" + retString;
+            var return_string:String = "";
+            return_string = n.toString(16).toUpperCase();
+            while (return_string.length < 6) {
+                return_string = "0" + return_string;
             }
-            return retString;
+            return return_string;
         };
 
         var to_char:Function = function toCharacter(s:String):String {

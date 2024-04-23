@@ -6,42 +6,42 @@ import net.blaxstar.starlib.input.gamepad.types.Gamepad;
 public class GamepadJoystick extends GamepadButton {
 		private static const JOYSTICK_THRESHOLD:Number = 0.5;
 		
-		private var xAxis:GameControl;
-		private var yAxis:GameControl;
+		private var _x_axis:GameControl;
+		private var _y_axis:GameControl;
 		
 		public var left:GamepadButton;
 		public var right:GamepadButton;
 		public var up:GamepadButton;
 		public var down:GamepadButton;
 		
-		private var reversedY:Boolean;
+		private var _y_axis_is_reversed:Boolean;
 		
-		public function GamepadJoystick(device:Gamepad, xAxis:GameInputControl, yAxis:GameInputControl, joystickButton:GameInputControl, reversedY:Boolean = false) {
-			super(device, joystickButton);
+		public function GamepadJoystick(device:Gamepad, x_axis:GameInputControl, y_axis:GameInputControl, joystick_button:GameInputControl, reverse_y_axis:Boolean = false) {
+			super(device, joystick_button);
 			
-			this.xAxis = new GameControl(device, xAxis);
-			this.yAxis = new GameControl(device, yAxis);
+			this._x_axis = new GameControl(device, x_axis);
+			this._y_axis = new GameControl(device, y_axis);
 			
-			this.left = new GamepadButton(device, xAxis, -1, -JOYSTICK_THRESHOLD);
-			this.right = new GamepadButton(device, xAxis, JOYSTICK_THRESHOLD, 1);
+			this.left = new GamepadButton(device, x_axis, -1, -JOYSTICK_THRESHOLD);
+			this.right = new GamepadButton(device, x_axis, JOYSTICK_THRESHOLD, 1);
 			
-			if (reversedY) {
-				this.down = new GamepadButton(device, yAxis, JOYSTICK_THRESHOLD, 1);
-				this.up = new GamepadButton(device, yAxis, -1, -JOYSTICK_THRESHOLD);
+			if (reverse_y_axis) {
+				this.down = new GamepadButton(device, y_axis, JOYSTICK_THRESHOLD, 1);
+				this.up = new GamepadButton(device, y_axis, -1, -JOYSTICK_THRESHOLD);
 			} else {
-				this.up = new GamepadButton(device, yAxis, JOYSTICK_THRESHOLD, 1);
-				this.down = new GamepadButton(device, yAxis, -1, -JOYSTICK_THRESHOLD);
+				this.up = new GamepadButton(device, y_axis, JOYSTICK_THRESHOLD, 1);
+				this.down = new GamepadButton(device, y_axis, -1, -JOYSTICK_THRESHOLD);
 			}
 			
-			this.reversedY = reversedY;
+			this._y_axis_is_reversed = reverse_y_axis;
 		}
 		
 		public function get x():Number {
-			return xAxis.value;
+			return _x_axis.value;
 		}
 		
 		public function get y():Number {
-			return reversedY ? -yAxis.value : yAxis.value;
+			return _y_axis_is_reversed ? -_y_axis.value : _y_axis.value;
 		}
 		
 		/**

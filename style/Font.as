@@ -18,15 +18,15 @@ import flash.text.TextFormat;
 		static public const H3:TextFormat         = new TextFormat(Font.gsans, 48);
 		static public const H4:TextFormat         = new TextFormat(Font.gsans, 34);
 		static public const H5:TextFormat         = new TextFormat(Font.gsans, 24);
-		static public const H6:TextFormat         = new TextFormat(Font.gsansBold, 20);
+		static public const H6:TextFormat         = new TextFormat(Font.gsans_bold, 20);
 		static public const SUBTITLE_1:TextFormat = new TextFormat(Font.gsans, 16);
-		static public const SUBTITLE_2:TextFormat = new TextFormat(Font.gsansBold, 14);
+		static public const SUBTITLE_2:TextFormat = new TextFormat(Font.gsans_bold, 14);
 		static public const BODY_1:TextFormat     = new TextFormat(Font.gsans, 16);
 		static public const BODY_2:TextFormat     = new TextFormat(Font.gsans, 14);
 		static public const BUTTON:TextFormat     = new TextFormat(Font.gsans, 14);
 		static public const CAPTION:TextFormat    = new TextFormat(Font.gsans, 12);
 		static public const OVERLINE:TextFormat   = new TextFormat(Font.gsans, 10);
-		public static var embedFonts:Boolean;
+		public static var embed_fonts:Boolean;
 
     /**
      * setup the defaults for the spacing of each formatting option, and ensure that embedded fonts are being used.
@@ -44,7 +44,7 @@ import flash.text.TextFormat;
 			BUTTON.letterSpacing = 1.25;
 			CAPTION.letterSpacing = 0.4;
 			OVERLINE.letterSpacing = 1.5;
-			embedFonts = true;
+			embed_fonts = true;
 		}
     /**
      * the identifying font name for gsans, as a string.
@@ -57,7 +57,7 @@ import flash.text.TextFormat;
      * the identifying font name for gsans bold, as a string.
      * @return font name for gsans bold.
      */
-		static public function get gsansBold():String {
+		static public function get gsans_bold():String {
 			return "gsans_bold";
 		}
 

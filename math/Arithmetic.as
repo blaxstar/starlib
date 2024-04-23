@@ -67,24 +67,24 @@ package net.blaxstar.starlib.math {
          */
         static private var _sqrt_cache:Array;
 
-        static public function floatToInt(val:Number):int {
+        static public function float_to_int(val:Number):int {
             return val >> 0;
         }
 
-        static public function flipSign(val:int):int {
+        static public function flip_sign(val:int):int {
             return ~val + 1;
         }
 
         static public function round(val:Number):int {
-            return floatToInt(val + 0.5);
+            return float_to_int(val + 0.5);
         }
 
         static public function ceil(val:Number):int {
-            return floatToInt(val + 1);
+            return float_to_int(val + 1);
         }
 
         static public function floor(val:Number):int {
-            return floatToInt(val);
+            return float_to_int(val);
         }
 
         static public function min(number0:Number, number1:Number):Number {
@@ -146,7 +146,7 @@ package net.blaxstar.starlib.math {
          * @param	of
          * @return
          */
-        static public function percentOf(percent:Number, of:Number):Number {
+        static public function percent_of(percent:Number, of:Number):Number {
             percent = (percent > 1) ? (percent / 100) : percent;
             return (percent * of);
         }
@@ -158,7 +158,7 @@ package net.blaxstar.starlib.math {
             return (a < 0.5);
         }
 
-        static public function darkenColor(color:uint, percent:Number = 0.10):uint {
+        static public function darken_color(color:uint, percent:Number = 0.10):uint {
             var r:uint = extract_red(color);
             var g:uint = extract_green(color);
             var b:uint = extract_blue(color);
