@@ -23,10 +23,7 @@ package net.blaxstar.starlib.components {
         private const MIN_WIDTH:uint = 100;
 
         private const PADDING:uint = 7;
-        static private var _proc_id:uint = 0;
 
-        // public
-        public var linkage_id:uint;
         // private
         protected var _label:PlainText;
         protected var _label_string:String;
@@ -36,7 +33,6 @@ package net.blaxstar.starlib.components {
         protected var _is_rounded:Boolean;
         private var _background:Sprite;
         private var _target_list:List;
-        private var _in_cache:Boolean;
         private var _fill_parent:Boolean;
         private var _on_click_signal:NativeSignal;
         private var _on_rollover_signal:NativeSignal;
@@ -45,7 +41,6 @@ package net.blaxstar.starlib.components {
         public var data:Object;
 
         public function ListItem(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = "New Item") {
-            linkage_id = _proc_id++;
             _label_string = label;
             super(parent, xpos, ypos);
         }
@@ -163,14 +158,6 @@ package net.blaxstar.starlib.components {
 
         public function get label():String {
             return _label.text;
-        }
-
-        public function get in_cache():Boolean {
-            return _in_cache;
-        }
-
-        public function set in_cache(value:Boolean):void {
-            _in_cache = value;
         }
 
         public function get is_glowing():Boolean {

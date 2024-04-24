@@ -1,4 +1,4 @@
-package net.blaxstar.starlib.components {
+package net.blaxstar.starlib.components.interfaces {
   import flash.events.Event;
 
   /**

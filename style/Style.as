@@ -3,6 +3,7 @@ package net.blaxstar.starlib.style
 import flash.display.DisplayObjectContainer;
 import flash.display.StageAlign;
 import flash.display.StageScaleMode;
+import thirdparty.org.osflash.signals.Signal;
 
 /**
 	 * ...
@@ -66,6 +67,7 @@ import flash.display.StageScaleMode;
 		 */
 		static public var TEXT:RGBA;
 
+    static public const ON_THEME_UPDATE:Signal = new Signal();
     /**
      * initialize the main stage/display with the default theme (dark).
      * @param main the Main display object (not stage).
@@ -119,6 +121,7 @@ import flash.display.StageScaleMode;
 					CURRENT_THEME = LIGHT;
 					break;
 			}
+      ON_THEME_UPDATE.dispatch();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package net.blaxstar.starlib.utils {
     import flash.utils.ByteArray;
     import avmplus.getQualifiedClassName;
+    import net.blaxstar.starlib.debug.DebugDaemon;
 
     public class Arrays {
 
@@ -17,14 +18,18 @@ package net.blaxstar.starlib.utils {
             return arr;
         }
 
-        static public function from_vector(vector:Vector.<Object>):Array {
-            var array:Array = [];
-            var vector_length:int = vector.length;
-
-            for (var i:int = 0; i < vector_length; i++) {
-                array.push(vector[i]);
+        static public function from_vector(vector:*):Array {
+            var vector_class_name:String = getQualifiedClassName(vector);
+            if (!(vector_class_name.indexOf("__AS3__.vec::Vector") > -1)) {
+              // is a vector instance
+              DebugDaemon.write_error("argument `vector` must be a valid Vector instance!");
+              return null;
             }
 
+            var array:Array = [];
+            vector.forEach(function(item:*, index:int, vector:*):void {
+                array[index] = item;
+            });
             return array;
         }
 

@@ -7,6 +7,7 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.style.Style;
     import net.blaxstar.starlib.utils.Strings;
+    import net.blaxstar.starlib.utils.Arrays;
 
     /**
      * ...
@@ -158,7 +159,6 @@ package net.blaxstar.starlib.components {
         }
 
         public function get_cached_item(id:uint):ListItem {
-            var list_item:ListItem;
 
             if (has_cached_item(id)) {
                 return _items_cache[id] as ListItem;
@@ -168,51 +168,56 @@ package net.blaxstar.starlib.components {
         }
 
         public function cache_item(item:ListItem):void {
-            if (has_cached_item(item.linkage_id)) {
-                return;
-            } else {
-                _items_cache[item.linkage_id] = item;
+            if (!has_cached_item(item.id)) {
+                _items_cache[item.id] = item;
             }
         }
 
         public function has_cached_item(item_id:uint):Boolean {
-            return _items_cache[item_id];
+            return _items_cache[item_id] != null;
         }
 
         public function has_cached_group(group_name:String):Boolean {
-            return _group_cache[group_name];
+            return _group_cache[group_name] != null;
         }
 
-        public function cache_current_list(group_name:String):void {
+        public function cache_current_list(group_name:String, overwrite:Boolean = false):void {
             if (!has_cached_group(group_name)) {
                 _group_cache[group_name] = [];
             }
-
-            for (var i:uint = 0; i < _items.length; i++) {
-                (_group_cache[group_name] as Array).push(_items[i]);
-                _items[i].in_cache = true;
+            if (_group_cache[group_name].length > 0 && overwrite || _group_cache[group_name].length == 0) {
+              _group_cache[group_name] = Arrays.from_vector(_items);
             }
+            
         }
 
-        public function set_from_cache(group_name:String):void {
+        public function apply_cached_list(group_name:String):void {
             if (has_cached_group(group_name)) {
                 clear();
                 var group:Array = _group_cache[group_name] as Array;
+                var num_items:uint = group.length;
 
-                for (var i:uint = 0; i < group.length; i++) {
-                    _items.push(group[i]);
+                group.forEach(function(item:*, index:int, array:Array):void {
+                  _items.push(array[index]);
+                });
+
+                for (var i:uint = 0; i < num_items; i++) {
                     _item_container.addChild(group[i]);
                 }
+              draw();
             }
-            draw();
         }
 
         public function hide_items(e:MouseEvent = null):void {
-            this.visible = false;
+            if (_item_container.parent) {
+              removeChild(_item_container);
+              removeChild(_background_card);
+            }
         }
 
         public function show_items():void {
-            this.visible = true;
+            addChild(_background_card); 
+            super.addChild(_item_container);
         }
 
         public function set_selection(item_index:uint):void {

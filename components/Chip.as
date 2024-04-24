@@ -57,8 +57,7 @@ package net.blaxstar.starlib.components {
 
     private function draw_icon():void {
       _close_button.icon = Icon.DELETE;
-      _close_button.get_icon().set_color('#' + Style.TEXT.value.toString(16));
-      //_close_button.set_size(16, 16);
+      _close_button.get_icon().set_color(Style.TEXT.value.toString(16));
       _close_button.on_click.add(remove_chip);
     }
 
@@ -69,17 +68,19 @@ package net.blaxstar.starlib.components {
 
     private function draw_label():void {
       _chip_label.text = _label_text;
-      //_chip_label.width = MAX_WIDTH;
       _chip_label.color = Style.TEXT.value;
     }
 
     private function draw_surface():void {
       _width_ = _layout_box.width + PADDING;
+
       var g:Graphics = _chip_surface.graphics;
+      g.clear();
       g.beginFill(Style.SECONDARY.value);
       g.drawRoundRectComplex(0, 0, _width_, _height_, _corner_radius, _corner_radius, _corner_radius, _corner_radius);
       g.endFill();
-      dispatchEvent(new Event(Event.RESIZE));
+
+      dispatchEvent(_resize_event_);
     }
 
     override public function draw(e:Event = null):void {
@@ -91,6 +92,11 @@ package net.blaxstar.starlib.components {
       draw_label();
       draw_surface();
       super.draw();
+    }
+
+    override protected function on_theme_update():void {
+      draw_surface();
+      _close_button.get_icon().set_color(Style.TEXT.value.toString(16));
     }
 
     public function get label_string():String {

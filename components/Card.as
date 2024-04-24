@@ -1,35 +1,34 @@
 package net.blaxstar.starlib.components {
     import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
+    import flash.display.Graphics;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.geom.Rectangle;
 
+    import net.blaxstar.starlib.style.RGBA;
     import net.blaxstar.starlib.style.Style;
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import net.blaxstar.starlib.style.RGBA;
-    import flash.geom.Rectangle;
-    import flash.display.Graphics;
 
     /**
-     * Card class, a component inspired by Google's Material Card. It can be used as a layout container for components.
+     * A card component inspired by Google's `Material Card`. It can be used as a layout container for components.
      * @author Deron Decamp (decamp.deron@gmail.com)
      */
     public class Card extends Component {
         static protected const MIN_WIDTH:uint = 200;
         static protected const MIN_HEIGHT:uint = 200;
-
+        // private var
         private var _card_background:Sprite;
         private var _component_container:VerticalBox;
         private var _option_container:HorizontalBox;
-        private var _highlight_region:Rectangle;
-        private var _region_highlighted:Boolean;
         private var _auto_resize:Boolean;
         private var _draggable:Boolean;
         private var _checkable:Boolean;
         private var _color_overriden:Boolean;
         private var _override_color:RGBA;
+        // signals
         private var _on_mouse_down_signal:NativeSignal;
         private var _on_mouse_up_signal:NativeSignal;
         private var _on_click_signal:NativeSignal;
@@ -68,7 +67,7 @@ package net.blaxstar.starlib.components {
             super.addChild(_card_background);
             super.addChild(_component_container);
             super.addChild(_option_container);
-            _component_container.move(PADDING,PADDING);
+            _component_container.move(PADDING, PADDING);
             _component_container.addEventListener(Event.RESIZE, on_component_resize);
             apply_shadow();
 
@@ -76,20 +75,20 @@ package net.blaxstar.starlib.components {
         }
 
         override public function draw(e:Event = null):void {
-            // auto resize if enabled
+            // auto resize the card if enabled
             if (_auto_resize) {
-                var totalW:Number = (PADDING * 2) + Math.max(_component_container.width, _option_container.width);
-                var totalH:Number = (PADDING * 3) +
-                _component_container.height + _option_container.height;
+                var total_width:Number = (PADDING * 2) + Math.max(_component_container.width, _option_container.width);
+                var total_height:Number = (PADDING * 3) + _component_container.height + _option_container.height;
 
-                if (totalW > MIN_WIDTH) {
-                    _width_ = totalW;
+                if (total_width > MIN_WIDTH) {
+                    _width_ = total_width;
                 }
-                if (totalH > MIN_HEIGHT) {
-                    _height_ = totalH;
+                if (total_height > MIN_HEIGHT) {
+                    _height_ = total_height;
                 }
             }
-            dispatchEvent(new Event(Event.RESIZE));
+
+            dispatchEvent(_resize_event_);
             draw_background();
             _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
             super.draw();
@@ -100,6 +99,7 @@ package net.blaxstar.starlib.components {
         }
 
         override public function update_skin():void {
+            _color_overriden = false;
             draw_background();
         }
 
@@ -147,33 +147,13 @@ package net.blaxstar.starlib.components {
             draw_background();
         }
 
-        public function highlight_region(x:uint, y:uint, width:uint, height:uint):void {
-            _region_highlighted = true;
-            _highlight_region ||= new Rectangle();
-            _highlight_region.x = x;
-            _highlight_region.y = y;
-            _highlight_region.width = width;
-            _highlight_region.height = height;
-            draw_background();
-        }
-
-        public function clear_highlight():void {
-            _highlight_region = null;
-            _region_highlighted = false;
-            draw_background();
-        }
-
         protected function draw_background():void {
             var g:Graphics = _card_background.graphics;
+
             g.clear();
             g.beginFill((!_color_overriden ? Style.SURFACE.value : _override_color.value), (!_color_overriden ? 1 : _override_color.alpha));
             g.lineStyle(0.5, Style.SURFACE.value, .2);
             g.drawRoundRect(0, 0, _width_, _height_, 7);
-
-            if (_region_highlighted && _highlight_region != null) {
-                g.beginFill(Style.SECONDARY.value);
-                g.drawRoundRect(_highlight_region.x, _highlight_region.y, _highlight_region.width, _highlight_region.height, 7);
-            }
 
             g.endFill();
         }
@@ -197,15 +177,15 @@ package net.blaxstar.starlib.components {
 
         public function set draggable(val:Boolean):void {
             _draggable = val;
+
+            if (!_on_mouse_down_signal) {
+                _on_mouse_down_signal = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
+            }
+
             if (_draggable) {
-                if (!_on_mouse_down_signal)
-                    _on_mouse_down_signal = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
                 _on_mouse_down_signal.add(on_mouse_down);
             } else {
-                if (!_on_mouse_down_signal)
-                    return;
-                else
-                    _on_mouse_down_signal.remove(on_mouse_down);
+                _on_mouse_down_signal.remove(on_mouse_down);
             }
         }
 
@@ -219,23 +199,27 @@ package net.blaxstar.starlib.components {
 
         public function set checkable(val:Boolean):void {
             _checkable = val;
+
+            if (!_on_click_signal) {
+                _on_click_signal = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
+            }
+
             if (_checkable) {
-                if (!_on_click_signal)
-                    _on_click_signal = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
                 _on_click_signal.add(onSelect);
             }
         }
 
-
         private function onSelect():void {
             // TODO (dyxribo): Implement selection property and indicator to Card
-
         }
 
         private function on_mouse_down(e:MouseEvent = null):void {
             this.startDrag();
-            if (!_on_mouse_up_signal)
+
+            if (!_on_mouse_up_signal) {
                 _on_mouse_up_signal = new NativeSignal(this, MouseEvent.MOUSE_UP, MouseEvent);
+            }
+
             _on_mouse_up_signal.add(on_mouse_up);
         }
 

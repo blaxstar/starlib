@@ -4,7 +4,7 @@ package net.blaxstar.starlib.components {
     import flash.events.Event;
     import flash.geom.Rectangle;
 
-    public class HorizontalBox extends Component {
+    public class HorizontalBox extends FunctionQueueableComponent {
         public static const TOP:String = "top";
         public static const CENTER:String = "middle";
         public static const BOTTOM:String = "bottom";

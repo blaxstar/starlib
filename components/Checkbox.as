@@ -13,91 +13,103 @@ package net.blaxstar.starlib.components {
    * @author ...
    */
   public class Checkbox extends Component {
-    static protected var checkboxes:Vector.<Checkbox>;
+    static protected var _checkboxes_:Vector.<Checkbox>;
+    private const _MIN_SIZE:int = 18;
+    private const _MINI_PADDING:int = 4;
     private var _size:uint;
-    private var _checkSquare:Shape;
-    private var _checkOutline:Shape;
+    private var _check_tick:Shape;
+    private var _check_outline:Shape;
     private var _label:PlainText;
-    private var _labelText:String;
+    private var _label_text:String;
     private var _checked:Boolean;
-    private var _onClick:NativeSignal;
-    private var _currentGroup:uint;
+    private var _on_click:NativeSignal;
+    private var _current_group:uint;
     private var _value:Object;
 
     public function Checkbox(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
-      if (!checkboxes)
-        checkboxes = new Vector.<Checkbox>();
+      if (!_checkboxes_)
+        _checkboxes_ = new Vector.<Checkbox>();
       super(parent, xpos, ypos);
-      checkboxes.push(this);
+      _checkboxes_.push(this);
     }
 
     override public function init():void {
-      _size = 18;
+      _size = _MIN_SIZE;
       super.init();
     }
 
     override public function add_children():void {
-      _checkSquare = new Shape();
-      _checkOutline = new Shape();
-      addChild(_checkSquare);
-      addChild(_checkOutline);
+      _check_tick = new Shape();
+      _check_outline = new Shape();
+      addChild(_check_tick);
+      addChild(_check_outline);
 
       super.add_children();
-      _onClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
-      _onClick.add(onClick);
+      _on_click = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
+      _on_click.add(on_click);
     }
 
     override public function draw(e:Event = null):void {
       _width_ = _height_ = _size;
+      var graphics:Graphics = _check_outline.graphics;
+      graphics.clear();
+      graphics.beginFill(0, 0);
+      graphics.lineStyle(2, Style.SECONDARY.value, 2, false);
+      graphics.drawRoundRect(0, 0, _size, _size, 7);
+      graphics.endFill();
+      // reuse the graphics var to draw the second shape
+      graphics = _check_tick.graphics;
+      graphics.clear();
+      graphics.beginFill(Style.SECONDARY.value);
+      graphics.drawRoundRect(PADDING/2, PADDING/2, _size - PADDING, _size - PADDING, 7);
+      graphics.endFill();
 
-      _checkOutline.graphics.beginFill(0, 0);
-      _checkOutline.graphics.lineStyle(2, Style.SECONDARY.value, 2, false);
-      _checkOutline.graphics.drawRoundRect(0, 0, _size, _size, 7);
-      _checkOutline.graphics.endFill();
+      if (_checked) {
+        _check_tick.alpha = 1;
+      } else {
+        _check_tick.alpha = 0;
+      }
 
-      var g:Graphics = _checkSquare.graphics;
-      g.beginFill(Style.SECONDARY.value);
-      g.drawRoundRect(PADDING/2, PADDING/2, _size - PADDING, _size - PADDING, 7);
-      g.endFill();
-
-      if (_checked)
-        _checkSquare.alpha = 1;
-      else
-        _checkSquare.alpha = 0;
-
-      _width_ = (_label) ? _size + 4 + _label.width : _size;
+      _width_ = (_label) ? _size + _MINI_PADDING + _label.width : _size;
       _height_ = (_label) ? Math.max(_size, _label.height) : _size;
 
-      dispatchEvent(_resizeEvent_);
+      dispatchEvent(_resize_event_);
       super.draw();
     }
 
-    public function getCheckedInGroup():Checkbox {
-      for (var i:uint = 0; i < checkboxes.length; i++) {
-        var cb:Checkbox = checkboxes[i];
-        if (cb.checked == true && cb.group == this.group) {
-          return cb;
+    override protected function on_theme_update():void {
+      draw();
+    }
+
+    public function get_checked_box_in_group():Checkbox {
+
+      for (var i:uint = 0; i < _checkboxes_.length; i++) {
+
+        var current_checkbox:Checkbox = _checkboxes_[i];
+        if (current_checkbox.checked == true && current_checkbox.group == this.group) {
+          return current_checkbox;
         }
       }
       return null;
     }
 
-    private function uncheckOthers():void {
-      for (var i:uint = 0; i < checkboxes.length; i++) {
-        var cb:Checkbox = checkboxes[i];
-        if (cb != this && cb.group == this.group && cb.checked) {
-          cb.checked = false;
+    private function uncheck_other_group_boxes():void {
+      for (var i:uint = 0; i < _checkboxes_.length; i++) {
+
+        var current_checkbox:Checkbox = _checkboxes_[i];
+        if (current_checkbox != this && current_checkbox.group == this.group && current_checkbox.checked) {
+          current_checkbox.checked = false;
         }
       }
     }
 
-    public function uncheckAll():void {
-      for (var i:uint = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = false;
+    public function uncheck_all_boxes_in_group():void {
+      for (var i:uint = 0; i < _checkboxes_.length; i++) {
+        _checkboxes_[i].checked = false;
       }
     }
 
-    private function onClick(e:MouseEvent):void {
+    private function on_click(e:MouseEvent):void {
       checked = (checked) ? false : true;
     }
 
@@ -114,8 +126,8 @@ package net.blaxstar.starlib.components {
     }
 
     public function set size(value:uint):void {
-      if (value < 18) {
-        _size = 18;
+      if (value < _MIN_SIZE) {
+        _size = _MIN_SIZE;
       } else {
         _size = value;
       }
@@ -123,11 +135,11 @@ package net.blaxstar.starlib.components {
     }
 
     public function get group():uint {
-      return _currentGroup;
+      return _current_group;
     }
 
     public function set group(val:uint):void {
-      _currentGroup = val;
+      _current_group = val;
     }
 
     public function get checked():Boolean {
@@ -135,28 +147,30 @@ package net.blaxstar.starlib.components {
     }
 
     public function set checked(val:Boolean):void {
-      if (_currentGroup || _currentGroup == 0) {
-        if (val)
-          uncheckOthers();
+      if (_current_group || _current_group == 0) {
+        if (val) {
+          uncheck_other_group_boxes();
+        }
       }
       _checked = val;
-      draw();
+      commit();
     }
 
     public function get label():String {
-      return _labelText;
+      return _label_text;
     }
 
     public function set label(val:String):void {
-      if (!_label)
-        _label = new PlainText(this, _size + 4, 0, val);
-      _labelText = val;
+      if (!_label) {
+        _label = new PlainText(this, _size + _MINI_PADDING, 0, val);
+      }
+      _label_text = val;
       commit();
     }
 
     override public function destroy():void {
       super.destroy();
-      _onClick.remove(onClick);
+      _on_click.remove(on_click);
     }
   }
 }

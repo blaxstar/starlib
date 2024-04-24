@@ -18,7 +18,7 @@ package net.blaxstar.starlib.components {
      * ...
      * @author Deron Decamp
      */
-    public class Icon extends Component {
+    public class Icon extends FunctionQueueableComponent {
         static public const ICON_LOADED:String = "icon_loaded";
         static public const X3_DOT_MENU:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 16q-.625 0-1.062-.438Q8.5 15.125 8.5 14.5t.438-1.062Q9.375 13 10 13t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 16 10 16Zm0-4.5q-.625 0-1.062-.438Q8.5 10.625 8.5 10t.438-1.062Q9.375 8.5 10 8.5t1.062.438q.438.437.438 1.062t-.438 1.062q-.437.438-1.062.438ZM10 7q-.625 0-1.062-.438Q8.5 6.125 8.5 5.5t.438-1.062Q9.375 4 10 4t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 7 10 7Z"/></svg>';
         static public const ACCESSIBILITY:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 5.5q-.729 0-1.24-.51-.51-.511-.51-1.24t.51-1.24Q9.271 2 10 2t1.24.51q.51.511.51 1.24t-.51 1.24q-.511.51-1.24.51ZM7.5 17.75V8.104q-1.146-.083-2.26-.333-1.115-.25-2.24-.542l.375-1.396Q5 6.271 6.656 6.51q1.656.24 3.344.24t3.344-.24q1.656-.239 3.281-.677L17 7.229q-1.125.292-2.24.542-1.114.25-2.26.333v9.646H11l-.188-4.625H9.208L9 17.75Z"/></svg>';
@@ -91,7 +91,7 @@ package net.blaxstar.starlib.components {
         override public function init():void {
             on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
             on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
-            _resizeEvent_ = new Event(Event.RESIZE);
+            _resize_event_ = new Event(Event.RESIZE);
             on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
             on_draw_signal = new Signal();
             _width_ = _height_ = 16;

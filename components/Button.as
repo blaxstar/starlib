@@ -12,24 +12,22 @@ package net.blaxstar.starlib.components {
     import thirdparty.com.greensock.plugins.TintPlugin;
     import thirdparty.com.greensock.plugins.TweenPlugin;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import flash.display.Graphics;
 
     /**
      * a simple button inspired by google material.
      * @author Deron D. (decamp.deron@gmail.com)
      */
     public class Button extends Component {
-
         // static
-
         static public const GROUNDED:uint = 0;
         static public const DEPRESSED:uint = 1;
         static public const DEFAULT_WIDTH:uint = 50;
         static public const DEFAULT_HEIGHT:uint = 10;
-
         // private
         private var _style:uint;
         private var _label:PlainText;
-        private var _labelString:String;
+        private var _label_string:String;
         private var _background:Component;
         private var _background_outline:Component;
         private var _glow_color:RGBA;
@@ -37,15 +35,15 @@ package net.blaxstar.starlib.components {
         private var _using_icon:Boolean;
         private var _display_icon:Icon;
         private var _data:Object;
-
-        private var _onRollOver:NativeSignal;
-        private var _onRollOut:NativeSignal;
-        private var _onMouseDown:NativeSignal;
-        private var _onMouseUp:NativeSignal;
-        private var _onMouseClick:NativeSignal;
+        // signals
+        private var _on_roll_over_signal:NativeSignal;
+        private var _on_roll_out_signal:NativeSignal;
+        private var _on_mouse_down_signal:NativeSignal;
+        private var _on_mouse_up_signal:NativeSignal;
+        private var _on_mouse_click_signal:NativeSignal;
 
         public function Button(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = "BUTTON") {
-            _labelString = label;
+            _label_string = label;
 
             super(parent, xpos, ypos);
         }
@@ -61,14 +59,15 @@ package net.blaxstar.starlib.components {
             _width_ = DEFAULT_WIDTH;
             _height_ = DEFAULT_HEIGHT;
             _style = 0;
+
             buttonMode = true;
             useHandCursor = true;
 
-            _onRollOver = new NativeSignal(this, MouseEvent.ROLL_OVER, MouseEvent);
-            _onRollOut = new NativeSignal(this, MouseEvent.ROLL_OUT, MouseEvent);
-            _onMouseDown = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
-            _onMouseUp = new NativeSignal(this, MouseEvent.MOUSE_UP, MouseEvent);
-            _onMouseClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
+            _on_roll_over_signal = new NativeSignal(this, MouseEvent.ROLL_OVER, MouseEvent);
+            _on_roll_out_signal = new NativeSignal(this, MouseEvent.ROLL_OUT, MouseEvent);
+            _on_mouse_down_signal = new NativeSignal(this, MouseEvent.MOUSE_DOWN, MouseEvent);
+            _on_mouse_up_signal = new NativeSignal(this, MouseEvent.MOUSE_UP, MouseEvent);
+            _on_mouse_click_signal = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
 
             super.init();
         }
@@ -80,7 +79,7 @@ package net.blaxstar.starlib.components {
         override public function add_children():void {
             _background = new Component(this);
             _background_outline = new Component(this);
-            _label = new PlainText(this, 0, 0, _labelString);
+            _label = new PlainText(this, 0, 0, _label_string);
             _background.width = _width_;
             _background.height = _height_;
             _label.format(Font.BUTTON);
@@ -109,25 +108,27 @@ package net.blaxstar.starlib.components {
             draw_bg();
             dispatchEvent(new Event(Event.RESIZE));
 
-            _onMouseDown.add(on_mouse_down);
-            _onRollOver.add(on_roll_over);
+            _on_mouse_down_signal.add(on_mouse_down);
+            _on_roll_over_signal.add(on_roll_over);
             super.draw();
         }
 
-        /** END INTERFACE ===================== */
-
-        // public
         override public function update_skin():void {
+            _glow_color = Style.GLOW;
+            _icon_color = Style.TEXT;
+            if (_using_icon) {
+              get_icon().set_color(_icon_color.value.toString(16));
+            }
             draw_bg();
         }
 
         public function add_click_listener(delegate:Function):void {
-            if (!_onMouseClick)
-                _onMouseClick = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
-            _onMouseClick.add(delegate);
+            if (!_on_mouse_click_signal)
+                _on_mouse_click_signal = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
+            _on_mouse_click_signal.add(delegate);
         }
 
-        // private
+        // ! PRIVATE FUNCTIONS ! //
 
         private function draw_bg():void {
             _background.graphics.clear();
@@ -142,28 +143,35 @@ package net.blaxstar.starlib.components {
         }
 
         private function fill_bg():void {
-            _background.graphics.beginFill(_glow_color.value);
+            var graphics:Graphics = _background.graphics;
+            graphics.beginFill(_glow_color.value);
+
             if (!_using_icon) {
-                _background.graphics.drawRoundRect(0, 0, _width_, _height_, 7);
+                graphics.drawRoundRect(0, 0, _width_, _height_, 7);
             } else {
-                _background.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
+                graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
             }
-            _background.graphics.endFill();
+
+            graphics.endFill();
             _background.alpha = 0;
 
         }
 
         private function draw_bg_outline():void {
-            _background_outline.graphics.lineStyle(1, Style.SECONDARY.value, 1, true);
+            var graphics:Graphics = _background_outline.graphics;
+
+            graphics.beginFill(0, 0);
+            graphics.lineStyle(1, Style.SECONDARY.value, 1, true);
 
             if (!_using_icon) {
-                _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 6);
+                graphics.drawRoundRect(0, 0, _width_, _height_, 6);
             } else {
-                _background_outline.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
+                graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
             }
+            graphics.endFill();
         }
 
-        // getters/setters
+        // ! GETTERS & SETTERS ! //
 
         public function set icon(val:String):void {
             _using_icon = true;
@@ -183,12 +191,6 @@ package net.blaxstar.starlib.components {
             draw();
         }
 
-        private function on_icon_loaded(event:Event):void {
-            _display_icon.removeEventListener(Icon.ICON_LOADED, on_icon_loaded);
-            _display_icon.move(((_width_ / 2) - (_display_icon.width / 2)), ((_height_ / 2) - (_display_icon.height / 2)));
-            _display_icon.set_color(_icon_color.to_hex_string());
-        }
-
         public function get_icon():Icon {
             return _display_icon;
         }
@@ -203,11 +205,11 @@ package net.blaxstar.starlib.components {
         }
 
         public function get label():String {
-            return _labelString;
+            return _label_string;
         }
 
         public function set label(val:String):void {
-            _labelString = val;
+            _label_string = val;
             commit();
         }
 
@@ -217,7 +219,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function get on_click():NativeSignal {
-            return _onMouseClick;
+            return _on_mouse_click_signal;
         }
 
         public function get data():Object {
@@ -228,40 +230,48 @@ package net.blaxstar.starlib.components {
             _data = val;
         }
 
-        // delegate functions
+        // ! DELEGATE FUNCTIONS ! //
+
+        private function on_icon_loaded(event:Event):void {
+            _display_icon.removeEventListener(Icon.ICON_LOADED, on_icon_loaded);
+            _display_icon.move(((_width_ / 2) - (_display_icon.width / 2)), ((_height_ / 2) - (_display_icon.height / 2)));
+            _display_icon.set_color(_icon_color.to_hex_string());
+        }
 
         private function on_mouse_down(e:MouseEvent = null):void {
-            _onMouseDown.remove(on_mouse_down);
-            _onMouseUp.add(on_mouse_up);
-            _onRollOut.add(on_mouse_up);
+            _on_mouse_down_signal.remove(on_mouse_down);
+            _on_mouse_up_signal.add(on_mouse_up);
+            _on_roll_out_signal.add(on_mouse_up);
             TweenLite.to(_background, 0.3, {tint: _glow_color.shade().value});
         }
 
         private function on_mouse_up(e:MouseEvent = null):void {
-            _onMouseUp.remove(on_mouse_up);
-            _onRollOut.remove(on_mouse_up);
-            _onMouseDown.add(on_mouse_down);
+            _on_mouse_up_signal.remove(on_mouse_up);
+            _on_roll_out_signal.remove(on_mouse_up);
+            _on_mouse_down_signal.add(on_mouse_down);
             TweenLite.to(_background, 0.3, {tint: _glow_color.value});
         }
 
         private function on_roll_over(e:MouseEvent = null):void {
-            _onRollOver.remove(on_roll_over);
-            _onRollOut.add(on_roll_out);
+            _on_roll_over_signal.remove(on_roll_over);
+            _on_roll_out_signal.add(on_roll_out);
             TweenLite.to(_background, 0.3, {alpha: .1});
         }
 
         private function on_roll_out(e:MouseEvent = null):void {
-            _onRollOut.remove(on_roll_out);
-            _onRollOver.add(on_roll_over);
+            _on_roll_out_signal.remove(on_roll_out);
+            _on_roll_over_signal.add(on_roll_over);
             TweenLite.to(_background, 0.3, {alpha: 0});
         }
 
+        // ! GARBAGE COLLECTION ! //
+
         override public function destroy():void {
-            _onRollOver.removeAll();
-            _onRollOut.removeAll();
-            _onMouseDown.removeAll();
-            _onMouseUp.removeAll();
-            _onMouseClick.removeAll();
+            _on_roll_over_signal.removeAll();
+            _on_roll_out_signal.removeAll();
+            _on_mouse_down_signal.removeAll();
+            _on_mouse_up_signal.removeAll();
+            _on_mouse_click_signal.removeAll();
         }
     }
 }

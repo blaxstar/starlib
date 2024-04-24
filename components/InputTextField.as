@@ -198,7 +198,7 @@ package net.blaxstar.starlib.components {
                             _suggestion_list.add_item(item);
                         } else {
                             item = new ListItem(_suggestion_list, 0, 0, currentSuggestion.label);
-                            item.linkage_id = currentSuggestion.linkageid;
+                            //item.id = currentSuggestion.linkageid;
                             item.label = currentSuggestion.label;
                             item.on_click.add(on_suggestion_select);
                         }

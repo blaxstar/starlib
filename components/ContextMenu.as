@@ -9,13 +9,13 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.components.ListItem;
     import net.blaxstar.starlib.debug.DebugDaemon;
 
-    // TODO: REMOVE DEBUG STUFF
+    // TODO: FIX CONTEXT ADDING AND CACHING
     public class ContextMenu extends Component {
 
         private var _card:Card;
         private var _list:List;
         private var _current_context:String;
-        private var _context_directory:Dictionary;
+        private var _context_cache:Dictionary;
 
         public function ContextMenu(parent:DisplayObjectContainer = null, xpos:uint = 0, ypos:uint = 0) {
             super(parent, xpos, ypos);
@@ -23,27 +23,26 @@ package net.blaxstar.starlib.components {
 
         override public function init():void {
             _list = new List(this);
-            _context_directory = new Dictionary();
+            _context_cache = new Dictionary();
             _current_context = "default";
             super.init();
         }
 
         override public function draw(e:Event = null):void {
-            //_card.set_size(_list.width, _list.height);
         }
 
-        public function add_context_item(label:String, action:Function, context:String = 'default'):void {
+        public function add_context_item(label:String, action:Function, context:String = "default"):void {
 
             var item:ListItem = new ListItem();
             item.label = label;
             item.on_click.add(action);
 
             if (!has_context(context)) {
-                _context_directory[context] = [item];
+                _context_cache[context] = [item];
             } else {
-                (_context_directory[context] as Array).push(item);
+                (_context_cache[context] as Array).push(item);
             }
-
+            // we'll update the context and list here, but first we'll cache the context items for the current context so we can quickly retrieve them later
             if (_list.num_items > 0 && _current_context !== context) {
                 _list.cache_current_list(_current_context);
                 _list.clear();
@@ -62,15 +61,15 @@ package net.blaxstar.starlib.components {
 
         public function add_context(context_id:String):void {
             if (has_context(context_id)) {
-                DebugDaemon.write_log("cannot add context: the context name already exists in this object!", DebugDaemon.ERROR);
+                DebugDaemon.write_warning("cannot add context: the context name already exists in this object!");
                 return;
             } else {
-                _context_directory[context_id] = [];
+                _context_cache[context_id] = [];
             }
         }
 
         public function has_context(context_id:String):Boolean {
-            return _context_directory[context_id] != null;
+            return _context_cache[context_id] != null;
         }
 
         public function set_context(context_id:String):void {
@@ -78,18 +77,18 @@ package net.blaxstar.starlib.components {
                 _current_context = context_id;
 
                 if (_list.has_cached_group(context_id)) {
-                    _list.set_from_cache(context_id);
+                    _list.apply_cached_list(context_id);
                 } else {
-                    DebugDaemon.write_log("failed to set context: the context was not registered to this menu! got: %s", DebugDaemon.WARN, context_id);
+                    DebugDaemon.write_warning("failed to set context: the context was not registered to this menu! got: %s", context_id);
 
                 }
             } else {
-                DebugDaemon.write_log("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", DebugDaemon.ERROR, context_id);
+                DebugDaemon.write_warning("failed to set context: the specified context does not exist in this object! please use add_context. got: %s", context_id);
             }
         }
 
         public function show():void {
-            _list.set_from_cache(_current_context);
+            _list.apply_cached_list(_current_context);
             _list.show_items();
         }
 

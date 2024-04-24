@@ -3,9 +3,8 @@ package net.blaxstar.starlib.components {
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
     import flash.geom.Rectangle;
-    import net.blaxstar.starlib.math.Arithmetic;
 
-    public class VerticalBox extends Component {
+    public class VerticalBox extends FunctionQueueableComponent {
         private static const MIN_HEIGHT:uint = 50;
         public static const LEFT:String = "left";
         public static const RIGHT:String = "right";
