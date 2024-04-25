@@ -8,8 +8,8 @@ AS3 components inspired by Google's material design.
 
 libraries used:
 * [as3_signals_starlib](https://github.com/dyxribo/as3_signals_starlib) (faster alternative to events)
-* [Greensock-AS3](https://github.com/dyxribo/greensock_as3_starlib) (most animations)
-* [as3_svg_renderer](https://github.com/dyxribo/as3_svg_renderer_starlib) (for Icon component)
+* [greensock_as3_starlib](https://github.com/dyxribo/greensock_as3_starlib) (most animations)
+* [as3_svg_renderer_starlib](https://github.com/dyxribo/as3_svg_renderer_starlib) (for Icon component)
 
 
 ## PREVIEW
