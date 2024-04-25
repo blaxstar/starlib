@@ -57,7 +57,7 @@ package net.blaxstar.starlib.components {
 
     private function draw_icon():void {
       _close_button.icon = Icon.DELETE;
-      _close_button.get_icon().set_color(Style.TEXT.value.toString(16));
+      _close_button.get_icon().set_color(Style.TEXT.to_hex_string());
       _close_button.on_click.add(remove_chip);
     }
 
@@ -96,7 +96,7 @@ package net.blaxstar.starlib.components {
 
     override protected function on_theme_update():void {
       draw_surface();
-      _close_button.get_icon().set_color(Style.TEXT.value.toString(16));
+      _close_button.get_icon().set_color(Style.TEXT.to_hex_string());
     }
 
     public function get label_string():String {

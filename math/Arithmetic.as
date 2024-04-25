@@ -54,12 +54,12 @@ package net.blaxstar.starlib.math {
         public static const SQRT2:Number = 1.4142135623730951;
 
         /**
-         * formula for converting degrees (measurement of angle from the inside) to radians (measurement of the distance traveled from the outside of a circle).
+         * A mathematical constant for converting degrees (measurement of angle from the inside) to radians (measurement of the distance traveled from the outside of a circle).
          */
         static private const D2R:Number = (PI / 180);
 
         /**
-         * formula for converting radians (measurement of the distance traveled from the outside of a circle) to degrees (measurement of angle from the inside).
+         * A mathematical constant for converting radians (measurement of the distance traveled from the outside of a circle) to degrees (measurement of angle from the inside).
          */
         static private const R2D:Number = (180 / PI);
         /**

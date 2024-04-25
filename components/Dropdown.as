@@ -18,12 +18,14 @@ package net.blaxstar.starlib.components {
         private var _display_label:PlainText;
         private var _label_fill:Sprite;
         private var _label_text:String;
+        private var _default_label:String;
         private var _dropdown_button:Button;
         private var _list_component:List;
         private var _selected_item:ListItem;
+        private var _list_visible:Boolean;
 
-        public function Dropdown(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, initLabel:String = "Select an Item") {
-            _label_text = initLabel;
+        public function Dropdown(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, default_label:String = "Select an Item") {
+            _label_text = _default_label = default_label;
             super(parent, xpos, ypos);
         }
 
@@ -38,19 +40,16 @@ package net.blaxstar.starlib.components {
             // TODO: fix resize of dropdown when label is larger than default
             _display_label = new PlainText(this, 0, 0, _label_text);
             _display_label.width = _width_;
-            _display_label.addEventListener(Event.RESIZE, on_label_resize);
 
             _dropdown_button = new Button(this, _display_label.width, 0);
             _dropdown_button.icon = Icon.EXPAND_DOWN_CIRCLED;
             _dropdown_button.set_size(MIN_HEIGHT, MIN_HEIGHT);
-            _dropdown_button.get_icon().set_color(Style.TEXT.value.toString(16));
+            _dropdown_button.get_icon().set_color(Style.TEXT.to_hex_string());
             _dropdown_button.on_click.add(on_click);
 
             _list_component ||= new List(null, 0, _display_label.height + PADDING);
-            _list_component.visible = false;
             _list_component.width = _display_label.width;
             _list_component.add_delegate_to_all(on_list_item_click);
-
             _label_fill = new Sprite();
 
             super.add_children();
@@ -59,7 +58,7 @@ package net.blaxstar.starlib.components {
         // ! PUBLIC ! //
 
         override public function draw(e:Event = null):void {
-            if (_list_component.visible) {
+            if (_list_visible) {
                 _height_ = MIN_HEIGHT + _list_component.height;
             } else {
                 _height_ = MIN_HEIGHT;
@@ -104,6 +103,12 @@ package net.blaxstar.starlib.components {
             _list_component.hide_items();
         }
 
+        public function reset():void {
+            _selected_item = null;
+            _label_text = _default_label;
+            commit();
+        }
+
         // ! PRIVATE ! //
 
         private function draw_border():void {
@@ -128,28 +133,34 @@ package net.blaxstar.starlib.components {
 
         public function set value(value:String):void {
             _label_text = value;
-            draw();
+            commit();
         }
 
         // ! DELEGATE FUNCTIONS ! //
         private function on_label_resize(event:Event):void {
-            draw();
             _dropdown_button.move(Math.max(_display_label.width, MIN_WIDTH), 0);
         }
 
         private function on_list_item_click(e:MouseEvent):void {
             _selected_item = e.currentTarget as ListItem;
             _label_text = _selected_item.label;
-            draw();
+            on_click();
         }
 
-        private function on_click(e:MouseEvent):void {
+        private function on_click(e:MouseEvent=null):void {
             if (!_list_component.parent) {
                 addChild(_list_component);
+                _list_visible = false;
             }
-            _list_component.visible = !_list_component.visible;
 
-            draw();
+            if (_list_visible) {
+              _list_component.hide_items();
+            } else {
+              _list_component.show_items();
+            }
+            _list_visible = !_list_visible;
+            
+            commit();
         }
     }
 

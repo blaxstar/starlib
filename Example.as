@@ -1,29 +1,24 @@
 package {
     import flash.display.Sprite;
-    import flash.text.TextField;
-    import flash.ui.Mouse;
-    import flash.events.MouseEvent;
-    import flash.display.DisplayObject;
-    import flash.display.InteractiveObject;
-    import net.blaxstar.starlib.components.Dialog;
-    import net.blaxstar.starlib.components.Icon;
     import flash.events.Event;
-    import thirdparty.com.lorentz.processing.ProcessExecutor;
-    import net.blaxstar.starlib.style.Style;
-    import net.blaxstar.starlib.style.Font;
-    import net.blaxstar.starlib.components.HorizontalBox;
-    import net.blaxstar.starlib.components.Button;
-    import net.blaxstar.starlib.gui.CheckeredSurface;
-    import net.blaxstar.starlib.components.Dropdown;
-    import net.blaxstar.starlib.components.LED;
-    import net.blaxstar.starlib.style.Color;
-    import net.blaxstar.starlib.components.Stepper;
-    import net.blaxstar.starlib.components.ScrollbarControl;
-    import net.blaxstar.starlib.components.Chip;
-    import net.blaxstar.starlib.components.ProgressBar;
-    import flash.utils.setInterval;
     import flash.utils.clearInterval;
+    import flash.utils.setInterval;
+
+    import net.blaxstar.starlib.components.Button;
+    import net.blaxstar.starlib.components.Chip;
+    import net.blaxstar.starlib.components.Dialog;
     import net.blaxstar.starlib.components.Divider;
+    import net.blaxstar.starlib.components.Dropdown;
+    import net.blaxstar.starlib.components.HorizontalBox;
+    import net.blaxstar.starlib.components.Icon;
+    import net.blaxstar.starlib.components.LED;
+    import net.blaxstar.starlib.components.ProgressBar;
+    import net.blaxstar.starlib.components.Stepper;
+    import net.blaxstar.starlib.gui.CheckeredSurface;
+    import net.blaxstar.starlib.style.Color;
+    import net.blaxstar.starlib.style.Style;
+
+    import thirdparty.com.lorentz.processing.ProcessExecutor;
 
     public class Main extends Sprite {
         public function Main() {
@@ -35,6 +30,7 @@ package {
             /** the SVG loader and the Style class for most components need a reference to the main stage/main class, so we pass those here. */
             ProcessExecutor.instance.initialize(stage);
             Style.init(this);
+            DebugDaemon.init(stage.nativeWindow);
 
             /** we can make the background a checkered surface, good for contrasting and visibility of certain objects. simply add the two lines below: */
             var cbg:CheckeredSurface = new CheckeredSurface();
@@ -59,6 +55,10 @@ package {
             var gamepad_icon:Icon = new Icon(h_icon_set);
             var ccheck_icon:Icon = new Icon(h_icon_set);
             var new_content_icon:Icon = new Icon(h_icon_set);
+            /** we can also set icon sizes and color: */
+            new_content_icon.set_size(35,35);
+            /** the svg renderer applies color using hex strings. luckily we have a useful utility method to get that built into the RGB class: */
+            new_content_icon.set_color(Color.TEAL.to_hex_string());
             /** Icon.setSVGXML allows drawing an icon from an SVG XML string. the Icon class has some of these built in from google's material components, so we'll use 5 of those: */
             heart_icon.set_svg_xml(Icon.HEART);
             download_icon.set_svg_xml(Icon.DOWNLOAD);

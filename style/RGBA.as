@@ -15,10 +15,11 @@ package net.blaxstar.starlib.style {
         private var _combined_value:uint;
         private var _black_text_compatible:Boolean;
 
-        public function RGBA(red:uint = 0, green:uint = 0, blue:uint = 0, alpha:uint = 1) {
+        public function RGBA(red:uint = 0, green:uint = 0, blue:uint = 0, alpha:uint = 255) {
             _red = red;
             _green = green;
             _blue = blue;
+            _alpha = alpha;
             _combined_value = Arithmetic.combine_rgba(red, green, blue, alpha);
             _black_text_compatible = Arithmetic.color_is_bright(_combined_value);
         }
@@ -53,8 +54,53 @@ package net.blaxstar.starlib.style {
             return rgba;
         }
 
-        public function to_hex_string():String {
-            return this._combined_value.toString(16);
+        public function to_hex_string(use_alpha:Boolean=false):String {
+          var r:uint = Arithmetic.extract_red(_combined_value);
+            var g:uint = Arithmetic.extract_green(_combined_value);
+            var b:uint = Arithmetic.extract_blue(_combined_value);
+            var a:uint = Arithmetic.extract_alpha(_combined_value);
+
+            r = r > 255 ? 255 : r;
+            g = g > 255 ? 255 : g;
+            b = b > 255 ? 255 : b;
+            a = a > 255 ? 255 : a;
+
+            var hex_string:String = (use_alpha ? get_channel_hex('a') : "") + get_channel_hex('r') + get_channel_hex('g') + get_channel_hex('b');
+
+            return hex_string.toUpperCase();
+        }
+
+        /**
+         *
+         * @param color_channel channel id which can be either `r`, `g`, `b`, or `a`.
+         */
+        private function get_channel_hex(color_channel:String):String {
+            var channel_string:String = "";
+
+            if (color_channel == 'r') {
+                var r:uint = _red > 255 ? 255 : _red;
+                channel_string = r.toString(16);
+            } else if (color_channel == 'g') {
+                var g:uint = _green > 255 ? 255 : _green;
+                channel_string = g.toString(16);
+            } else if (color_channel == 'b') {
+                var b:uint = _blue > 255 ? 255 : _blue;
+                channel_string = b.toString(16);
+            } else if (color_channel == 'a') {
+                var a:uint = _alpha > 255 ? 255 : _alpha;
+                channel_string = a.toString(16);
+            }
+
+            channel_string = pad_channel_hex_zeroes(channel_string);
+            return channel_string;
+        }
+
+        private function pad_channel_hex_zeroes(hex_string:String):String {
+            while (hex_string.length < 2) {
+              hex_string = "0" + hex_string;
+            }
+
+            return hex_string;
         }
 
         public function get red():uint {

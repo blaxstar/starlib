@@ -4,7 +4,7 @@ package net.blaxstar.starlib.components {
     import flash.events.Event;
     import flash.geom.Rectangle;
 
-    public class VerticalBox extends FunctionQueueableComponent {
+    public class VerticalBox extends Component {
         private static const MIN_HEIGHT:uint = 50;
         public static const LEFT:String = "left";
         public static const RIGHT:String = "right";
@@ -139,29 +139,6 @@ package net.blaxstar.starlib.components {
             }
 
             dispatchEvent(new Event(Event.RESIZE));
-        }
-
-        public function set maskThreshold(value:Number):void {
-            if (_height_ > value) {
-                cacheAsBitmap = true;
-                scrollRect = new Rectangle(0, 0, _width_, value);
-            } else
-                queue_function(arguments.callee, value);
-        }
-
-        /**
-         * sets the max amount of items that can be shown at once in this verticalbox.
-         * @param value
-         * @return void
-         */
-        public function set max_visible(value:Number):void {
-            if (value > numChildren) {
-                queue_function(arguments.callee, value);
-                return;
-            }
-            var last_child:DisplayObject = getChildAt(value - 1);
-            cacheAsBitmap = true;
-            scrollRect = new Rectangle(0, 0, _width_, last_child.y + last_child.height);
         }
 
         /**

@@ -1,24 +1,20 @@
 package net.blaxstar.starlib.components {
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
+    import flash.utils.Dictionary;
 
     import net.blaxstar.starlib.utils.Strings;
 
-    import thirdparty.com.lorentz.SVG.data.style.StyleDeclaration;
     import thirdparty.com.lorentz.SVG.display.SVGDocument;
     import thirdparty.com.lorentz.SVG.display.base.SVGElement;
     import thirdparty.com.lorentz.SVG.events.SVGEvent;
     import thirdparty.com.lorentz.SVG.utils.DisplayUtils;
-    import thirdparty.org.osflash.signals.Signal;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import flash.utils.Dictionary;
-    import flash.display.Graphics;
 
     /**
      * ...
      * @author Deron Decamp
      */
-    public class Icon extends FunctionQueueableComponent {
+    public class Icon extends Component {
         static public const ICON_LOADED:String = "icon_loaded";
         static public const X3_DOT_MENU:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 16q-.625 0-1.062-.438Q8.5 15.125 8.5 14.5t.438-1.062Q9.375 13 10 13t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 16 10 16Zm0-4.5q-.625 0-1.062-.438Q8.5 10.625 8.5 10t.438-1.062Q9.375 8.5 10 8.5t1.062.438q.438.437.438 1.062t-.438 1.062q-.437.438-1.062.438ZM10 7q-.625 0-1.062-.438Q8.5 6.125 8.5 5.5t.438-1.062Q9.375 4 10 4t1.062.438q.438.437.438 1.062t-.438 1.062Q10.625 7 10 7Z"/></svg>';
         static public const ACCESSIBILITY:String = '<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20"><path d="M10 5.5q-.729 0-1.24-.51-.51-.511-.51-1.24t.51-1.24Q9.271 2 10 2t1.24.51q.51.511.51 1.24t-.51 1.24q-.511.51-1.24.51ZM7.5 17.75V8.104q-1.146-.083-2.26-.333-1.115-.25-2.24-.542l.375-1.396Q5 6.271 6.656 6.51q1.656.24 3.344.24t3.344-.24q1.656-.239 3.281-.677L17 7.229q-1.125.292-2.24.542-1.114.25-2.26.333v9.646H11l-.188-4.625H9.208L9 17.75Z"/></svg>';
@@ -72,13 +68,18 @@ package net.blaxstar.starlib.components {
         static private const _ICON_CACHE:Dictionary = new Dictionary();
 
         private var _src:String;
+        private var _current_color:String;
         private var _doc:SVGDocument;
         private var _is_rendered:Boolean;
         private var _width_height_ratio:Number;
+        private var _icon_loaded_event:Event;
 
         public function Icon(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, url:String = '') {
-            if (!Strings.is_empty_or_null(url))
-                _src = url;
+
+            if (!Strings.is_empty_or_null(url)) {
+              _src = url;
+            }
+
             super(parent, xpos, ypos);
         }
 
@@ -89,18 +90,21 @@ package net.blaxstar.starlib.components {
          * frame. created to be overridden.
          */
         override public function init():void {
-            on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
-            on_added_signal = new NativeSignal(this, Event.ADDED_TO_STAGE, Event);
-            _resize_event_ = new Event(Event.RESIZE);
-            on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
-            on_draw_signal = new Signal();
             _width_ = _height_ = 16;
-
+            _current_color = "FFFFFF";
+            _icon_loaded_event = new Event(ICON_LOADED);
             _doc = new SVGDocument();
             _doc.addEventListener(SVGEvent.RENDERED, on_doc_parse);
+
             if (_src) {
                 set_svg_xml(_src);
             }
+
+            super.init();
+        }
+
+        override protected function on_added(e:Event):void {
+          draw();
         }
 
         private function on_doc_parse(e:SVGEvent = null):void {
@@ -120,14 +124,9 @@ package net.blaxstar.starlib.components {
             }
 
             _is_rendered = true;
-
-
-            //_width_ = _doc.width;
-            //_height_ = _doc.height;
-            //_width_height_ratio = _height_ / _width_;
-            set_color();
-            dispatchEvent(new Event(ICON_LOADED));
-            dispatchEvent(new Event(Event.RESIZE));
+            set_color(_current_color);
+            dispatchEvent(_icon_loaded_event);
+            dispatchEvent(_resize_event_);
         }
 
         /**
@@ -143,19 +142,20 @@ package net.blaxstar.starlib.components {
          * (re)draws the component and applies any pending visual changes.
          */
         override public function draw(e:Event = null):void {
-
+            set_color(_current_color);
             _doc.width = _width_;
             _doc.height = _height_;
             super.draw(e);
         }
 
         /** END INTERFACE ===================== */
-        public function set_color(colorCode:String = 'FFFFFF'):void {
-            if (colorCode.indexOf('#') < 0) {
-                colorCode = '#' + colorCode;
+        public function set_color(color_hex:String):void {
+          _current_color = color_hex;
+            if (color_hex.indexOf('#') < 0) {
+                _current_color = '#' + _current_color;
             }
             var e:SVGElement = DisplayUtils.getSVGElement(_doc);
-            e.style.setProperty('fill', colorCode);
+            e.style.setProperty('fill', _current_color);
         }
 
         public function set_svg_xml(svg_string:String):void {
@@ -179,7 +179,11 @@ package net.blaxstar.starlib.components {
 
         override public function set_size(w:Number, h:Number):void {
             if (!_is_rendered) {
-                queue_function(set_size, w, h);
+              addEventListener(ICON_LOADED, function set_size_on_render():void {
+                set_size(w, h);
+                trace(arguments);
+              });
+                //queue_function(set_size, w, h);
                 return;
             }
             super.set_size(w, h);

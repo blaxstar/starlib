@@ -7,20 +7,18 @@ package net.blaxstar.starlib.components {
     import flash.events.FocusEvent;
     import flash.events.KeyboardEvent;
     import flash.events.MouseEvent;
-    import flash.text.AntiAliasType;
-    import flash.text.GridFitType;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFieldType;
     import flash.text.TextFormat;
 
+    import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.input.InputEngine;
     import net.blaxstar.starlib.style.Font;
     import net.blaxstar.starlib.style.Style;
+    import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import net.blaxstar.starlib.debug.DebugDaemon;
-    import net.blaxstar.starlib.utils.Strings;
 
     /**
      * ...

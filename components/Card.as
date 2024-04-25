@@ -158,14 +158,6 @@ package net.blaxstar.starlib.components {
             g.endFill();
         }
 
-        public function set viewable_items(val:Number):void {
-            _component_container.max_visible = val;
-        }
-
-        public function set mask_threshold(val:Number):void {
-            _component_container.maskThreshold = val;
-        }
-
         public function get auto_resize():Boolean {
             return _auto_resize;
         }

@@ -265,14 +265,6 @@ package net.blaxstar.starlib.components {
             return _on_close;
         }
 
-        public function set viewableItems(val:uint):void {
-            _dialog_card.viewable_items = val;
-        }
-
-        public function set maskThreshold(val:Number):void {
-            _dialog_card.mask_threshold = val;
-        }
-
         public function get draggable():Boolean {
             return _draggable;
         }

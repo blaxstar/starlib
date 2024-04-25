@@ -4,7 +4,7 @@ package net.blaxstar.starlib.components {
     import flash.events.Event;
     import flash.geom.Rectangle;
 
-    public class HorizontalBox extends FunctionQueueableComponent {
+    public class HorizontalBox extends Component {
         public static const TOP:String = "top";
         public static const CENTER:String = "middle";
         public static const BOTTOM:String = "bottom";
@@ -134,24 +134,6 @@ package net.blaxstar.starlib.components {
             align();
             _width_ += _spacing_ * (numChildren - 1);
             dispatchEvent(new Event(Event.RESIZE));
-        }
-
-        public function set maskThreshold(value:Number):void {
-            if (_width_ > value) {
-                cacheAsBitmap = true;
-                scrollRect = new Rectangle(0, 0, _width_, value);
-            } else
-                queue_function(arguments.callee, value);
-        }
-
-        public function set viewableItems(value:Number):void {
-            if (value > numChildren) {
-                queue_function(arguments.callee, value);
-                return;
-            }
-            var lastChild:DisplayObject = getChildAt(value - 1);
-            cacheAsBitmap = true;
-            scrollRect = new Rectangle(0, 0, lastChild.x + lastChild.width, _height_);
         }
 
         /**

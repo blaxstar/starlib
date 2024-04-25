@@ -117,7 +117,7 @@ package net.blaxstar.starlib.components {
             _glow_color = Style.GLOW;
             _icon_color = Style.TEXT;
             if (_using_icon) {
-              get_icon().set_color(_icon_color.value.toString(16));
+              get_icon().set_color(_icon_color.to_hex_string());
             }
             draw_bg();
         }

@@ -186,9 +186,9 @@ package net.blaxstar.starlib.components {
                 _group_cache[group_name] = [];
             }
             if (_group_cache[group_name].length > 0 && overwrite || _group_cache[group_name].length == 0) {
-              _group_cache[group_name] = Arrays.from_vector(_items);
+                _group_cache[group_name] = Arrays.from_vector(_items);
             }
-            
+
         }
 
         public function apply_cached_list(group_name:String):void {
@@ -198,26 +198,27 @@ package net.blaxstar.starlib.components {
                 var num_items:uint = group.length;
 
                 group.forEach(function(item:*, index:int, array:Array):void {
-                  _items.push(array[index]);
+                    _items.push(array[index]);
                 });
 
                 for (var i:uint = 0; i < num_items; i++) {
                     _item_container.addChild(group[i]);
                 }
-              draw();
+                draw();
             }
         }
 
         public function hide_items(e:MouseEvent = null):void {
             if (_item_container.parent) {
-              removeChild(_item_container);
-              removeChild(_background_card);
+                removeChild(_item_container);
+                removeChild(_background_card);
             }
         }
 
         public function show_items():void {
-            addChild(_background_card); 
-            super.addChild(_item_container);
+            addChild(_background_card);
+            addChild(_item_container);
+
         }
 
         public function set_selection(item_index:uint):void {
