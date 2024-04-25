@@ -5,7 +5,7 @@
 AS3 components inspired by Google's material design.
 
 libraries used:
-* [as3 signals](https://github.com/robertpenner/as3-signals) (faster alternative to events)
+* [as3 signals](https://github.com/dyxribo/as3-signals) (faster alternative to events)
 * [Greensock-AS3](https://github.com/dyxribo/GreenSock-AS3) (most animations)
 * [as3_svg_renderer](https://github.com/dyxribo/as3_svg_renderer) (for Icon component)
 
