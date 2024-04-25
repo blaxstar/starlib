@@ -1,14 +1,16 @@
 package net.blaxstar.starlib.components {
     import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
+    import flash.display.Sprite;
     import flash.events.Event;
+    import flash.events.MouseEvent;
+
+    import net.blaxstar.starlib.style.Style;
 
     import thirdparty.org.osflash.signals.Signal;
-    import flash.sampler._getInvocationCount;
-    import flash.display.Sprite;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import flash.events.MouseEvent;
-    import net.blaxstar.starlib.style.Style;
+    import net.blaxstar.starlib.structs.LinkedList;
+    import net.blaxstar.starlib.structs.LinkedListNode;
 
     /**
      * ...
@@ -28,7 +30,7 @@ package net.blaxstar.starlib.components {
          */
         private var _dialog_card:Card;
         private var _mask:Sprite;
-        private var _child_dialog_vector:Vector.<Dialog>;
+        private var _child_dialog_list:LinkedList;
         private var _currently_active_dialog:Dialog
         private var _component_container:VerticalBox;
         private var _text_container:VerticalBox;
@@ -40,14 +42,14 @@ package net.blaxstar.starlib.components {
         private var _message_string:String;
         private var _draggable:Boolean;
         private var _auto_resize:Boolean;
-        private var _on_close:Signal;
+        private var _on_close_signal:Signal;
         private var _on_mouse_up_signal:NativeSignal;
         private var _on_mouse_down_signal:NativeSignal;
 
         public function Dialog(parent:DisplayObjectContainer = null, title:String = '', message:String = '') {
             _title_string = title;
             _message_string = message;
-            _on_close = new Signal();
+            _on_close_signal = new Signal();
             super(parent);
         }
 
@@ -63,40 +65,34 @@ package net.blaxstar.starlib.components {
             super.init();
         }
 
-        override protected function on_added(e:Event):void {
-            _prev_parent_container = parent;
-        }
-
         /**
          * initializes and adds all required children of the component.
          */
         override public function add_children():void {
             _dialog_card = new Card();
             super.addChild(_dialog_card);
-
+            // mask
             _mask = new Sprite();
             _mask.mouseEnabled = false;
             super.addChild(_mask);
-
             super.addChild(_dialog_card);
             _dialog_card.mask = _mask;
-
+            // textfields
             _text_container = new VerticalBox();
             _title_textfield = new PlainText();
             _message_textfield = new PlainText();
-
             _title_textfield.enabled = false;
             _title_textfield.text = _title_string;
             _message_textfield.multiline = true;
             _message_textfield.width = 300;
             _message_textfield.text = _message_string;
+            _text_container.addChild(_title_textfield);
+            _text_container.addChild(_message_textfield);
+            // card
             _dialog_card.draggable = false;
             this.draggable = true;
             _dialog_card.auto_resize = false;
-
             _dialog_card.add_child_native(_text_container);
-            _text_container.addChild(_title_textfield);
-            _text_container.addChild(_message_textfield);
             // cache the containers, no need to keep accessing them via dot
             _component_container = _dialog_card.component_container;
             _option_container = _dialog_card.option_container;
@@ -122,7 +118,6 @@ package net.blaxstar.starlib.components {
                 _text_container.move(PADDING, PADDING);
                 _component_container.move(PADDING, _text_container.y + _text_container.height);
                 _option_container.move(PADDING, _component_container.y + _component_container.height + PADDING);
-
             } else {
                 _dialog_card.set_size(_width_, _height_);
                 _component_container.move(PADDING, _text_container.y + _text_container.height + PADDING);
@@ -136,13 +131,15 @@ package net.blaxstar.starlib.components {
             _mask.graphics.endFill();
             dispatchEvent(new Event(Event.RESIZE));
             _component_container.draw();
-
         }
 
-        private function on_card_resize(e:Event = null):void {
-            commit();
-        }
-
+        /**
+         * Adds an option button for the current dialog. subsequent calls pushes additional buttons.
+         * @param name 
+         * @param action 
+         * @param emphasis 
+         * @return 
+         */
         public function add_button(name:String, action:Function = null, emphasis:uint = Button.GROUNDED):Button {
 
             var b:Button = new Button(_dialog_card.option_container, 0, 0, name.toUpperCase());
@@ -156,13 +153,16 @@ package net.blaxstar.starlib.components {
 
             return b;
         }
-
+        /**
+         * pushes a child dialog and disables the currently active one. if there is a dialog that is already pushed, it pushes another one on top, and disables the previously pushed dialog. 
+         * @param dialog the dialog to add as a child.
+         */
         public function push_dialog(dialog:Dialog):void {
-            if (!_child_dialog_vector) {
-                _child_dialog_vector = new Vector.<Dialog>();
+            if (!_child_dialog_list) {
+                _child_dialog_list = new LinkedList();
             }
 
-            _child_dialog_vector.push(dialog);
+            _child_dialog_list.append(new LinkedListNode(dialog));
             _currently_active_dialog = dialog;
             dialog.move(this.x + PADDING, this.y + PADDING);
             enabled = false;
@@ -171,10 +171,10 @@ package net.blaxstar.starlib.components {
         }
 
         public function pop_dialog():Dialog {
-            var d:Dialog = _child_dialog_vector.pop();
+            var d:Dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
             d.close();
-            if (_child_dialog_vector.length > 0) {
-                _currently_active_dialog = _child_dialog_vector[_child_dialog_vector.length - 1];
+            if (_child_dialog_list.size > 0) {
+                _currently_active_dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
             } else {
                 _currently_active_dialog = this;
                 enabled = true;
@@ -182,18 +182,31 @@ package net.blaxstar.starlib.components {
             return d;
         }
 
+        /**
+         * adds a child to the current dialogs component container (VerticalBox).
+         * @param child 
+         * @return 
+         */
         override public function addChild(child:DisplayObject):DisplayObject {
             return _component_container.addChild(child);
         }
 
+        /**
+         * adds a child to the current dialog's actual container (Sprite).
+         * @param child 
+         * @return 
+         */
         public function add_child_native(child:DisplayObject):DisplayObject {
             return super.addChild(child);
         }
 
         override public function move(x_position:Number, y_position:Number):void {
-            if (_child_dialog_vector && _child_dialog_vector.length) {
-                for (var i:int = 0; i < _child_dialog_vector.length; i++) {
-                    _child_dialog_vector[i].move(x_position + PADDING, y_position + PADDING);
+            if (_child_dialog_list) {
+                var num_dialogs:uint = _child_dialog_list.size;
+            }
+            if (num_dialogs) {
+                for (var i:int = 0; i < num_dialogs; i++) {
+                    _child_dialog_list[i].move(x_position + PADDING, y_position + PADDING);
                 }
             }
             super.move(x_position, y_position);
@@ -218,8 +231,15 @@ package net.blaxstar.starlib.components {
             super.height = value;
         }
 
-        // * DELEGATE FUNCTIONS * //
+        // ! DELEGATE FUNCTIONS ! //
 
+        override protected function on_added(e:Event):void {
+            _prev_parent_container = parent;
+        }
+
+        private function on_card_resize(e:Event = null):void {
+            commit();
+        }
 
         private function on_mouse_down(e:MouseEvent = null):void {
             _on_mouse_down_signal.remove(on_mouse_down);
@@ -240,8 +260,7 @@ package net.blaxstar.starlib.components {
             _on_mouse_down_signal.add(on_mouse_down);
         }
 
-        // * GETTERS & SETTERS * //
-
+        // ! GETTERS & SETTERS ! //
 
         public function set title(val:String):void {
             _title_string = (val.length > 0) ? val : _title_string;
@@ -261,8 +280,8 @@ package net.blaxstar.starlib.components {
             return _message_string;
         }
 
-        public function get onClose():Signal {
-            return _on_close;
+        public function get on_close_signal():Signal {
+            return _on_close_signal;
         }
 
         public function get draggable():Boolean {
@@ -295,15 +314,18 @@ package net.blaxstar.starlib.components {
         }
 
         public function close(e:Event = null):void {
-            if (_child_dialog_vector && _child_dialog_vector.length > 0) {
-                for (var i:int = _child_dialog_vector.length - 1; i > -1; i--) {
+            if (_child_dialog_list) {
+                var num_dialogs:uint = _child_dialog_list.size;
+            }
+            if (num_dialogs > 0) {
+                for (var i:int = num_dialogs - 1; i > -1; i--) {
                     pop_dialog();
                 }
             }
 
             if (parent) {
                 parent.removeChild(this);
-                _on_close.dispatch();
+                _on_close_signal.dispatch();
             }
         }
 
@@ -316,6 +338,8 @@ package net.blaxstar.starlib.components {
         public function removeOptions():void {
             _dialog_card.option_container.removeChildren();
         }
+
+        // ! GETTERS & SETTERS ! //
 
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
@@ -333,6 +357,7 @@ package net.blaxstar.starlib.components {
         public function get option_container():HorizontalBox {
             return _dialog_card.option_container;
         }
+
     }
 
 }

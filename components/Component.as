@@ -11,6 +11,8 @@ package net.blaxstar.starlib.components {
 
     import thirdparty.org.osflash.signals.Signal;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import net.blaxstar.starlib.structs.LinkedList;
+    import net.blaxstar.starlib.structs.LinkedListNode;
 
     /**
      * Generic Component Class.
@@ -21,8 +23,7 @@ package net.blaxstar.starlib.components {
         static public const DRAW:String = "draw";
         static public const PADDING:uint = 10;
         // static public var
-        static public var total_components:uint;
-        static public var component_list:Vector.<Component>;
+        static public var component_list:LinkedList;
         // static protected
         static protected var _resize_event_:Event;
         // protected
@@ -49,11 +50,10 @@ package net.blaxstar.starlib.components {
             super();
             // component tracking
             if (component_list == null) {
-                component_list = new Vector.<Component>();
-                total_components = 0;
+                component_list = new LinkedList();
             }
-            component_list.push(this);
-            _id_ = total_components++;
+            _id_ = component_list.size;
+            component_list.append(new LinkedListNode(this));
             // components are enabled by default.
             _enabled_ = true;
             // move the component's anchor to the correct position...

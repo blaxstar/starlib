@@ -181,7 +181,6 @@ package net.blaxstar.starlib.components {
             if (!_is_rendered) {
               addEventListener(ICON_LOADED, function set_size_on_render():void {
                 set_size(w, h);
-                trace(arguments);
               });
                 //queue_function(set_size, w, h);
                 return;
