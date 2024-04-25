@@ -1,13 +1,16 @@
 # starlib
 ### utility library for as3
+## libraries used:
+* [as3_msgpack_starlib](https://github.com/dyxribo/as3_msgpack_starlib) (for secure socket data transfer)
 
 # starcomps
 AS3 components inspired by Google's material design.
 
 libraries used:
-* [as3 signals](https://github.com/dyxribo/as3-signals) (faster alternative to events)
-* [Greensock-AS3](https://github.com/dyxribo/GreenSock-AS3) (most animations)
-* [as3_svg_renderer](https://github.com/dyxribo/as3_svg_renderer) (for Icon component)
+* [as3_signals_starlib](https://github.com/dyxribo/as3_signals_starlib) (faster alternative to events)
+* [Greensock-AS3](https://github.com/dyxribo/greensock_as3_starlib) (most animations)
+* [as3_svg_renderer](https://github.com/dyxribo/as3_svg_renderer_starlib) (for Icon component)
+
 
 ## PREVIEW
 _example of components in use: Card, Dialog, Button, Plaintext, DropDown, Icon, VerticalBox, HorizontalBox, LED, Uint Stepper, Divider, ProgressBar, Chip_ 
