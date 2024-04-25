@@ -8,8 +8,8 @@ package net.blaxstar.starlib.networking {
 
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.io.URL;
-    import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPack;
-    import net.blaxstar.starlib.thirdparty.org.msgpack.MsgPackFlags;
+    import thirdparty.org.msgpack.MsgPack;
+    import thirdparty.org.msgpack.MsgPackFlags;
     import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.org.osflash.signals.Signal;
