@@ -19,13 +19,16 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.utils.Strings;
 
     import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import net.blaxstar.starlib.math.Arithmetic;
+    import net.blaxstar.starlib.debug.printf;
+    import flash.events.TextEvent;
 
     /**
      * ...
      * @author Deron D. (decamp.deron@gmail.com)
      */
     public class InputTextField extends Component {
-
+        // textfield
         private var _text_field:TextField;
         private var _textfield_underline:Shape;
         private var _textfield_underline_strength:uint;
@@ -33,34 +36,31 @@ package net.blaxstar.starlib.components {
         private var _text_format:TextFormat;
         private var _hint_text:String;
         private var _leading_icon:Icon;
+        private var _is_hinting:Boolean;
+        private var _showing_underline:Boolean;
+        private var _has_leading_icon:Boolean;
+        private var _is_password_field:Boolean;
+        // suggestions
+        private var _input_engine:InputEngine;
         private var _suggestion_cache:Vector.<Suggestion>;
+        private var _selected_suggestion:Suggestion;
         private var _suggestion_list:List;
         private var _suggestion_limit:uint;
         private var _suggestion_generator:Suggestitron;
         private var _suggestion_iterator_index:uint;
-        private var _input_cache:String;
-        private var _showing_underline:Boolean;
+        private var _input_cache:Array;
         private var _showing_suggestions:Boolean;
-        private var _has_leading_icon:Boolean;
-        private var _selected_suggestion:Suggestion;
-        private var _suggestions_available:Boolean;
-        private var _is_password_field:Boolean;
-        private var _is_hinting:Boolean;
-
-        private var _input_engine:InputEngine;
+        // signals
         private var _on_focus:NativeSignal;
         private var _on_defocus:NativeSignal;
-        private var _on_text_update:NativeSignal;
-        private var _typed_chars:uint;
 
-        // TODO (dyxribo, STARCOMPS-3): add icon support to InputTextField
         public function InputTextField(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, hintText:String = "type something") {
             _hint_text = _textfield_string = hintText;
             _is_hinting = true;
             super(parent, xpos, ypos);
         }
 
-        // * public methods
+        // ! PUBLIC FUNCTIONS ! //
 
         override public function init():void {
             _text_format = Font.BODY_2;
@@ -94,11 +94,7 @@ package net.blaxstar.starlib.components {
             _on_focus = new NativeSignal(_text_field, FocusEvent.FOCUS_IN, FocusEvent);
             _on_defocus = new NativeSignal(_text_field, FocusEvent.FOCUS_OUT, FocusEvent);
 
-
-            // TODO (dyxribo, STARCOMPS-11): use keydown listeners in favor of change event in InputTextField
-            //_on_text_update = new NativeSignal(_text_field, KeyboardEvent.KEY_DOWN, Event);
-            _on_focus.add(onFocus);
-            //_on_text_update.add(onTextChange);
+            _on_focus.add(on_focus);
 
             super.add_children();
 
@@ -134,7 +130,7 @@ package net.blaxstar.starlib.components {
                 _text_field.height = _height_;
             }
 
-            dispatchEvent(new Event(Event.RESIZE));
+            dispatchEvent(_resize_event_);
         }
 
         override public function addChild(child:DisplayObject):DisplayObject {
@@ -158,7 +154,25 @@ package net.blaxstar.starlib.components {
         public function add_suggestion():void {
         }
 
-        // * private methods
+        // ! PRIVATE FUNCTIONS ! //
+
+        private function navigate_suggestions(key_code:int):void {
+            // TODO: the initial downward navigation skips the first element when the counter is supposed to be reset. flipping the order of increment seems to give some weird results. 
+            if (_suggestion_list.is_showing_items && _suggestion_cache.length > 0) {
+                if (key_code == _input_engine.keys.UP) {
+                    if (_suggestion_iterator_index > 0) { 
+                      _suggestion_iterator_index -= 1;
+                      _suggestion_list.set_selection(_suggestion_iterator_index);
+                    }
+                } else if (key_code == _input_engine.keys.DOWN) {
+                  if (_suggestion_iterator_index < _suggestion_cache.length-1) {
+                    _suggestion_list.set_selection(_suggestion_iterator_index);
+                    _suggestion_iterator_index += 1;
+                  } 
+                }
+                
+            }
+        }
 
         private function update_underline():void {
             _textfield_underline.graphics.clear();
@@ -169,46 +183,134 @@ package net.blaxstar.starlib.components {
             } else {
                 _textfield_underline.graphics.lineTo(_text_field.width + _leading_icon.width, 0);
             }
+
             _textfield_underline.y = _text_field.height + 4;
             _width_ = _textfield_underline.width;
             _height_ = _textfield_underline.y + _textfield_underline.height;
         }
 
         private function show_suggestions():void {
-            if (_input_cache == _text_field.text) {
-                if (!_suggestion_list.parent) {
-                    addChild(_suggestion_list);
-                }
-            } else {
-                _suggestion_list.clear();
-                _suggestion_cache = _suggestion_generator.generateSuggestions(_text_field.text, _suggestion_limit);
+            var input_prefix:String = _input_cache.join("");
+            _suggestion_cache = _suggestion_generator.generate_suggestions_from_input(input_prefix, _suggestion_limit);
 
-                if (!_suggestion_cache.length) {
-                    if (_suggestion_list.parent) {
-                        removeChild(_suggestion_list);
-                    }
-                    return;
-                } else {
-                    for (var i:uint = 0; i < _suggestion_cache.length; i++) {
-                        var currentSuggestion:Suggestion = _suggestion_cache[i];
-                        var item:ListItem = _suggestion_list.get_cached_item(currentSuggestion.linkageid);
-                        if (item) {
-                            _suggestion_list.add_item(item);
-                        } else {
-                            item = new ListItem(_suggestion_list, 0, 0, currentSuggestion.label);
-                            //item.id = currentSuggestion.linkageid;
-                            item.label = currentSuggestion.label;
-                            item.on_click.add(on_suggestion_select);
-                        }
-                    }
+            var num_suggestions:int = _suggestion_cache.length;
+            _suggestion_list.clear();
+            if (_suggestion_list.has_cached_group(input_prefix)) {
+              _suggestion_list.apply_cached_list(input_prefix);
+            } else {
+                for (var i:int = 0; i < num_suggestions; i++) {
+                  var list_item:ListItem = new ListItem(null, 0, 0, _suggestion_cache[i].label);
+                  list_item.data = _suggestion_cache[i].data;
+                  list_item.on_click.add(on_suggestion_select);
+                  _suggestion_list.add_item(list_item);
                 }
             }
-            _suggestion_list.y = _textfield_underline.y + 1;
-            _suggestion_list.width = _width_;
-
+            
+            _suggestion_list.move(_textfield_underline.x, _textfield_underline.y + 2);
+            _suggestion_list.show_items();
+            _height_ = Arithmetic.max(_height_, _suggestion_list.y + _suggestion_list.y);
         }
 
-        // * getters & setters //
+        private function apply_suggestion(list_item:ListItem):void {
+            var suggestion:Suggestion = list_item.data as Suggestion;
+            _selected_suggestion = new Suggestion();
+            _selected_suggestion.label = list_item.label;
+            _selected_suggestion.data = (suggestion && suggestion.data) ? suggestion.data : null;
+            _text_field.setTextFormat(_text_field.defaultTextFormat);
+            text = _selected_suggestion.label;
+            _input_cache = list_item.label.split("");
+            _suggestion_list.hide_items();
+        }
+
+        // ! DELEGATE FUNCTIONS !//
+
+        private function on_suggestion_select(e:MouseEvent):void {
+            var list_item:ListItem = (e.currentTarget as ListItem);
+            apply_suggestion(list_item);
+        }
+
+        private function on_text_input(e:TextEvent):void {
+            if (_suggestion_list.num_items > 0) {
+              _suggestion_list.cache_current_list(_input_cache.join(""));
+            }
+            _input_cache.push(e.text);
+            show_suggestions();
+        }
+
+        private function on_key_down(e:KeyboardEvent):void {
+          var pressed_key:uint = e.keyCode;
+          if (pressed_key == _input_engine.keys.ENTER) {
+            if (_suggestion_list.selected_item.is_glowing) {
+                apply_suggestion(_suggestion_list.selected_item);
+            }
+          } else if (pressed_key == _input_engine.keys.TAB) {
+                e.preventDefault();
+            } else if (pressed_key == _input_engine.keys.UP || pressed_key == _input_engine.keys.DOWN) {
+                navigate_suggestions(pressed_key);
+            } else if (pressed_key == _input_engine.keys.BACKSPACE) {
+                // if backspace key is pressed and the textfield is empty...
+                _input_cache.pop();
+                _suggestion_list.clear();
+                if (_input_cache.length == 0) {
+                    // then hide the list
+                    _suggestion_list.hide_items();
+                } else {
+                    show_suggestions();
+                }
+            }
+        }
+
+        private function on_focus(e:FocusEvent):void {
+            _on_focus.remove(on_focus);
+
+            if (_is_hinting) {
+                _is_hinting = false;
+                _textfield_string = "";
+                _text_field.text = "";
+            } else {
+                _text_field.setSelection(0, _text_field.text.length);
+            }
+
+            if (_showing_underline) {
+                _textfield_underline_strength = 2;
+                update_underline();
+            }
+
+            if (_input_cache && _input_cache.length > 0 && _suggestion_cache && _suggestion_cache.length > 0) {
+                show_suggestions();
+            }
+
+            _on_defocus.add(on_defocus);
+        }
+
+        private function on_defocus(e:FocusEvent):void {
+            _on_defocus.remove(on_defocus);
+            _suggestion_list.hide_items();
+
+            if (_text_field.text == "") {
+                show_hint_text();
+            } else {
+                _textfield_string = _text_field.text;
+            }
+
+            if (_showing_underline) {
+                _textfield_underline_strength = 1;
+                update_underline();
+            }
+
+            _on_focus.add(on_focus);
+        }
+
+        private function show_hint_text():void {
+            if (_is_password_field) {
+                _text_field.displayAsPassword = false;
+            }
+            _text_field.text = _hint_text;
+            _is_hinting = true;
+            commit();
+        }
+
+        // ! GETTERS & SETTERS ! //
 
         public function get input_target():TextField {
             return _text_field;
@@ -275,31 +377,40 @@ package net.blaxstar.starlib.components {
             return _showing_suggestions;
         }
 
+        /**
+         * 
+         * @param val 
+         */
         public function set showing_suggestions(val:Boolean):void {
-            _showing_suggestions = _suggestions_available = val;
+            _showing_suggestions = val;
+            _suggestion_iterator_index = 0;
+            
 
             if (val) {
                 _suggestion_list ||= new List(this);
                 _suggestion_list.width = _width_;
                 _suggestion_limit = 5;
-                _suggestion_iterator_index = 0;
+                _input_cache = [];
+                
                 if (!_input_engine) {
-                    _input_engine = new InputEngine();
+                    _input_engine = InputEngine.instance();
                 }
-                _input_engine.add_keyboard_delegate(on_key_press);
+                _input_engine.add_text_input_delegate(_text_field, on_text_input);
+                _input_engine.add_keyboard_delegate(on_key_down, InputEngine.KEYDOWN);
             } else {
                 if (_suggestion_list != null) {
                     _suggestion_list.clear();
                     _suggestion_list.width = _width_;
                 }
-                _suggestion_limit = 0;
-                _suggestion_iterator_index = 0;
-                _input_engine.remove_keyboard_delegates(on_key_press);
+                //_input_engine.remove_keyboard_delegates(on_text_input);
             }
         }
 
         public function set suggestion_store(json:String):void {
-            _suggestion_generator.loadFromJsonString(json);
+            if (!_suggestion_generator) {
+                _suggestion_generator = new Suggestitron();
+            }
+            _suggestion_generator.parse_json_string(json);
         }
 
         public function get suggestion_limit():uint {
@@ -307,10 +418,11 @@ package net.blaxstar.starlib.components {
         }
 
         public function set suggestion_limit(val:uint):void {
-            if (val < 1)
+            if (val < 1) {
                 _suggestion_limit = 1;
-            else
+            } else {
                 _suggestion_limit = val;
+            }
         }
 
         public function get showing_underline():Boolean {
@@ -320,8 +432,9 @@ package net.blaxstar.starlib.components {
         public function set showing_underline(val:Boolean):void {
             if (!val) {
                 _textfield_underline.graphics.clear();
-                if (_textfield_underline.parent)
+                if (_textfield_underline.parent) {
                     removeChild(_textfield_underline);
+                }
             }
             _showing_underline = val;
             draw();
@@ -340,127 +453,10 @@ package net.blaxstar.starlib.components {
             _text_field.restrict = value;
         }
 
-        // * delegate functions
-
-        private function on_suggestion_select(e:MouseEvent = null):void {
-            var item:ListItem = (e.currentTarget as ListItem);
-            _selected_suggestion = new Suggestion();
-            _selected_suggestion.label = item.label;
-            _selected_suggestion.data = (item.data as Suggestion).data;
-            _text_field.text = _selected_suggestion.label;
-            _text_field.setTextFormat(_text_field.defaultTextFormat);
-            _input_cache = item.label;
-            _typed_chars = item.label.length;
-
-        }
-
-        /*
-           private function on_added(e:Event):void {
-           _input_engine = new InputEngine(stage, true);
-           draw();
-           }
-         */
-
-        public function get on_text_update():NativeSignal {
-            return _on_text_update;
-        }
-
-        private function on_key_press(e:KeyboardEvent):void {
-            var pressedKey:uint = e.keyCode;
-            var keyName:String = _input_engine.get_key_name(e.keyCode).toLowerCase();
-
-            if (_input_engine.mod_is_down())
-                return;
-
-            // TODO (dyxribo, STARLIB-7): implement arrow navigation for suggestions
-            if (pressedKey == _input_engine.keys.TAB) {
-                e.preventDefault();
-                return;
-            } else if (pressedKey == _input_engine.keys.UP) {
-                return;
-            } else if (pressedKey == _input_engine.keys.DOWN) {
-                return; // letter pressed                         number pressed                        numpad number
-                    // pressed
-            } else if ((pressedKey > 64 && pressedKey < 91) || (pressedKey > 47 && pressedKey < 58) || (pressedKey > 95 && pressedKey < 106)) {
-                if (!_suggestion_list.parent)
-                    show_suggestions();
-            } else if (pressedKey == _input_engine.keys.BACKSPACE) {
-                if (_text_field.text == '') {
-                    _suggestion_list.hide_items();
-                }
-            }
-        }
-
-        private function onFocus(e:FocusEvent):void {
-            _on_focus.remove(onFocus);
-
-            if (_is_hinting) {
-                _is_hinting = false;
-                _textfield_string = "";
-                _text_field.text = "";
-            } else {
-                _text_field.setSelection(0, _text_field.text.length);
-            }
-
-            if (_showing_underline) {
-                _textfield_underline_strength = 2;
-                update_underline();
-            }
-
-            if (_suggestions_available && _suggestion_cache && _suggestion_cache.length > 0) {
-                if (!_suggestion_list.parent)
-                    addChild(_suggestion_list);
-                show_suggestions();
-            }
-
-            draw();
-            _on_defocus.add(onDeFocus);
-        }
-
-        private function onDeFocus(e:FocusEvent):void {
-            // TODO(dyxribo, STARLIB-9): Allow suggestion list to hide on InputTextField defocus
-            _on_defocus.remove(onDeFocus);
-
-            if (_text_field.text == "") {
-                show_hint_text();
-            } else {
-                _textfield_string = _text_field.text;
-            }
-
-            if (_showing_underline) {
-                _textfield_underline_strength = 1;
-                update_underline();
-            }
-
-            _on_focus.add(onFocus);
-        }
-
-        private function show_hint_text():void {
-            if (_is_password_field) {
-                _text_field.displayAsPassword = false;
-            }
-            _text_field.text = _hint_text;
-            _is_hinting = true;
-            commit();
-        }
-
-        private function onTextChange(e:Event):void {
-            if (_suggestions_available) {
-                if (_text_field.text.length > 0) {
-                    if (!_suggestion_list.parent)
-                        addChild(_suggestion_list);
-                    show_suggestions();
-                } else if (_suggestion_list.parent) {
-                    removeChild(_suggestion_list);
-                }
-            }
-            //on_resize_signal.dispatch(_resizeEvent_);
-        }
-
+        // ! GARBAGE COLLECTION ! //
         override public function destroy():void {
             _on_focus.removeAll();
             _on_defocus.removeAll();
-            _on_text_update.removeAll();
         }
     }
 

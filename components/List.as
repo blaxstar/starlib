@@ -30,6 +30,7 @@ package net.blaxstar.starlib.components {
         private var _alternating_colors:Boolean;
         private var _custom_delegates:Vector.<Function>;
         private var _default_fill:uint;
+        private var _showing_items:Boolean;
 
         public function List(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, altColors:Boolean = false) {
             super(parent, xpos, ypos);
@@ -43,6 +44,7 @@ package net.blaxstar.starlib.components {
             _items = new Vector.<ListItem>();
             _group_cache = new Dictionary();
             _items_cache = new Dictionary();
+
             super.init();
         }
 
@@ -52,6 +54,7 @@ package net.blaxstar.starlib.components {
             _background_card = new Card(this, 0, 0, false);
             _background_card.width = _list_width;
             super.addChild(_item_container);
+            _showing_items = true;
             super.add_children();
             _item_container.addEventListener(MouseEvent.RELEASE_OUTSIDE, on_item_rollout);
         }
@@ -212,13 +215,14 @@ package net.blaxstar.starlib.components {
             if (_item_container.parent) {
                 removeChild(_item_container);
                 removeChild(_background_card);
+                _showing_items = false;
             }
         }
 
         public function show_items():void {
             addChild(_background_card);
             addChild(_item_container);
-
+            _showing_items = true;
         }
 
         public function set_selection(item_index:uint):void {
@@ -269,6 +273,10 @@ package net.blaxstar.starlib.components {
         / * PRIVATE METHODS * /;
 
         private function select_item(list_item:ListItem):void {
+            if (_selected_item) {
+                _selected_item.is_glowing = false;
+            }
+
             _selected_item = list_item;
             list_item.is_glowing = true;
         }
@@ -294,6 +302,10 @@ package net.blaxstar.starlib.components {
 
         public function get selected_item():ListItem {
             return _selected_item;
+        }
+
+        public function get is_showing_items():Boolean {
+            return _showing_items;
         }
 
         public function set use_selection_indicator(val:Boolean):void {

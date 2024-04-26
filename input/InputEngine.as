@@ -11,6 +11,8 @@
     import net.blaxstar.starlib.input.gamepad.types.GamepadType;
     import net.blaxstar.starlib.input.gamepad.types.OuyaGamepad;
     import net.blaxstar.starlib.input.gamepad.types.Xbox360Gamepad;
+    import flash.events.IEventDispatcher;
+    import flash.events.TextEvent;
 
     /**
      * Enumerated type holding all the key code values and their names.
@@ -35,6 +37,7 @@
         static private var _keyboard_initialized:Boolean;
         static private var _mouse_initialized:Boolean;
         static private var _gamepad_initialized:Boolean;
+        static private var _instance:InputEngine;
 
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         /**
@@ -45,11 +48,23 @@
          * @param init_gamepad boolean value to initialize gamepad input listeners.
          */
         public function InputEngine(stage:Stage = null, init_keyboard:Boolean = false, init_mouse:Boolean = false, init_gamepad:Boolean = false) {
-            super();
-            if (stage) {
-                stage.addChild(this);
-                init(stage, init_keyboard, init_mouse, init_gamepad);
+            if (!_instance) {
+                super();
+                if (stage) {
+                    stage.addChild(this);
+                    init(stage, init_keyboard, init_mouse, init_gamepad);
+                }
+                _instance = this;
+            } else {
+              DebugDaemon.write_error("input engine is a singleton, please use InputEngine.instance()!");
             }
+        }
+
+        static public function instance():InputEngine {
+            if (!_instance) {
+                _instance = new InputEngine();
+            }
+            return _instance;
         }
 
         // * PUBLIC * //////////////////////////////////////////////////////////////
@@ -203,6 +218,22 @@
                 } else if (key_event_trigger == KEYUP) {
                     stage.addEventListener(KeyboardEvent.KEY_UP, delegate);
                 }
+            }
+        }
+
+        /**
+         * adds a delegate to the internal keyboard listener that fires based on `key_event_trigger`.
+         * @param delegate the function to be called when `key_event_trigger`'s associated event is dispatched.
+         * @param key_event_trigger the keyboard event type to use as a trigger for `delegate`.
+         * @return void
+         */
+        public function add_text_input_delegate(object:IEventDispatcher,delegate:Function):void {
+            // if the stage is not available then there's nothing we can do
+            if (!object) {
+                DebugDaemon.write_log("the object is not available, could not add text input listener!", DebugDaemon.WARN);
+            } else {
+                // otherwise lets add listener
+                object.addEventListener(TextEvent.TEXT_INPUT, delegate);
             }
         }
 
