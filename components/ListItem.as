@@ -21,16 +21,14 @@ package net.blaxstar.starlib.components {
     public class ListItem extends Component {
         private const MIN_HEIGHT:uint = 20;
         private const MIN_WIDTH:uint = 100;
-
-        private const PADDING:uint = 7;
-
-        // private
+        // protected
         protected var _label:PlainText;
         protected var _label_string:String;
         protected var _text_format:TextFormat;
         protected var _glow_color:RGBA;
         protected var _is_glowing:Boolean;
         protected var _is_rounded:Boolean;
+        // private
         private var _background:Sprite;
         private var _target_list:List;
         private var _fill_parent:Boolean;
@@ -72,11 +70,15 @@ package net.blaxstar.starlib.components {
             _label.mouseEnabled = true;
             _label.format(_text_format);
             _glow_color = Style.SURFACE.tint();
-            on_rollover.add(on_item_rollover);
-            on_rollout.add(on_item_rollout);
-            addChildAt(_background, 0);
 
-            draw();
+            if (!parent is List) {
+                on_rollover.add(on_item_rollover);
+                on_rollout.add(on_item_rollout);
+            }
+            
+            addChildAt(_background, 0);
+            _width_ = Arithmetic.max(_width_, _label.width);
+            super.add_children();
         }
 
         /**
@@ -90,7 +92,7 @@ package net.blaxstar.starlib.components {
             if (_fill_parent && parent) {
                 _width_ = parent.width;
             } else if (!_fill_parent) {
-                _width_ = Math.max(_width_, _label.width);
+                _width_ = Arithmetic.max(_width_, _label.width + PADDING);
             }
 
             if (_is_glowing) {
@@ -106,9 +108,8 @@ package net.blaxstar.starlib.components {
             }
 
             g.endFill();
-
+            _label.move(PADDING/2, PADDING/2);
             super.draw();
-            dispatchEvent(new Event(Event.RESIZE));
         }
 
         protected function on_item_rollover(e:MouseEvent):void {
@@ -171,6 +172,12 @@ package net.blaxstar.starlib.components {
 
         public function set fill_parent(value:Boolean):void {
             _fill_parent = value;
+            commit();
+        }
+
+        override public function set width(value:Number):void {
+            _width_ = value;
+            _fill_parent = false;
             commit();
         }
 

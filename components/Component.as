@@ -34,6 +34,7 @@ package net.blaxstar.starlib.components {
         private var _enabled_:Boolean;
         private var _is_showing_bounds_:Boolean;
         private var _dropshadow_filter:DropShadowFilter;
+        private var _barebones:Boolean;
         // public
         public var on_enter_frame_signal:NativeSignal;
         public var on_resize_signal:NativeSignal;
@@ -46,7 +47,7 @@ package net.blaxstar.starlib.components {
          * @param xpos  x position of the new component.
          * @param ypos  y position of the new component.
          */
-        public function Component(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
+        public function Component(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, barebones:Boolean = false) {
             super();
             // component tracking
             if (component_list == null) {
@@ -60,6 +61,8 @@ package net.blaxstar.starlib.components {
             move(xpos, ypos);
             // initialize the component...
             init();
+            // enable barebones mode if true...
+            _barebones = barebones;
             // then add it to parent if parent isn't null.
             if (parent != null) {
                 parent.addChild(this);
@@ -70,31 +73,32 @@ package net.blaxstar.starlib.components {
          * initializes the component by adding all the children and committing the visual changes to be written on the next frame. created to be overridden.
          */
         public function init():void {
+            if (!_barebones) {
+                _dropshadow_filter = new DropShadowFilter(4, 90, 0, 0.3, 7, 7, .6);
 
-            _dropshadow_filter = new DropShadowFilter(4, 90, 0, 0.3, 7, 7, .6);
-
-            if (!on_enter_frame_signal) {
-                on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
-            }
-            if (!on_added_signal) {
-                on_added_signal = new NativeSignal(this, Event.ADDED, Event);
-            }
-            if (!on_resize_signal) {
-                _resize_event_ = new Event(Event.RESIZE);
-                on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
-            }
-            if (!on_draw_signal) {
-                on_draw_signal = new Signal();
+                if (!on_enter_frame_signal) {
+                    on_enter_frame_signal = new NativeSignal(this, Event.ENTER_FRAME, Event);
+                }
+                if (!on_added_signal) {
+                    on_added_signal = new NativeSignal(this, Event.ADDED, Event);
+                }
+                if (!on_resize_signal) {
+                    _resize_event_ = new Event(Event.RESIZE);
+                    on_resize_signal = new NativeSignal(this, Event.RESIZE, Event);
+                }
+                if (!on_draw_signal) {
+                    on_draw_signal = new Signal();
+                }
+                on_added_signal.addOnce(on_added);
             }
 
             add_children();
-            on_added_signal.addOnce(on_added);
-            // TODO: update theme on all components when theme is changed.
+            // TODO: update theme on all components when global theme is changed.
             Style.ON_THEME_UPDATE.add(on_theme_update);
         }
 
         protected function on_theme_update():void {
-          commit();
+            commit();
         }
 
         /**

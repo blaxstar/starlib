@@ -8,14 +8,13 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.Style;
     import net.blaxstar.starlib.utils.Strings;
     import net.blaxstar.starlib.utils.Arrays;
+    import net.blaxstar.starlib.math.Arithmetic;
 
     /**
      * ...
      * @author Deron Decamp
      */
     public class List extends Component {
-        private const PADDING:uint = 7;
-
         private var _list_width:uint;
         private var _item_height:uint;
         private var _items:Vector.<ListItem>;
@@ -67,11 +66,11 @@ package net.blaxstar.starlib.components {
             var number_of_items:uint = _items.length;
             for (var i:uint; i < number_of_items; i++) {
                 _item_container.addChild(_items[i]);
-                _width_ = Math.max(_list_width, _items[i].label_component.width);
+                _items[i].set_size(_list_width, _item_height);
             }
 
             _height_ = _background_card.height = _item_container.height;
-            _background_card.width = _width_;
+            _background_card.width = _list_width;
             _background_card.height = _item_height * number_of_items;
             super.draw();
         }
@@ -83,7 +82,6 @@ package net.blaxstar.starlib.components {
         public function add_item(list_item:ListItem):List {
             if (list_item != null) {
                 _items.push(list_item);
-                list_item.set_size(_list_width, _item_height);
                 list_item.on_resize_signal.add(on_item_resize);
                 list_item.on_rollover.add(on_item_rollover);
                 list_item.on_rollout.add(on_item_rollout);
@@ -104,6 +102,7 @@ package net.blaxstar.starlib.components {
 
         public function add_item_at(list_item:ListItem, index:uint = 0):List {
             if (list_item) {
+                _list_width = Arithmetic.max(_list_width, list_item.width);
                 _items.splice(index, 0, list_item);
                 commit();
             }
@@ -120,8 +119,7 @@ package net.blaxstar.starlib.components {
 
                 if (item_string_array[i] is String) {
                     var new_list_item:ListItem = new ListItem(null, 0, 0, item_string_array[i]);
-                    _list_width = Math.max(_list_width, new_list_item.width);
-                    new_list_item.width = _list_width;
+                    _list_width = Arithmetic.max(_list_width, new_list_item.width);
                     add_item(new_list_item);
 
                     if (listener) {
@@ -157,6 +155,7 @@ package net.blaxstar.starlib.components {
                 var list_item:ListItem = new ListItem();
                 list_item.label = current_item[0];
                 list_item.on_click.add(current_item[1]);
+                _list_width = Arithmetic.max(_list_width, list_item.width);
                 add_item(list_item);
             }
         }
@@ -220,6 +219,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function show_items():void {
+            draw();
             addChild(_background_card);
             addChild(_item_container);
             _showing_items = true;
@@ -327,6 +327,7 @@ package net.blaxstar.starlib.components {
             var list_item:ListItem = (e.currentTarget as ListItem);
             deselect_all_items();
             select_item(list_item);
+            draw();
         }
 
         private function on_item_click(e:MouseEvent):void {
@@ -335,7 +336,7 @@ package net.blaxstar.starlib.components {
         }
 
         private function on_item_resize(e:Event = null):void {
-            draw();
+            _list_width = Arithmetic.max(e.currentTarget.width, _list_width);
         }
 
         private function add_selection_indicator_delegates():void {

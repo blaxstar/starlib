@@ -2,17 +2,14 @@ package net.blaxstar.starlib.components {
   import flash.display.DisplayObjectContainer;
   import flash.events.Event;
   import flash.events.MouseEvent;
-  import thirdparty.com.lorentz.processing.ProcessExecutor;
-  import net.blaxstar.starlib.style.Color;
-  import net.blaxstar.starlib.style.Style;
 
   public class Stepper extends Component {
 
     private var _box:HorizontalBox;
-    private var _valueDisplay:PlainText;
+    private var _value_display:PlainText;
     private var _value:uint;
-    private var _downButton:Button;
-    private var _upButton:Button;
+    private var _down_button:Button;
+    private var _up_button:Button;
 
     // TODO (dyxribo): stepper breaks verticalbox + scrollrect combo.
     public function Stepper(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0) {
@@ -23,40 +20,42 @@ package net.blaxstar.starlib.components {
       _value = 0;
 
       _box = new HorizontalBox(this, 0, 0);
-      _downButton = new Button(_box, 0, 0);
-      _valueDisplay = new PlainText(_box, 0, 0, '0');
-      _upButton = new Button(_box, 0, 0);
+      _down_button = new Button(_box, 0, 0);
+      _value_display = new PlainText(_box, 0, 0, '0');
+      _up_button = new Button(_box, 0, 0);
 
-      _downButton.icon = Icon.MINUS_CIRCLED;
-      _upButton.icon = Icon.PLUS_CIRCLED;
-      _downButton.style = _upButton.style = Button.DEPRESSED;
-
-      update_skin();
-      _downButton.on_click.add(stepDown);
-      _upButton.on_click.add(stepUp);
+      _down_button.icon = Icon.MINUS_CIRCLED;
+      _up_button.icon = Icon.PLUS_CIRCLED;
+      _down_button.style = _up_button.style = Button.DEPRESSED;
+      _down_button.set_size(32,32);
+      _up_button.set_size(32,32);
+      _down_button.on_click.add(step_down);
+      _up_button.on_click.add(step_up);
       is_showing_bounds = true;
       super.add_children();
     }
 
     override public function draw(e:Event = null):void {
-      _valueDisplay.text = _value.toString();
+      _value_display.text = _value.toString();
       _box.alignment = HorizontalBox.CENTER;
       _width_ = _box.width;
       _height_ = _box.height;
       super.draw();
-      dispatchEvent(new Event(Event.RESIZE));
+      dispatchEvent(_resize_event_);
     }
 
-    private function stepUp(e:MouseEvent):void {
-      if (_value >= uint.MAX_VALUE)
+    private function step_up(e:MouseEvent):void {
+      if (_value >= uint.MAX_VALUE) {
         return;
+      }
       ++_value;
       draw();
     }
 
-    private function stepDown(e:MouseEvent):void {
-      if (_value == 0)
+    private function step_down(e:MouseEvent):void {
+      if (_value == 0) {
         return;
+      }
       --_value;
       draw();
     }
@@ -65,12 +64,12 @@ package net.blaxstar.starlib.components {
       return _value;
     }
 
-    public function get downButton():Button {
-      return _downButton;
+    public function get down_button():Button {
+      return _down_button;
     }
 
-    public function get upButton():Button {
-      return _upButton;
+    public function get up_button():Button {
+      return _up_button;
     }
   }
 }

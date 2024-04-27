@@ -92,7 +92,7 @@ package net.blaxstar.starlib.math {
         }
 
         static public function max(number0:Number, number1:Number):Number {
-            return (number0 > number0 ? number0 : number1);
+            return (number0 > number1 ? number0 : number1);
         }
 
         static public function mod(numerator:int, divisor:int):int {

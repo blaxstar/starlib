@@ -11,19 +11,21 @@ package net.blaxstar.starlib.components {
 
     import net.blaxstar.starlib.style.Font;
     import net.blaxstar.starlib.style.Style;
+    import net.blaxstar.starlib.math.Arithmetic;
+    import net.blaxstar.starlib.utils.Strings;
 
     /**
      * A simple component for displaying text information.
      * @author Deron D. (decamp.deron@gmail.com)
      */
     public class PlainText extends Component {
-        private const DEFAULT_WIDTH:uint = 300;
+        private const DEFAULT_WIDTH:uint = 100;
         private const DEFAULT_HEIGHT:uint = 30;
 
         private var _textfield:TextField;
         private var _textfield_string:String;
         private var _text_format:TextFormat;
-        private var _colorOverwritten:Boolean;
+        private var _color_overwritten:Boolean;
 
         public function PlainText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, text:String = "") {
             _textfield_string = text;
@@ -36,9 +38,7 @@ package net.blaxstar.starlib.components {
         }
 
         override public function add_children():void {
-            _width_ = DEFAULT_WIDTH;
-            _height_ = DEFAULT_HEIGHT;
-
+            
             _textfield = new TextField();
             _text_format = Font.BODY_2;
             _textfield.embedFonts = Font.embed_fonts;
@@ -53,29 +53,28 @@ package net.blaxstar.starlib.components {
             _textfield.text = _textfield_string;
             _textfield.textColor = Style.TEXT.value;
             cacheAsBitmap = _textfield.cacheAsBitmap = true;
-            //is_showing_bounds = true;
+            _width_ = (Strings.is_empty_or_null(_textfield.text)) ? DEFAULT_WIDTH : _textfield.width;
+            _height_ = DEFAULT_HEIGHT;
 
             addChild(_textfield);
             super.add_children();
         }
 
         override public function draw(e:Event = null):void {
-            super.draw(e);
             _textfield.text = _textfield_string;
 
             if (!_textfield.multiline) {
                 _width_ = _textfield.width;
-
-                _height_ = _textfield.height = 18;
             } else {
                 _textfield.width = _width_;
-                _height_ = _textfield.height;
             }
-            dispatchEvent(new Event(Event.RESIZE));
+
+            _height_ = _textfield.height;            
+            super.draw(e);
         }
 
         override public function update_skin():void {
-            if (!_colorOverwritten) {
+            if (!_color_overwritten) {
                 color = Style.TEXT.value;
             }
         }
@@ -114,7 +113,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set color(val:uint):void {
-            _colorOverwritten = true;
+            _color_overwritten = true;
             _textfield.text = (_textfield_string.length) ? _textfield_string : '...';
             _textfield.textColor = val;
             commit();

@@ -6,7 +6,7 @@ package net.blaxstar.starlib.components {
 
     public class HorizontalBox extends Component {
         public static const TOP:String = "top";
-        public static const CENTER:String = "middle";
+        public static const CENTER:String = "center";
         public static const BOTTOM:String = "bottom";
         public static const NONE:String = "none";
 

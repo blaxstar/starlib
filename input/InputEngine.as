@@ -222,22 +222,6 @@
         }
 
         /**
-         * adds a delegate to the internal keyboard listener that fires based on `key_event_trigger`.
-         * @param delegate the function to be called when `key_event_trigger`'s associated event is dispatched.
-         * @param key_event_trigger the keyboard event type to use as a trigger for `delegate`.
-         * @return void
-         */
-        public function add_text_input_delegate(object:IEventDispatcher,delegate:Function):void {
-            // if the stage is not available then there's nothing we can do
-            if (!object) {
-                DebugDaemon.write_log("the object is not available, could not add text input listener!", DebugDaemon.WARN);
-            } else {
-                // otherwise lets add listener
-                object.addEventListener(TextEvent.TEXT_INPUT, delegate);
-            }
-        }
-
-        /**
          * remove previously set delegates from the stage.
          * @param delegate the delegate to remove.
          */

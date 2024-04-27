@@ -11,6 +11,7 @@ package net.blaxstar.starlib.components {
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import net.blaxstar.starlib.structs.LinkedList;
     import net.blaxstar.starlib.structs.LinkedListNode;
+    import flash.utils.Dictionary;
 
     /**
      * ...
@@ -28,10 +29,13 @@ package net.blaxstar.starlib.components {
            also bring the currently active to the front.
            . also make a `pin()` method, which will always ensure the dialog is on top. only one dialog should be pinned at a time, since multiple cannot possibly be placed at the same index.
          */
+        static private var _efficiency_mode:Boolean = true;
+        static private var _dialog_cache:Dictionary;
+        static private var _active_dialog:Dialog;
         private var _dialog_card:Card;
         private var _mask:Sprite;
         private var _child_dialog_list:LinkedList;
-        private var _currently_active_dialog:Dialog
+        private var _active_nested_dialog:Dialog;
         private var _component_container:VerticalBox;
         private var _text_container:VerticalBox;
         private var _option_container:HorizontalBox;
@@ -42,11 +46,16 @@ package net.blaxstar.starlib.components {
         private var _message_string:String;
         private var _draggable:Boolean;
         private var _auto_resize:Boolean;
+        private var _is_nested:Boolean;
         private var _on_close_signal:Signal;
         private var _on_mouse_up_signal:NativeSignal;
+        private var _on_release_outside:NativeSignal;
         private var _on_mouse_down_signal:NativeSignal;
 
         public function Dialog(parent:DisplayObjectContainer = null, title:String = '', message:String = '') {
+
+            _dialog_cache = new Dictionary();
+            
             _title_string = title;
             _message_string = message;
             _on_close_signal = new Signal();
@@ -60,6 +69,7 @@ package net.blaxstar.starlib.components {
          * created to be overridden.
          */
         override public function init():void {
+            _dialog_cache[this.id] = this;
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
             super.init();
@@ -129,16 +139,16 @@ package net.blaxstar.starlib.components {
             _mask.graphics.beginFill(0xff0000);
             _mask.graphics.drawRoundRect(0, 0, _width_, _height_, 7);
             _mask.graphics.endFill();
-            dispatchEvent(new Event(Event.RESIZE));
+            dispatchEvent(_resize_event_);
             _component_container.draw();
         }
 
         /**
          * Adds an option button for the current dialog. subsequent calls pushes additional buttons.
-         * @param name 
-         * @param action 
-         * @param emphasis 
-         * @return 
+         * @param name
+         * @param action
+         * @param emphasis
+         * @return
          */
         public function add_button(name:String, action:Function = null, emphasis:uint = Button.GROUNDED):Button {
 
@@ -153,8 +163,9 @@ package net.blaxstar.starlib.components {
 
             return b;
         }
+
         /**
-         * pushes a child dialog and disables the currently active one. if there is a dialog that is already pushed, it pushes another one on top, and disables the previously pushed dialog. 
+         * pushes a child dialog and disables the currently active one. if there is a dialog that is already pushed, it pushes another one on top, and disables the previously pushed dialog.
          * @param dialog the dialog to add as a child.
          */
         public function push_dialog(dialog:Dialog):void {
@@ -163,7 +174,8 @@ package net.blaxstar.starlib.components {
             }
 
             _child_dialog_list.append(new LinkedListNode(dialog));
-            _currently_active_dialog = dialog;
+            _active_nested_dialog = dialog;
+            _active_nested_dialog.is_nested = true;
             dialog.move(this.x + PADDING, this.y + PADDING);
             enabled = false;
             parent.addChild(dialog);
@@ -172,11 +184,12 @@ package net.blaxstar.starlib.components {
 
         public function pop_dialog():Dialog {
             var d:Dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
+            d.is_nested = false;
             d.close();
             if (_child_dialog_list.size > 0) {
-                _currently_active_dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
+                _active_nested_dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
             } else {
-                _currently_active_dialog = this;
+                _active_nested_dialog = this;
                 enabled = true;
             }
             return d;
@@ -184,8 +197,8 @@ package net.blaxstar.starlib.components {
 
         /**
          * adds a child to the current dialogs component container (VerticalBox).
-         * @param child 
-         * @return 
+         * @param child
+         * @return
          */
         override public function addChild(child:DisplayObject):DisplayObject {
             return _component_container.addChild(child);
@@ -193,8 +206,8 @@ package net.blaxstar.starlib.components {
 
         /**
          * adds a child to the current dialog's actual container (Sprite).
-         * @param child 
-         * @return 
+         * @param child
+         * @return
          */
         public function add_child_native(child:DisplayObject):DisplayObject {
             return super.addChild(child);
@@ -210,6 +223,23 @@ package net.blaxstar.starlib.components {
                 }
             }
             super.move(x_position, y_position);
+        }
+
+        private function create_efficiency():void {
+            if (_efficiency_mode) {
+                for each (var dialog:Dialog in _dialog_cache) {
+                    if (dialog.is_nested && dialog != _active_nested_dialog) {
+                        continue;
+                    }
+                    dialog.component_container.enabled = false;
+                    dialog.option_container.enabled = false;
+                    dialog.alpha = 1;
+                }
+                _active_dialog = this;
+                option_container.enabled = true;
+                component_container.enabled = true;
+                parent.setChildIndex(this, parent.numChildren - 1);
+            }
         }
 
         public function set message_color(color:uint):void {
@@ -244,14 +274,34 @@ package net.blaxstar.starlib.components {
         private function on_mouse_down(e:MouseEvent = null):void {
             _on_mouse_down_signal.remove(on_mouse_down);
             this.startDrag();
-            if (!_on_mouse_up_signal)
+
+            create_efficiency();
+
+            if (!_on_mouse_up_signal) {
                 _on_mouse_up_signal = new NativeSignal(_title_textfield, MouseEvent.MOUSE_UP, MouseEvent);
+                _on_release_outside = new NativeSignal(_title_textfield, MouseEvent.RELEASE_OUTSIDE, MouseEvent);
+            }
             _on_mouse_up_signal.add(on_mouse_up);
+            _on_release_outside.add(on_mouse_up);
         }
 
         private function on_mouse_up(e:MouseEvent = null):void {
             _on_mouse_up_signal.remove(on_mouse_up);
+            _on_release_outside.remove(on_mouse_up);
             this.stopDrag();
+
+            if (y < 0) {
+                y = 5;
+            }
+            if (x < 0) {
+                x = 5;
+            }
+            if (parent === stage && y > stage.stageHeight) {
+                y = stage.stageHeight - _height_;
+            }
+            if (parent === stage && x > stage.stageWidth) {
+                x = stage.stageWidth - _width_;
+            }
 
             if (!_on_mouse_down_signal) {
                 _on_mouse_down_signal = new NativeSignal(_title_textfield, MouseEvent.MOUSE_DOWN, MouseEvent);
@@ -261,6 +311,12 @@ package net.blaxstar.starlib.components {
         }
 
         // ! GETTERS & SETTERS ! //
+        static public function get efficiency_mode():Boolean {
+          return _efficiency_mode;
+        }
+        static public function set efficiency_mode(value:Boolean):void {
+          _efficiency_mode = value;
+        }
 
         public function set title(val:String):void {
             _title_string = (val.length > 0) ? val : _title_string;
@@ -344,6 +400,14 @@ package net.blaxstar.starlib.components {
         public function set auto_resize(val:Boolean):void {
             _auto_resize = val;
             draw();
+        }
+
+        public function get is_nested():Boolean {
+            return _is_nested;
+        }
+
+        public function set is_nested(value:Boolean):void {
+            _is_nested = value;
         }
 
         public function get active():Boolean {

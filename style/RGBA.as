@@ -28,8 +28,8 @@ package net.blaxstar.starlib.style {
          * lightens the current RGBA color by 50% and returns the result.
          * @return RGBA result of the lightened RGBA color.
          */
-        public function tint():RGBA {
-            var tinted:RGBA = new RGBA(_red + (255 - _red) * 0.5, _green + (255 - _green) * 0.5, _blue + (255 - _blue) * 0.5);
+        public function tint(percent:Number=0.5):RGBA {
+            var tinted:RGBA = new RGBA(_red + (255 - _red) * percent, _green + (255 - _green) * percent, _blue + (255 - _blue) * percent);
 
             return tinted;
         }
@@ -38,8 +38,8 @@ package net.blaxstar.starlib.style {
          * darkens the current RGBA color by 50% and returns the result.
          * @return RGBA result of the darkened RGBA color.
          */
-        public function shade():RGBA {
-            var shaded:RGBA = new RGBA(_red * 0.5, _green * 0.5, _blue * 0.5);
+        public function shade(percent:Number=0.5):RGBA {
+            var shaded:RGBA = new RGBA(_red * percent, _green * percent, _blue * percent);
 
             return shaded;
         }

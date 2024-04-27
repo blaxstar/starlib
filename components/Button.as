@@ -13,6 +13,7 @@ package net.blaxstar.starlib.components {
     import thirdparty.com.greensock.plugins.TweenPlugin;
     import thirdparty.org.osflash.signals.natives.NativeSignal;
     import flash.display.Graphics;
+    import flash.display.Sprite;
 
     /**
      * a simple button inspired by google material.
@@ -28,8 +29,8 @@ package net.blaxstar.starlib.components {
         private var _style:uint;
         private var _label:PlainText;
         private var _label_string:String;
-        private var _background:Component;
-        private var _background_outline:Component;
+        private var _background:Sprite;
+        private var _background_outline:Sprite;
         private var _glow_color:RGBA;
         private var _icon_color:RGBA;
         private var _using_icon:Boolean;
@@ -77,8 +78,8 @@ package net.blaxstar.starlib.components {
          * created to be overridden.
          */
         override public function add_children():void {
-            _background = new Component(this);
-            _background_outline = new Component(this);
+            _background = new Component(this, 0, 0, true);
+            _background_outline = new Component(this, 0, 0, true);
             _label = new PlainText(this, 0, 0, _label_string);
             _background.width = _width_;
             _background.height = _height_;
@@ -100,14 +101,15 @@ package net.blaxstar.starlib.components {
                 _background.width = _background_outline.width = _width_;
                 _background.height = _background_outline.height = _height_;
                 _label.move((_width_ / 2) - (_label.width / 2), (_height_ / 2) - (_label.height / 2));
+                
             } else {
                 _background.width = _background_outline.width = _width_;
                 _background.height = _background_outline.height = _height_;
+                _display_icon.move(PADDING/2, PADDING/2);
             }
 
             draw_bg();
-            dispatchEvent(new Event(Event.RESIZE));
-
+            dispatchEvent(_resize_event_);
             _on_mouse_down_signal.add(on_mouse_down);
             _on_roll_over_signal.add(on_roll_over);
             super.draw();
@@ -115,9 +117,8 @@ package net.blaxstar.starlib.components {
 
         override public function update_skin():void {
             _glow_color = Style.GLOW;
-            _icon_color = Style.TEXT;
             if (_using_icon) {
-              get_icon().set_color(_icon_color.to_hex_string());
+                _display_icon.set_color(_icon_color.to_hex_string());
             }
             draw_bg();
         }
@@ -126,6 +127,13 @@ package net.blaxstar.starlib.components {
             if (!_on_mouse_click_signal)
                 _on_mouse_click_signal = new NativeSignal(this, MouseEvent.CLICK, MouseEvent);
             _on_mouse_click_signal.add(delegate);
+        }
+
+        override public function set_size(width:Number, height:Number):void {
+          if (_using_icon) {
+            _display_icon.set_size(width-PADDING, height-PADDING);
+          }
+          super.set_size(width, height);
         }
 
         // ! PRIVATE FUNCTIONS ! //
@@ -159,7 +167,6 @@ package net.blaxstar.starlib.components {
 
         private function draw_bg_outline():void {
             var graphics:Graphics = _background_outline.graphics;
-
             graphics.beginFill(0, 0);
             graphics.lineStyle(1, Style.SECONDARY.value, 1, true);
 
@@ -183,16 +190,19 @@ package net.blaxstar.starlib.components {
                 _display_icon = new Icon(this);
             }
 
-            _display_icon.set_svg_xml(val);
             _display_icon.addEventListener(Icon.ICON_LOADED, on_icon_loaded);
-            _width_ = 32;
-            _height_ = 32;
+            _display_icon.set_svg_xml(val);
             _style = DEPRESSED;
             draw();
         }
 
         public function get_icon():Icon {
             return _display_icon;
+        }
+
+        public function set icon_color(color:RGBA):void {
+            _icon_color = color;
+            _display_icon.set_color(_icon_color.to_hex_string());
         }
 
         public function get style():uint {
@@ -234,8 +244,7 @@ package net.blaxstar.starlib.components {
 
         private function on_icon_loaded(event:Event):void {
             _display_icon.removeEventListener(Icon.ICON_LOADED, on_icon_loaded);
-            _display_icon.move(((_width_ / 2) - (_display_icon.width / 2)), ((_height_ / 2) - (_display_icon.height / 2)));
-            _display_icon.set_color(_icon_color.to_hex_string());
+            _display_icon.move(PADDING/2, PADDING/2);
         }
 
         private function on_mouse_down(e:MouseEvent = null):void {

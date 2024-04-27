@@ -6,7 +6,6 @@ package net.blaxstar.starlib.components {
     import flash.events.MouseEvent;
 
     import net.blaxstar.starlib.style.Style;
-    import net.blaxstar.starlib.math.Arithmetic;
 
     /**
      * ...
@@ -14,7 +13,7 @@ package net.blaxstar.starlib.components {
      */
     public class Dropdown extends Component {
         private const MIN_HEIGHT:uint = 30;
-        private const MIN_WIDTH:uint = 150;
+        private const MIN_WIDTH:uint = 100;
         private var _display_label:PlainText;
         private var _label_fill:Sprite;
         private var _label_text:String;
@@ -37,7 +36,6 @@ package net.blaxstar.starlib.components {
         }
 
         override public function add_children():void {
-            // TODO: fix resize of dropdown when label is larger than default
             _display_label = new PlainText(this, 0, 0, _label_text);
             _display_label.width = _width_;
 
@@ -51,6 +49,7 @@ package net.blaxstar.starlib.components {
             _list_component.width = _display_label.width;
             _list_component.add_delegate_to_all(on_list_item_click);
             _label_fill = new Sprite();
+            _display_label.addEventListener(Event.RESIZE, on_label_resize);
 
             super.add_children();
         }
@@ -63,18 +62,19 @@ package net.blaxstar.starlib.components {
             } else {
                 _height_ = MIN_HEIGHT;
             }
-            _width_ = _display_label.width;
             _display_label.text = _label_text;
-
-
+            _display_label.move(PADDING/2, PADDING/2);
+            _dropdown_button.move(_display_label.x + _display_label.width + (PADDING/2), 0);
+            _width_ = _display_label.width + PADDING + _dropdown_button.width;
             draw_border();
+
 
             if (_list_component.num_items == 1) {
                 _selected_item = _list_component.get_item_at(0);
             }
 
 
-            dispatchEvent(new Event(Event.RESIZE));
+            dispatchEvent(_resize_event_);
             super.draw(e);
         }
 
@@ -116,7 +116,7 @@ package net.blaxstar.starlib.components {
             g.clear();
             g.beginFill(Style.SURFACE.value, 1);
             g.lineStyle(2, Style.SECONDARY.value);
-            g.drawRoundRect(0, 0, Math.max(_width_, MIN_WIDTH) + _dropdown_button.width, MIN_HEIGHT, 7, 7);
+            g.drawRoundRect(0, 0, _width_, MIN_HEIGHT, 7, 7);
             g.endFill();
             if (!_label_fill.parent) {
                 addChild(_label_fill);
@@ -138,7 +138,7 @@ package net.blaxstar.starlib.components {
 
         // ! DELEGATE FUNCTIONS ! //
         private function on_label_resize(event:Event):void {
-            _dropdown_button.move(Math.max(_display_label.width, MIN_WIDTH), 0);
+            commit();
         }
 
         private function on_list_item_click(e:MouseEvent):void {
