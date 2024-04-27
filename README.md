@@ -47,7 +47,7 @@ _example of components in use_
 
 These classes might still need work as I find bugs here and there, but the ones listed are at least usable for most projects.
 they currently only support proprietary light and dark themes. will be updated as time goes on. 
-Feel free to take a look at the `Example.as` file in the root of this repo, which was used for the gif example above. It's fairly well commented.
+Feel free to take a look at the `Example.as` file in the root of this repo, which was used for the video example above. It's fairly well commented.
 
 COMING NEXT
 ============
