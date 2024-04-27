@@ -9,13 +9,13 @@ package net.blaxstar.starlib.utils {
 
     static public function is_empty_or_null(val:String):Boolean {
       if (!val) return true;
-      val = condenseString(val);
+      val = condense_string(val);
       return (val == "");
     }
 
     static public function is_valid_email(email:String):Boolean {
-      var emailExpression:RegExp = /([a-z0-9._-]+?)@([a-z0-9.-]+)\.([a-z]{2,4})/i;
-      return emailExpression.test(email);
+      var email_expression:RegExp = /([a-z0-9._-]+?)@([a-z0-9.-]+)\.([a-z]{2,4})/i;
+      return email_expression.test(email);
     }
 
     static public function is_valid_filepath(filepath:String):Boolean {
@@ -35,19 +35,19 @@ package net.blaxstar.starlib.utils {
      * @param	inputString The string to condense.
      * @return
      */
-    static public function condenseString(inputString:String, removeHTML:Boolean = false, removeSpecialChars:Boolean = false):String {
+    static public function condense_string(input_string:String, remove_html:Boolean = false, remove_special_characters:Boolean = false):String {
       var c:RegExp = /"/g;
-      inputString = inputString.replace(c, "");
-      inputString = inputString.split(" ").join("");
-      inputString = inputString.split("\r").join("");
-      inputString = inputString.split("\t").join("");
-      inputString = inputString.split("%20").join(" ");
+      input_string = input_string.replace(c, "");
+      input_string = input_string.split(" ").join("");
+      input_string = input_string.split("\r").join("");
+      input_string = input_string.split("\t").join("");
+      input_string = input_string.split("%20").join(" ");
 
-      if (removeHTML)
-        inputString = html_to_string(inputString);
-      if (removeSpecialChars)
-        inputString = getWordsFromString(inputString, true).join(" ");
-      return inputString;
+      if (remove_html)
+        input_string = html_to_string(input_string);
+      if (remove_special_characters)
+        input_string = get_words_from_string(input_string, true).join(" ");
+      return input_string;
     }
     /**
      * replaces empty spaces at the beginning and end of a string.
@@ -64,14 +64,14 @@ package net.blaxstar.starlib.utils {
      * @param withNumbers 
      * @return 
      */
-    static public function getWordsFromString(inputString:String, withNumbers:Boolean = false):Vector.<String> {
-      var onlyWords:String = (withNumbers) ? "/([a-zA-Z0-9]+)/g" : "/([a-zA-Z]+)/g";
-      var wordArray:Array = inputString.match(onlyWords);
-      var wordArrayLen:uint = wordArray.length;
+    static public function get_words_from_string(input_string:String, with_numbers:Boolean = false):Vector.<String> {
+      var only_words:String = (with_numbers) ? "/([a-zA-Z0-9]+)/g" : "/([a-zA-Z]+)/g";
+      var word_array:Array = input_string.match(only_words);
+      var num_words:uint = word_array.length;
       var words_array:Vector.<String> = new Vector.<String>();
 
-      for (var i:uint = 0; i < wordArrayLen; i++) {
-        words_array.push(wordArray[i]);
+      for (var i:uint = 0; i < num_words; i++) {
+        words_array.push(word_array[i]);
       }
 
       return words_array;
@@ -83,14 +83,14 @@ package net.blaxstar.starlib.utils {
      * @param	splitTo the array or vector you want to split to.
      * @param	splitAt specifies the delimiter used to split the string.
      */
-    static public function splitStringTo(string:String, splitAt:String, result_list:* = null):* {
+    static public function split_string_to(string:String, split_at:String, result_list:* = null):* {
 
       if (!result_list) {
-        result_list = new Array();
+        result_list = [];
       }
 
-      for (var i:int = 0; i < string.split(splitAt).length; ++i) {
-        result_list.push(string.split(splitAt)[i]);
+      for (var i:int = 0; i < string.split(split_at).length; ++i) {
+        result_list.push(string.split(split_at)[i]);
       }
 
         return result_list;

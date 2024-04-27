@@ -156,9 +156,9 @@ package net.blaxstar.starlib.components {
         }
 
         public function add_suggestion(label:String, data:Object):void {
-          if (_showing_suggestions && _suggestion_generator) {
-            _suggestion_generator.add_suggestion_data(label, data);
-          }
+            if (_showing_suggestions && _suggestion_generator) {
+                _suggestion_generator.add_suggestion_data(label, data);
+            }
         }
 
         // ! PRIVATE FUNCTIONS ! //
@@ -167,8 +167,8 @@ package net.blaxstar.starlib.components {
             // TODO: the initial downward navigation skips the first element when the counter is supposed to be reset. flipping the order of increment seems to give some weird results. 
             if (_suggestion_list.is_showing_items && _suggestion_cache.length > 0) {
                 if (!_initial_selection_made) {
-                  _suggestion_iterator_index = 0;
-                  _initial_selection_made = true;
+                    _suggestion_iterator_index = 0;
+                    _initial_selection_made = true;
                 } else {
                     if (key_code == _input_engine.keys.UP) {
                         // Decrement regardless of index, but handle potential underflow
@@ -185,7 +185,7 @@ package net.blaxstar.starlib.components {
         private function update_background():void {
             _textfield_background.graphics.clear();
             _textfield_background.graphics.beginFill(Style.BACKGROUND.shade(0.8).value);
-            _textfield_background.graphics.drawRoundRect(0,0,_width_,_height_,7,7);
+            _textfield_background.graphics.drawRoundRect(0, 0, _width_, _height_, 7, 7);
             _textfield_background.graphics.endFill();
         }
 
@@ -233,7 +233,7 @@ package net.blaxstar.starlib.components {
             _selected_suggestion.data = (suggestion && suggestion.data) ? suggestion.data : null;
             _text_field.setTextFormat(_text_field.defaultTextFormat);
             text = _selected_suggestion.label;
-            _text_field.setSelection(_text_field.text.length,_text_field.text.length);
+            _text_field.setSelection(_text_field.text.length, _text_field.text.length);
             _suggestion_list.hide_items();
             _initial_selection_made = false;
         }
@@ -250,7 +250,7 @@ package net.blaxstar.starlib.components {
                 _suggestion_list.cache_current_list(_input_cache.join(""));
             }
             if (Strings.is_empty_or_null(e.text)) {
-              return;
+                return;
             }
             _input_cache.push(e.text);
             show_suggestions();
@@ -275,12 +275,12 @@ package net.blaxstar.starlib.components {
                 _input_cache.pop();
                 _suggestion_list.hide_items();
                 _initial_selection_made = false;
-                
+
 
                 if (_input_cache.length != 0) {
                     show_suggestions();
                 } else {
-                  draw();
+                    draw();
                 }
             }
         }
@@ -317,12 +317,14 @@ package net.blaxstar.starlib.components {
         private function on_defocus(e:FocusEvent):void {
             _on_defocus.remove(on_defocus);
             _is_focused = false;
-            _suggestion_list.hide_items();
-            _initial_selection_made = false;
 
-            if (_showing_suggestions && _text_field.hasEventListener(TextEvent.TEXT_INPUT)) {
-                _text_field.removeEventListener(TextEvent.TEXT_INPUT, on_text_input);
-                _input_engine.remove_keyboard_delegates(on_key_down);
+            if (_showing_suggestions) {
+                if (_text_field.hasEventListener(TextEvent.TEXT_INPUT)) {
+                    _text_field.removeEventListener(TextEvent.TEXT_INPUT, on_text_input);
+                    _input_engine.remove_keyboard_delegates(on_key_down);
+                }
+                _suggestion_list.hide_items();
+                _initial_selection_made = false;
             }
 
             if (_text_field.text == "") {
