@@ -19,8 +19,9 @@ package net.blaxstar.starlib.components {
         private var _track:Sprite;
         private var _grip:Sprite;
         private var _vertical:Boolean;
+        private var _auto_attach:Boolean;
         private var _content:DisplayObject;
-        private var _viewport:Rectangle;
+        private var _viewport:DisplayObject;
         private var _y_offset:uint;
         private var _max_grip_y:uint;
         private var _x_offset:uint;
@@ -30,10 +31,11 @@ package net.blaxstar.starlib.components {
         private var _grip_down_color:uint;
         private var on_scroll_signal:Signal;
 
-        public function ScrollbarControl(content:DisplayObject, viewport:Rectangle, parent:DisplayObjectContainer = null, vertical:Boolean = true) {
+        public function ScrollbarControl(content:DisplayObject, viewport:DisplayObject, parent:DisplayObjectContainer = null, vertical:Boolean = true, attach_outside:Boolean=true) {
             _vertical = vertical;
             _content = content;
             _viewport = viewport;
+            _auto_attach = attach_outside;
 
             super(parent);
         }
@@ -94,8 +96,8 @@ package net.blaxstar.starlib.components {
         private function attach():void {
             // if content is vertical
             if (_vertical) {
-
-                x = _viewport.x + _viewport.width - _width_;
+                
+                x = _viewport.x + _viewport.width - (_auto_attach ? 0 : _width_);
                 y = _viewport.y;
                 _height_ = _viewport.height;
                 // only show the scrollbar if the content is taller than the viewport, and apply scroll listeners.
@@ -107,7 +109,7 @@ package net.blaxstar.starlib.components {
             } else {
                 // same thing but horizontally 👇
                 x = _viewport.x;
-                y = _viewport.y + _viewport.height - _width_;
+                y = _viewport.y + _viewport.height - (_auto_attach ? 0 : _height_);
 
                 if (_content.x + _content.width > _viewport.x + _viewport.width) {
                     this.visible = true;
@@ -221,6 +223,11 @@ package net.blaxstar.starlib.components {
         public function set scroll_ratio(val:Number):void {
             _scroll_ratio = val;
             commit();
+        }
+
+        public function set auto_attach(value:Boolean):void {
+          _auto_attach = value;
+          commit();
         }
     }
 }

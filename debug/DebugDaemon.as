@@ -63,6 +63,10 @@ package net.blaxstar.starlib.debug {
         }
 
         static public function write_log(message:String, severity:uint = DebugDaemon.DEBUG, ... format):void {
+            if (!_instance) {
+              return;
+            }
+
             var prefix:String = "[".concat(new Date().toUTCString()).concat("]");
             var full_message:String = "";
 
@@ -89,6 +93,9 @@ package net.blaxstar.starlib.debug {
             _log.push(full_message);
 
             if (severity == ERROR) {
+                if (!_filestream) {
+                  _filestream = new FileStream();
+                }
                 flush_log();
                 throw new Error(full_message, severity);
             }

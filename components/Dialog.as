@@ -53,9 +53,9 @@ package net.blaxstar.starlib.components {
         private var _on_mouse_down_signal:NativeSignal;
 
         public function Dialog(parent:DisplayObjectContainer = null, title:String = '', message:String = '') {
-
-            _dialog_cache = new Dictionary();
-            
+            if (!_dialog_cache) {
+                _dialog_cache = new Dictionary();
+            }
             _title_string = title;
             _message_string = message;
             _on_close_signal = new Signal();
@@ -69,6 +69,7 @@ package net.blaxstar.starlib.components {
          * created to be overridden.
          */
         override public function init():void {
+            
             _dialog_cache[this.id] = this;
             _width_ = MIN_WIDTH;
             _height_ = MIN_HEIGHT;
