@@ -127,7 +127,7 @@
                 }
             } else {
                 // otherwise
-                trace("no gamepads found!");
+                DebugDaemon.write_warning("no gamepads found!");
                 init_gamepad();
             }
             return null;

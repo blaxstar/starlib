@@ -1,11 +1,11 @@
-package net.blaxstar.starlib.debug.console.commands {
+package net.blaxstar.starlib.debug.terminal.commands {
 
     import net.blaxstar.starlib.utils.Strings;
     import flash.filesystem.FileStream;
     import flash.filesystem.FileMode;
     import flash.filesystem.File;
 
-    public class GrepCommand extends ConsoleCommand {
+    public class GrepCommand extends TerminalCommand {
         private const _filestream:FileStream = new FileStream();
 
         public function GrepCommand() {

@@ -23,7 +23,7 @@ package {
     import net.blaxstar.starlib.components.ScrollbarControl;
     import net.blaxstar.starlib.components.Stepper;
     import net.blaxstar.starlib.debug.DebugDaemon;
-    import net.blaxstar.starlib.debug.console.DebugConsole;
+    import net.blaxstar.starlib.debug.console.Termini;
     import net.blaxstar.starlib.gui.CheckeredSurface;
     import net.blaxstar.starlib.input.InputEngine;
     import net.blaxstar.starlib.style.Color;
@@ -205,7 +205,7 @@ package {
             //scrollbar.draw() <-- you can use it with a listener as well, since it accepts any Event object.
 
             // ah, yes, the debug console. now admittedly, this isn't a component. but it earns an honorary mention! it is a slim, horizontal console that appears at the top of the screen when you press the trigger key (by default it's set to tilde, but you can change this.) there are a few commands already built in such as add and grep (which supports local files and multiline text!) but i've created the ConsoleCommand class to be as extensible as possible. it's a very powerful tool for debugging at runtime, especially in game development-- see if you can't come up with your own ideas and mods!
-            var debug_console:DebugConsole = new DebugConsole(stage);
+            var debug_console:Termini = new Termini(stage);
             addChild(debug_console);
 
             stage.addEventListener(MouseEvent.RIGHT_CLICK, show_context_menu);

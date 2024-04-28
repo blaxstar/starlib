@@ -1,8 +1,9 @@
-package net.blaxstar.starlib.debug.console.commands {
-    import net.blaxstar.starlib.debug.console.commands.ConsoleCommand;
+package net.blaxstar.starlib.debug.terminal.commands {
+    import net.blaxstar.starlib.debug.terminal.commands.TerminalCommand;
     import flash.utils.Dictionary;
+    import net.blaxstar.starlib.utils.Strings;
 
-    public class EvalObjectCommand extends ConsoleCommand {
+    public class EvalObjectCommand extends TerminalCommand {
         private static var _registry:Dictionary;
 
         public function EvalObjectCommand() {
@@ -18,6 +19,7 @@ package net.blaxstar.starlib.debug.console.commands {
         }
 
         public function eval(query:String):String {
+            query = Strings.trim(query);
             var properties:Array = query.split(".");
             var object_name:String = properties.shift();
             var accessible_property:Object;

@@ -1,6 +1,6 @@
-package net.blaxstar.starlib.debug.console.commands
+package net.blaxstar.starlib.debug.terminal.commands
 {
-  public class ArithmeticAddCommand extends ConsoleCommand {
+  public class ArithmeticAddCommand extends TerminalCommand {
     
     public function ArithmeticAddCommand() {
       super("add", add);

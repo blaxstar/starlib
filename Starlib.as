@@ -8,6 +8,7 @@ package net.blaxstar.starlib
   import net.blaxstar.starlib.input.InputEngine;
 
   public class Starlib {
+    static public const VERSION_STRING:String = "STARLIB VERSION 0.8.0";
     static private var _input_engine:InputEngine;
 
     static public function init(main:DisplayObjectContainer, stage:Stage, write_errors_to_logfile:Boolean=false, error_log_name:String="starlib_log_file"):void {

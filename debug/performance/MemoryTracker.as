@@ -5,6 +5,7 @@ package net.blaxstar.starlib.debug.performance {
     import flash.system.System;
     import flash.utils.Dictionary;
     import flash.display.Sprite;
+    import net.blaxstar.starlib.debug.DebugDaemon;
 
     public class MemoryTracker {
         // megabyte constant to convert from bytes to megabytes.
@@ -82,9 +83,9 @@ package net.blaxstar.starlib.debug.performance {
          * prints a memory report to std out.
          */
         private static function print_memory_report():void {
-            trace("** MEMORY REPORT AT:", int(getTimer() / 1000));
+            DebugDaemon.write_log("** MEMORY REPORT AT:", int(getTimer() / 1000));
             for (var obj:* in _tracker_lookup) {
-                trace(obj, "exists", _tracker_lookup[obj]);
+                DebugDaemon.write_debug("%s exists %s", obj, _tracker_lookup[obj]);
             }
         }
 
