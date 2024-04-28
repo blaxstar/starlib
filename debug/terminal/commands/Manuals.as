@@ -49,8 +49,9 @@ package net.blaxstar.starlib.debug.terminal.commands
     "DESCRIPTION:\n\n" + 
     "\tgrep searches for PATTERNS in each FILE.  PATTERN is a single pattern, and grep prints each line (seperated by pipes) that matches that pattern. pattern should not be quoted. if a file is provided, it will search the file. if the file contains a URL to another file that is on the system, it will search recursively for the matching pattern through each file and concatenate all the results from all files.\n" + 
     "\tthe following are examples of usage:\n\n"+
-    "\tgrep b booty\n\t// booty\n\n"+
-    "\tgrep b c:\\file.txt\n\t// returns every line in c:\\file.txt containing `b`";
+    "\tgrep b apple bottom jeans boots with the fur\n\t// bottom | boots\n\n"+
+    "\tgrep b c:\\file.txt\n\t// returns every line in c:\\file.txt containing `b`\n\n" +
+    "\t// in c:\\file.txt:  d:\\other_file.txt <newline> e:\\other_file.txt\n\tgrep a c:\\file.txt\n\t// returns every line in c:\\file.txt, d:\\other_file.txt, and e:\\other_file.txt containing `a`";
     
     static public const eval:String = 
     "NAME:\n\n" +

@@ -101,6 +101,9 @@ package net.blaxstar.starlib.debug.terminal {
                 stage.stageFocusRect = false;
                 stage.focus = _input_field.input_target;
                 parent.setChildIndex(this, parent.numChildren-1);
+                _output_field.text = "";
+                _manpage_scaled = false;
+                draw_background();
                 _input_engine.add_keyboard_listener(on_key_press_in_console, InputEngine.KEYDOWN);
             }
         }
@@ -111,7 +114,6 @@ package net.blaxstar.starlib.debug.terminal {
                 visible = false;
                 _input_engine.remove_keyboard_listeners(on_key_press_in_console);
                 reset_history_navigation();
-                _manpage_scaled = false;
             }
         }
 
@@ -162,8 +164,8 @@ package net.blaxstar.starlib.debug.terminal {
             _is_showing = false;
             open_key = _input_engine.keys.TILDE;
 
-            check_save();
             init_text_fields();
+            check_save();
             hide_console();
         }
 

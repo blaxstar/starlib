@@ -22,10 +22,15 @@ package net.blaxstar.starlib.debug.terminal.commands {
             var search_string:String = Strings.trim(args.splice(0, 1));
             var result:Array = [];
             var searchable_data:String;
-            var regex:RegExp = new RegExp(Strings.trim(search_string), "gim");
+            var regex:RegExp = new RegExp("(^.*" + search_string + ".*$)", "gim");
+            var num_args:uint = args.length;
 
-            for each (var search_source:String in args) {
-                result = result.concat(match_lines_in_text(search_source, regex));
+            for (var i:int=0;i<num_args;i++) {
+              if (Strings.is_valid_filepath(args[i])) {
+                result = result.concat(match_lines_in_file(args[i], regex));
+              } else {
+                result = result.concat(String(args[i]).match(regex));
+              }
             }
 
             if (!result || result.length == 0) {
@@ -36,7 +41,7 @@ package net.blaxstar.starlib.debug.terminal.commands {
             return result.join("$@").replace(/[\r\n ]+/gim, " ").replace(/[$@]+/gim, " | ");
         }
 
-        private function match_lines_in_text(searchable_data:String, regex:RegExp):Array {
+        private function match_lines_in_file(searchable_data:String, regex:RegExp):Array {
             var lines:Array = [];
             // read the file in...
             _filestream.open(new File(Strings.trim(searchable_data)), FileMode.READ);
@@ -53,7 +58,7 @@ package net.blaxstar.starlib.debug.terminal.commands {
                     // if it is, then verify the file exists and call this function again for the file on this line
                     var input_file:File = new File(line);
                     if (input_file.exists && !input_file.isDirectory) {
-                        recursed_file_matches = recursed_file_matches.concat(match_lines_in_text(line, regex));
+                        recursed_file_matches = recursed_file_matches.concat(match_lines_in_file(line, regex));
                         // we'll return false to remove the filepath from the results
                         return false;
                     }
