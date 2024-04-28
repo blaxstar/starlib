@@ -45,13 +45,13 @@ package net.blaxstar.starlib.debug.console {
         private var _command_history_length:Number;
         private var _current_history_index:int;
         private var _temp_history_save:String;
-        private var _isShowing:Boolean;
-        private var _navigatingHistory:Boolean;
+        private var _is_showing:Boolean;
+        private var _navigating_history:Boolean;
         private var _pipeline:Pipe;
 
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         public function DebugConsole(stage:Stage) {
-            _input_engine = new InputEngine(stage);
+            _input_engine = InputEngine.instance();
             init();
             addEventListener(Event.ADDED_TO_STAGE, on_added_to_stage);
         }
@@ -71,7 +71,7 @@ package net.blaxstar.starlib.debug.console {
             var trimmedCommand:String = Strings.trim(command);
             var commandIndex:int = command_history.indexOf(trimmedCommand);
 
-            if (_navigatingHistory && _command_history_length) {
+            if (_navigating_history && _command_history_length) {
                 command_history.removeAt(_current_history_index);
             }
 
@@ -87,7 +87,7 @@ package net.blaxstar.starlib.debug.console {
 
         public function toggle_console():void {
 
-            if (_isShowing) {
+            if (_is_showing) {
                 hide_console();
             } else {
                 show_console();
@@ -100,7 +100,7 @@ package net.blaxstar.starlib.debug.console {
                 visible = true;
                 stage.stageFocusRect = false;
                 stage.focus = _input_field.input_target;
-                _input_engine.add_keyboard_delegate(on_key_press_in_console, InputEngine.KEYDOWN);
+                _input_engine.add_keyboard_listener(on_key_press_in_console, InputEngine.KEYDOWN);
             }
         }
 
@@ -108,7 +108,7 @@ package net.blaxstar.starlib.debug.console {
 
             if (visible) {
                 visible = false;
-                _input_engine.remove_keyboard_delegates(on_key_press_in_console);
+                _input_engine.remove_keyboard_listeners(on_key_press_in_console);
                 reset_history_navigation();
             }
         }
@@ -155,8 +155,8 @@ package net.blaxstar.starlib.debug.console {
             _temp_history_save = "";
             _current_history_index = -1;
             _command_history_length = 0;
-            _navigatingHistory = false;
-            _isShowing = false;
+            _navigating_history = false;
+            _is_showing = false;
             open_key = _input_engine.keys.TILDE;
 
             check_save();
@@ -239,7 +239,7 @@ package net.blaxstar.starlib.debug.console {
 
         private function reset_history_navigation():void {
             _current_history_index = -1;
-            _navigatingHistory = false;
+            _navigating_history = false;
             clear_console();
             _temp_history_save = "";
         }
@@ -261,7 +261,7 @@ package net.blaxstar.starlib.debug.console {
 
             if (_current_history_index >= _command_history_length - 1) {
                 _current_history_index = -1;
-                _navigatingHistory = false;
+                _navigating_history = false;
                 return current_command;
             }
 
@@ -354,19 +354,19 @@ package net.blaxstar.starlib.debug.console {
                     return;
                 }
                 var text_length:uint = _input_field.text.length;
-                _navigatingHistory = true;
+                _navigating_history = true;
                 _input_field.text = previous_command;
                 _input_field.input_target.setSelection(text_length, text_length);
 
             } else if (e.keyCode == next_history_key) {
 
                 if (_current_history_index == -1) {
-                    _navigatingHistory = false;
+                    _navigating_history = false;
                     return;
 
                 }
                 text_length = _input_field.text.length;
-                _navigatingHistory = true;
+                _navigating_history = true;
                 _input_field.text = next_command;
                 _input_field.input_target.setSelection(text_length, text_length);
             }
@@ -380,7 +380,7 @@ package net.blaxstar.starlib.debug.console {
 
             _input_field.width = _output_field.width = (stage.stageWidth - (Component.PADDING * 2));
             _output_field.move(10, _input_field.height);
-            _input_engine.add_keyboard_delegate(on_toggle_key_press, InputEngine.KEYDOWN);
+            _input_engine.add_keyboard_listener(on_toggle_key_press, InputEngine.KEYDOWN);
         }
 
         private function on_console_focus_out(event:FocusEvent):void {
@@ -399,7 +399,7 @@ package net.blaxstar.starlib.debug.console {
         }
 
         private function on_text_field_change(e:Event):void {
-            if (!_navigatingHistory) {
+            if (!_navigating_history) {
                 _temp_history_save = _input_field.text;
             }
         }

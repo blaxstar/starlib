@@ -5,8 +5,11 @@ package net.blaxstar.starlib
   import net.blaxstar.starlib.style.Style;
   import thirdparty.com.lorentz.processing.ProcessExecutor;
   import net.blaxstar.starlib.debug.DebugDaemon;
+  import net.blaxstar.starlib.input.InputEngine;
 
   public class Starlib {
+    static private var _input_engine:InputEngine;
+
     static public function init(main:DisplayObjectContainer, stage:Stage, write_errors_to_logfile:Boolean=false, error_log_name:String="starlib_log_file"):void {
 
         if (!main) {
@@ -16,6 +19,7 @@ package net.blaxstar.starlib
           throw new Error("stage is null!");
         }
 
+        _input_engine = new InputEngine(stage, true);
         Style.init(main);
         ProcessExecutor.instance.initialize(stage);
 

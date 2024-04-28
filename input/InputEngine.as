@@ -1,5 +1,4 @@
 ﻿package net.blaxstar.starlib.input {
-    import flash.display.Sprite;
     import flash.display.Stage;
     import flash.events.Event;
     import flash.events.KeyboardEvent;
@@ -11,15 +10,13 @@
     import net.blaxstar.starlib.input.gamepad.types.GamepadType;
     import net.blaxstar.starlib.input.gamepad.types.OuyaGamepad;
     import net.blaxstar.starlib.input.gamepad.types.Xbox360Gamepad;
-    import flash.events.IEventDispatcher;
-    import flash.events.TextEvent;
 
     /**
      * Enumerated type holding all the key code values and their names.
      * @author Deron Decamp	(decamp.deron@gmail.com)
      *
      */
-    public class InputEngine extends Sprite {
+    public class InputEngine {
         // const
         static public const KEYUP:uint = 0;
         static public const KEYDOWN:uint = 1;
@@ -37,26 +34,26 @@
         static private var _keyboard_initialized:Boolean;
         static private var _mouse_initialized:Boolean;
         static private var _gamepad_initialized:Boolean;
+        static private var _stage:Stage;
         static private var _instance:InputEngine;
 
         // * CONSTRUCTOR * /////////////////////////////////////////////////////////
         /**
          * instantiates a logical engine for handling user input (keyboard, gamepad, mouse).
-         * @param stage a `Stage` object, which references the main stage. this allows for input processing from anywhere in the current native window.
+         * @param _stage a `_stage` object, which references the main _stage. this allows for input processing from anywhere in the current native window.
          * @param init_keyboard boolean value to initialize keyboard input listeners.
          * @param init_mouse boolean value to initialize mouse input listeners.
          * @param init_gamepad boolean value to initialize gamepad input listeners.
          */
         public function InputEngine(stage:Stage = null, init_keyboard:Boolean = false, init_mouse:Boolean = false, init_gamepad:Boolean = false) {
             if (!_instance) {
-                super();
                 if (stage) {
-                    stage.addChild(this);
-                    init(stage, init_keyboard, init_mouse, init_gamepad);
+                    _stage = stage;
+                    init(init_keyboard, init_mouse, init_gamepad);
                 }
                 _instance = this;
             } else {
-              DebugDaemon.write_error("input engine is a singleton, please use InputEngine.instance()!");
+                DebugDaemon.write_error("input engine is a singleton, please use InputEngine.instance()!");
             }
         }
 
@@ -70,18 +67,18 @@
         // * PUBLIC * //////////////////////////////////////////////////////////////
 
         /**
-         * initializes listeners on the stage for input events.
-         * NOTE: instantiating this class with the constructor and a non-null stage
+         * initializes listeners on the _stage for input events.
+         * NOTE: instantiating this class with the constructor and a non-null _stage
          * will result in an automatic call to this method. this method is mainly
          * for dependency injection.
-         * @param stage
+         * @param _stage
          * @param init_keyboard boolean value to initialize keyboard input listeners.
          * @param init_mouse boolean value to initialize mouse input listeners.
          * @param init_gamepad boolean value to initialize gamepad input listeners.
          */
-        public function init(stage:Stage, init_keyboard:Boolean = false, init_mouse:Boolean = false, init_gamepad:Boolean = false):void {
-            // the stage is needed for these listeners, so if it hasn't been instantiated yet, then return
-            if (!stage) {
+        public function init(init_keyboard:Boolean = false, init_mouse:Boolean = false, init_gamepad:Boolean = false):void {
+            // the _stage is needed for these listeners, so if it hasn't been instantiated yet, then return
+            if (!_stage) {
                 return;
             }
             // if none of the init flags are set, then there's no point
@@ -90,15 +87,15 @@
             }
 
             // conditionally activate listeners based on the flags, we won't always want all of them simultaneously
-            if (init_keyboard) {
+            if (init_keyboard && !_keyboard_initialized) {
                 this.init_keyboard();
             }
 
-            if (init_mouse) {
+            if (init_mouse && !_mouse_initialized) {
                 this.init_mouse();
             }
 
-            if (init_gamepad) {
+            if (init_gamepad && !_gamepad_initialized) {
                 this.init_gamepad();
             }
         }
@@ -184,19 +181,19 @@
         }
 
         /**
-         * adds a mouse listener to the main stage.
+         * adds a mouse listener to the main _stage.
          * @param listener_type the string name of the type of listener to add.
          * @param delegate the delegate function to fire when the listener's event is dispatched.
          * @return void
          */
         public function add_mouse_listener(listener_type:String, delegate:Function):void {
-            // lets double check the stage is available just in case, and write a log if it isn't, for easy debugging.
-            if (!stage) {
-                DebugDaemon.write_log("the stage is not available, could not add mouse listener!", DebugDaemon.WARN);
+            // lets double check the _stage is available just in case, and write a log if it isn't, for easy debugging.
+            if (!_stage) {
+                DebugDaemon.write_log("the _stage is not available, could not add mouse listener!", DebugDaemon.WARN);
             } else {
                 // otherwise, make sure the provided listener name actually refers to an existing MouseEvent type, then add it.
                 if (MouseEvent[listener_type]) {
-                    stage.addEventListener(listener_type, delegate);
+                    _stage.addEventListener(listener_type, delegate);
                 }
             }
         }
@@ -207,27 +204,29 @@
          * @param key_event_trigger the keyboard event type to use as a trigger for `delegate`.
          * @return void
          */
-        public function add_keyboard_delegate(delegate:Function, key_event_trigger:uint = 0):void {
-            // if the stage is not available then there's nothing we can do
-            if (!stage) {
+        public function add_keyboard_listener(delegate:Function, key_event_trigger:uint = 0):void {
+            // if the _stage is not available then there's nothing we can do
+            if (!_stage) {
                 DebugDaemon.write_log("the stage is not available, could not add keyboard listener!", DebugDaemon.WARN);
             } else {
                 // otherwise lets add listeners based on the trigger
                 if (key_event_trigger == KEYDOWN) {
-                    stage.addEventListener(KeyboardEvent.KEY_DOWN, delegate);
+                    _stage.addEventListener(KeyboardEvent.KEY_DOWN, delegate);
                 } else if (key_event_trigger == KEYUP) {
-                    stage.addEventListener(KeyboardEvent.KEY_UP, delegate);
+                    _stage.addEventListener(KeyboardEvent.KEY_UP, delegate);
                 }
             }
         }
 
         /**
-         * remove previously set delegates from the stage.
+         * remove previously set delegates from the _stage.
          * @param delegate the delegate to remove.
          */
-        public function remove_keyboard_delegates(delegate:Function):void {
-            stage.removeEventListener(KeyboardEvent.KEY_DOWN, delegate);
-            stage.removeEventListener(KeyboardEvent.KEY_UP, delegate);
+        public function remove_keyboard_listeners(delegate:Function):void {
+            if (_stage) {
+                _stage.removeEventListener(KeyboardEvent.KEY_DOWN, delegate);
+                _stage.removeEventListener(KeyboardEvent.KEY_UP, delegate);
+            }
         }
 
         // * DELEGATE FUNCTIONS * //////////////////////////////////////////////////
@@ -266,57 +265,60 @@
 
         private function on_scroll_wheel_move(e:MouseEvent):void {
             _scroll_delta = e.delta;
-            dispatchEvent(e);
+            _stage.dispatchEvent(e);
         }
 
         /**
-         * initializes the keyboard listeners on the main stage.
+         * initializes the keyboard listeners on the main _stage.
          * @param e event for listener
          */
         private function init_keyboard(e:Event = null):void {
-            if (stage) {
-                removeEventListener(Event.ADDED_TO_STAGE, init_keyboard);
-                stage.addEventListener(KeyboardEvent.KEY_DOWN, on_key_down);
-                stage.addEventListener(KeyboardEvent.KEY_UP, on_key_up);
+            if (_stage) {
+                _stage.addEventListener(KeyboardEvent.KEY_DOWN, on_key_down);
+                _stage.addEventListener(KeyboardEvent.KEY_UP, on_key_up);
+                _keyboard_initialized = true;
             } else {
-                addEventListener(Event.ADDED_TO_STAGE, this.init_keyboard);
+                DebugDaemon.write_warning("the stage is null! cannot init keyboard listeners.");
             }
-
         }
 
         /**
-         * initializes the mouse listeners on the main stage.
+         * initializes the mouse listeners on the main _stage.
          * @param e event for listener
          */
         private function init_mouse(e:Event = null):void {
-            if (stage) {
-                stage.addEventListener(MouseEvent.MOUSE_DOWN, on_mouse_down);
-                stage.addEventListener(MouseEvent.MOUSE_UP, on_mouse_up);
-                stage.addEventListener(MouseEvent.CLICK, on_mouse_up);
-                stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, on_scroll_button_down);
-                stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, on_scroll_button_up);
-                stage.addEventListener(MouseEvent.MOUSE_WHEEL, on_scroll_wheel_move);
-                stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, on_right_mouse_down);
-                stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, on_right_mouse_up);
+            if (_stage) {
+                _stage.addEventListener(MouseEvent.MOUSE_DOWN, on_mouse_down);
+                _stage.addEventListener(MouseEvent.MOUSE_UP, on_mouse_up);
+                _stage.addEventListener(MouseEvent.CLICK, on_mouse_up);
+                _stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, on_scroll_button_down);
+                _stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, on_scroll_button_up);
+                _stage.addEventListener(MouseEvent.MOUSE_WHEEL, on_scroll_wheel_move);
+                _stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, on_right_mouse_down);
+                _stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, on_right_mouse_up);
+                _mouse_initialized = true;
             } else {
-                addEventListener(Event.ADDED_TO_STAGE, init_mouse);
+                DebugDaemon.write_warning("the stage is null! cannot init mouse listeners.");
             }
         }
 
         /**
-         * initializes the gamepad listeners on the main stage.
+         * initializes the gamepad listeners on the main _stage.
          * @param e event for listener
          */
         private function init_gamepad(e:Event = null):void {
-            if (stage) {
+            if (_stage) {
                 if (!GamepadBus.is_initialized) {
-                    GamepadBus.initialize(stage, init_gamepad);
+                    GamepadBus.initialize(_stage, init_gamepad);
                 }
                 while (GamepadBus.has_ready_controller()) {
                     _gamepads.push(GamepadBus.get_ready_controller());
                 }
+                if (_gamepads && _gamepads.length) {
+                    _gamepad_initialized = true;
+                }
             } else {
-                addEventListener(Event.ADDED_TO_STAGE, init_gamepad);
+                DebugDaemon.write_warning("the stage is null! cannot init gamepads.");
             }
 
         }

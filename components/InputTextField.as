@@ -296,9 +296,9 @@ package net.blaxstar.starlib.components {
                 _text_field.setSelection(0, _text_field.text.length);
             }
 
-            if (_showing_suggestions && !_input_engine.hasEventListener(TextEvent.TEXT_INPUT)) {
+            if (_showing_suggestions) {
                 _text_field.addEventListener(TextEvent.TEXT_INPUT, on_text_input);
-                _input_engine.add_keyboard_delegate(on_key_down, InputEngine.KEYDOWN);
+                _input_engine.add_keyboard_listener(on_key_down, InputEngine.KEYDOWN);
             }
 
             if (_showing_underline) {
@@ -321,7 +321,7 @@ package net.blaxstar.starlib.components {
             if (_showing_suggestions) {
                 if (_text_field.hasEventListener(TextEvent.TEXT_INPUT)) {
                     _text_field.removeEventListener(TextEvent.TEXT_INPUT, on_text_input);
-                    _input_engine.remove_keyboard_delegates(on_key_down);
+                    _input_engine.remove_keyboard_listeners(on_key_down);
                 }
                 _suggestion_list.hide_items();
                 _initial_selection_made = false;
@@ -439,7 +439,7 @@ package net.blaxstar.starlib.components {
                     _input_engine = InputEngine.instance();
                 }
                 _text_field.addEventListener(TextEvent.TEXT_INPUT, on_text_input);
-                _input_engine.add_keyboard_delegate(on_key_down, InputEngine.KEYDOWN);
+                _input_engine.add_keyboard_listener(on_key_down, InputEngine.KEYDOWN);
             } else {
                 if (_suggestion_list != null) {
                     _suggestion_list.clear();
