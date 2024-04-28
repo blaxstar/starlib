@@ -24,15 +24,14 @@ _example of components in use_
 
 ## "completed" components
 
-* input textfield
-* input text area
-* button
-* checkbox / radio box
-* context menu
-* icon (built for SVG only so far)
-* file loader
-* progress bar
-* plain text
+* input textfield - an input textfield component with support for suggestions
+* input text area - a multiline textfield for large bodies of text
+* button - a simple animated button with 2 styles. supports the icon class to create icon buttons.
+* checkbox / radio box - a checkbox with a unique style. can be organized into groups similar to radio buttons.
+* context menu - a menu that has support for automatic list caching and named groups (contexts).
+* icon - an SVG icon that can load SVG XML data on the fly. has support for changing color and size.
+* progress bar - a simple progress bar. 
+* plain text - a simple, static text block. supports color and multiline properties.
 * dialog
 * card
 * list
