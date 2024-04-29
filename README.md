@@ -22,27 +22,26 @@ _example of components in use_
 
 
 
-## "completed" components
+## COMPLETED COMPONENTS
 
-* input textfield - an input textfield component with support for suggestions
-* input text area - a multiline textfield for large bodies of text
-* button - a simple animated button with 2 styles. supports the icon class to create icon buttons.
-* checkbox / radio box - a checkbox with a unique style. can be organized into groups similar to radio buttons.
-* context menu - a menu that has support for automatic list caching and named groups (contexts).
-* icon - an SVG icon that can load SVG XML data on the fly. has support for changing color and size.
-* progress bar - a simple progress bar. 
-* plain text - a simple, static text block. supports color and multiline properties.
-* dialog
-* card
-* list
-* scrollbar control (fixed!)
-* autocomplete / suggestions
-* uint stepper
-* chip
-* dropdown selector
-* LED
-* divider
-* debug console
+* **INPUT TEXTFIELD** - an input textfield component with support for suggestions
+* **INPUT TEXT AREA** - a multiline textfield for large bodies of text
+* **BUTTON** - a simple animated button with 2 styles. supports the icon class to create icon buttons.
+* **CHECKBOX / RADIO BOX** - a checkbox with a unique style. can be organized into groups similar to radio buttons.
+* **CONTEXT MENU** - a menu that has support for automatic list caching and named groups (contexts).
+* **ICON** - an SVG icon that can load SVG XML data on the fly. has support for changing color and size.
+* **PROGRESS BAR** - a simple progress bar. 
+* **PLAIN TEXT** - a simple, static text block. supports color and multiline properties.
+* **DIALOG** - a fully featured ui dialog. has built-in support for title display & message display (plaintext) as well as action buttons (the button component). can be dragged using the draggable property, and also has automatic resource management when multiple dialogs are in use.
+* **CARD** - a card container. it can be dragged using the draggable property. it has a VerticalBox component that automatically organizes children in a vertical list. can be used with a HorizontalBox component for complex layouts.
+* **LIST** - a cacheable list. can be hidden or shown via show_list() or hide_list(). also has a useful is_showing boolean property.
+* **SCROLLBAR CONTROL** - a plain scrollbar control. can be auto attached to a display object. use listeners to update position when the target is moved.
+* **SUGGESTITRON** - A suggestions generator. generates a vector of list items to be used with a list. 
+* **UINT STEPPER** - a simple uint stepper that counts from 0 to uint.MAX_VALUE.
+* **CHIP** - a chip/tag component. can be removed with the default trash button and is immediately prepared for garbage collection.
+* **DROPDOWN SELECTOR** - a dropdown selector. you can provide a list of items to choose from and retrieve the current value through the value property.
+* **LED** - a toggleable circle LED. can be resized and set to flash, which will toggle it on/off every half second (500ms).
+* **DIVIDER** - a divider component. can be vertical or horizontal.
 
 These classes might still need work as I find bugs here and there, but the ones listed are at least usable for most projects.
 they currently only support proprietary light and dark themes. will be updated as time goes on. 
