@@ -15,7 +15,11 @@ libraries used:
 ## PREVIEW
 _example of components in use_
 
-[![STARLIB](https://i.stack.imgur.com/Vp2cE.png)](https://github.com/blaxstar/starlib/assets/6477128/0adf9cbf-f1da-42fb-b277-ce847e6a4da6)
+[![STARLIB](https://i.stack.imgur.com/Vp2cE.png)](https://github.com/blaxstar/starlib/assets/6477128/2d4f1948-1da8-4192-92bc-82f2059c5f66)
+
+
+
+
 
 
 
