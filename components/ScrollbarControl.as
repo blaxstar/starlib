@@ -31,11 +31,11 @@ package net.blaxstar.starlib.components {
         private var _grip_down_color:uint;
         private var on_scroll_signal:Signal;
 
-        public function ScrollbarControl(content:DisplayObject, viewport:DisplayObject, parent:DisplayObjectContainer = null, vertical:Boolean = true, attach_outside:Boolean=true) {
+        public function ScrollbarControl(content:DisplayObject, viewport:DisplayObject, parent:DisplayObjectContainer = null, vertical:Boolean = true, auto_attach:Boolean=true) {
             _vertical = vertical;
             _content = content;
             _viewport = viewport;
-            _auto_attach = attach_outside;
+            _auto_attach = auto_attach;
 
             super(parent);
         }
@@ -97,7 +97,7 @@ package net.blaxstar.starlib.components {
             // if content is vertical
             if (_vertical) {
                 
-                x = _viewport.x + _viewport.width - (_auto_attach ? 0 : _width_);
+                x = _viewport.x + _viewport.width;
                 y = _viewport.y;
                 _height_ = _viewport.height;
                 // only show the scrollbar if the content is taller than the viewport, and apply scroll listeners.
@@ -109,7 +109,7 @@ package net.blaxstar.starlib.components {
             } else {
                 // same thing but horizontally 👇
                 x = _viewport.x;
-                y = _viewport.y + _viewport.height - (_auto_attach ? 0 : _height_);
+                y = _viewport.y + _viewport.height;
 
                 if (_content.x + _content.width > _viewport.x + _viewport.width) {
                     this.visible = true;
