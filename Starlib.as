@@ -3,7 +3,7 @@ package net.blaxstar.starlib
   import flash.display.DisplayObjectContainer;
   import flash.display.Stage;
   import net.blaxstar.starlib.style.Style;
-  import thirdparty.com.lorentz.processing.ProcessExecutor;
+  import com.lorentz.processing.ProcessExecutor;
   import net.blaxstar.starlib.debug.DebugDaemon;
   import net.blaxstar.starlib.input.InputEngine;
 

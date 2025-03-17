@@ -10,7 +10,7 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.RGBA;
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.natives.NativeSignal;
 
     /**
      * A card component inspired by Google's `Material Card`. It can be used as a layout container for components.

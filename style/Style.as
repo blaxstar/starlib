@@ -3,7 +3,7 @@ package net.blaxstar.starlib.style
 import flash.display.DisplayObjectContainer;
 import flash.display.StageAlign;
 import flash.display.StageScaleMode;
-import thirdparty.org.osflash.signals.Signal;
+import org.osflash.signals.Signal;
 
 /**
 	 * ...

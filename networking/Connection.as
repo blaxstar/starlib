@@ -4,17 +4,17 @@ package net.blaxstar.starlib.networking {
     import flash.events.ProgressEvent;
     import flash.net.SecureSocket;
     import flash.utils.ByteArray;
+    import flash.utils.Dictionary;
     import flash.utils.Timer;
 
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.io.URL;
-    import thirdparty.org.msgpack.MsgPack;
-    import thirdparty.org.msgpack.MsgPackFlags;
     import net.blaxstar.starlib.utils.Strings;
 
-    import thirdparty.org.osflash.signals.Signal;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
-    import flash.utils.Dictionary;
+    import org.msgpack.MsgPack;
+    import org.msgpack.MsgPackFlags;
+    import org.osflash.signals.Signal;
+    import org.osflash.signals.natives.NativeSignal;
 
     /**
      * TODO: documentation

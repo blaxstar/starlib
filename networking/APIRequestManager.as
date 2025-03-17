@@ -6,7 +6,7 @@ package net.blaxstar.starlib.networking {
     import net.blaxstar.starlib.debug.DebugDaemon;
     import net.blaxstar.starlib.io.URL;
 
-    import thirdparty.org.osflash.signals.Signal;
+    import org.osflash.signals.Signal;
     import flash.events.IOErrorEvent;
 
     /**

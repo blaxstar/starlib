@@ -71,16 +71,16 @@ package net.blaxstar.starlib.components {
                 turn_off();
             else
                 turn_on();
-
-            draw();
         }
 
         public function turn_on():void {
             _is_on = true;
+            draw();
         }
 
         public function turn_off():void {
             _is_on = false;
+            draw();
         }
 
         public function set off_color(val:uint):void {
@@ -95,11 +95,11 @@ package net.blaxstar.starlib.components {
 
         public function set is_flashing(val:Boolean):void {
             if (_is_flashing) {
-              if (!val) {
-                clearInterval(_flash_interval);
-              } 
+                if (!val) {
+                    clearInterval(_flash_interval);
+                }
             } else {
-              _flash_interval = val ? setInterval(toggle, 500): 0;
+                _flash_interval = val ? setInterval(toggle, 500) : 0;
             }
             _is_flashing = val;
             draw();

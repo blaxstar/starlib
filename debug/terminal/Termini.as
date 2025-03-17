@@ -24,7 +24,7 @@ package net.blaxstar.starlib.debug.terminal {
     import net.blaxstar.starlib.style.Color;
     import net.blaxstar.starlib.utils.Strings;
 
-    import thirdparty.org.osflash.signals.Signal;
+    import org.osflash.signals.Signal;
 
     public class Termini extends Sprite {
         static private const _ON_DICTIONARY_INIT:Signal = new Signal();

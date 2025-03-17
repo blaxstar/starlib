@@ -9,7 +9,6 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.components.ListItem;
     import net.blaxstar.starlib.debug.DebugDaemon;
 
-    // TODO: FIX CONTEXT ADDING AND CACHING
     public class ContextMenu extends Component {
 
         private var _card:Card;

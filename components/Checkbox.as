@@ -5,7 +5,7 @@ package net.blaxstar.starlib.components {
   import flash.events.Event;
   import flash.events.MouseEvent;
 
-  import thirdparty.org.osflash.signals.natives.NativeSignal;
+  import org.osflash.signals.natives.NativeSignal;
   import net.blaxstar.starlib.style.Style;
 
   /**

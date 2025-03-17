@@ -8,10 +8,10 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.RGBA;
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.com.greensock.TweenLite;
-    import thirdparty.com.greensock.plugins.TintPlugin;
-    import thirdparty.com.greensock.plugins.TweenPlugin;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import com.greensock.TweenLite;
+    import com.greensock.plugins.TintPlugin;
+    import com.greensock.plugins.TweenPlugin;
+    import org.osflash.signals.natives.NativeSignal;
     import flash.display.Graphics;
     import flash.display.Sprite;
 
@@ -34,6 +34,7 @@ package net.blaxstar.starlib.components {
         private var _glow_color:RGBA;
         private var _icon_color:RGBA;
         private var _using_icon:Boolean;
+        private var _is_compressed:Boolean;
         private var _display_icon:Icon;
         private var _data:Object;
         // signals
@@ -59,7 +60,7 @@ package net.blaxstar.starlib.components {
         override public function init():void {
             _width_ = DEFAULT_WIDTH;
             _height_ = DEFAULT_HEIGHT;
-            _style = 0;
+            _style = GROUNDED;
 
             buttonMode = true;
             useHandCursor = true;
@@ -96,20 +97,18 @@ package net.blaxstar.starlib.components {
          */
         override public function draw(e:Event = null):void {
             if (!_using_icon) {
-                _width_ = _label.width + (PADDING * 2);
-                _height_ = _label.height + (PADDING * 2);
+                _width_ = (!_is_compressed) ?_label.width + (PADDING * 2) : _label.width + PADDING;
+                _height_ = (!_is_compressed) ? _label.height + (PADDING * 2) : _label.height;
                 _background.width = _background_outline.width = _width_;
                 _background.height = _background_outline.height = _height_;
                 _label.move((_width_ / 2) - (_label.width / 2), (_height_ / 2) - (_label.height / 2));
                 
             } else {
-                _background.width = _background_outline.width = _width_;
-                _background.height = _background_outline.height = _height_;
+                _background.width = _background_outline.width = (!_is_compressed) ?  _width_ : _display_icon.width;
+                _background.height = _background_outline.height = (!_is_compressed) ? _height_ : _display_icon.height;
                 _display_icon.move(PADDING/2, PADDING/2);
             }
-
-            draw_bg();
-            dispatchEvent(_resize_event_);
+            // TODO: button neds to be redrawn on next frame to size properly, needs fixing
             _on_mouse_down_signal.add(on_mouse_down);
             _on_roll_over_signal.add(on_roll_over);
             super.draw();
@@ -142,9 +141,9 @@ package net.blaxstar.starlib.components {
             _background.graphics.clear();
             _background_outline.graphics.clear();
             filters = [];
-
             fill_bg();
-            if (_style != DEPRESSED) {
+
+            if (_style == GROUNDED) {
                 draw_bg_outline();
             }
 
@@ -182,6 +181,9 @@ package net.blaxstar.starlib.components {
 
         public function set icon(val:String):void {
             _using_icon = true;
+            if (_width_ != _height_) {
+              _width_ = _height_;
+            }
 
             if (_label && _label.parent) {
                 removeChild(_label);
@@ -190,10 +192,9 @@ package net.blaxstar.starlib.components {
                 _display_icon = new Icon(this);
             }
 
-            _display_icon.addEventListener(Icon.ICON_LOADED, on_icon_loaded);
+            _display_icon.on_icon_loaded_signal.add(on_icon_loaded);
             _display_icon.set_svg_xml(val);
             _style = DEPRESSED;
-            draw();
         }
 
         public function get_icon():Icon {
@@ -211,6 +212,15 @@ package net.blaxstar.starlib.components {
 
         public function set style(val:uint):void {
             _style = val;
+            commit();
+        }
+
+        public function get compressed():Boolean {
+            return _is_compressed;
+        }
+
+        public function set compressed(val:Boolean):void {
+            _is_compressed = val;
             commit();
         }
 
@@ -242,9 +252,11 @@ package net.blaxstar.starlib.components {
 
         // ! DELEGATE FUNCTIONS ! //
 
-        private function on_icon_loaded(event:Event):void {
-            _display_icon.removeEventListener(Icon.ICON_LOADED, on_icon_loaded);
+        private function on_icon_loaded():void {
+            _display_icon.on_icon_loaded_signal.remove(on_icon_loaded);
+            _display_icon.set_size(width-PADDING, height-PADDING);
             _display_icon.move(PADDING/2, PADDING/2);
+            draw();
         }
 
         private function on_mouse_down(e:MouseEvent = null):void {

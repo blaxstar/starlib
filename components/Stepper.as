@@ -27,11 +27,11 @@ package net.blaxstar.starlib.components {
       _down_button.icon = Icon.MINUS_CIRCLED;
       _up_button.icon = Icon.PLUS_CIRCLED;
       _down_button.style = _up_button.style = Button.DEPRESSED;
-      _down_button.set_size(32,32);
-      _up_button.set_size(32,32);
+      _down_button.set_size(30, 30);
+      _up_button.set_size(30, 30);
       _down_button.on_click.add(step_down);
       _up_button.on_click.add(step_up);
-      is_showing_bounds = true;
+      _box.draw();
       super.add_children();
     }
 
@@ -41,7 +41,6 @@ package net.blaxstar.starlib.components {
       _width_ = _box.width;
       _height_ = _box.height;
       super.draw();
-      dispatchEvent(_resize_event_);
     }
 
     private function step_up(e:MouseEvent):void {

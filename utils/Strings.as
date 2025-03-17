@@ -65,9 +65,12 @@ package net.blaxstar.starlib.utils {
      * @return 
      */
     static public function get_words_from_string(input_string:String, with_numbers:Boolean = false):Vector.<String> {
-      var only_words:String = (with_numbers) ? "/([a-zA-Z0-9]+)/g" : "/([a-zA-Z]+)/g";
+      var only_words:RegExp = (with_numbers) ? (/([a-zA-Z0-9]+)/gim) : (/([a-zA-Z]+)/gim);
       var word_array:Array = input_string.match(only_words);
-      var num_words:uint = word_array.length;
+      if (!word_array) {
+        word_array = [input_string];
+      }
+      var num_words:uint = word_array ? word_array.length : 0;
       var words_array:Vector.<String> = new Vector.<String>();
 
       for (var i:uint = 0; i < num_words; i++) {

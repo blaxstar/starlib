@@ -9,8 +9,8 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.math.Arithmetic;
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.org.osflash.signals.Signal;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.Signal;
+    import org.osflash.signals.natives.NativeSignal;
     import net.blaxstar.starlib.structs.LinkedList;
     import net.blaxstar.starlib.structs.LinkedListNode;
 

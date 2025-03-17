@@ -9,7 +9,7 @@ package net.blaxstar.starlib.components {
 
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.org.osflash.signals.Signal;
+    import org.osflash.signals.Signal;
 
     public class ScrollbarControl extends Component {
         private const XMIN:uint = 0;

@@ -128,7 +128,7 @@ package net.blaxstar.starlib.components {
         // ! GETTERS & SETTERS ! //
 
         public function get value():String {
-            return _label_text;
+            return (_label_text == _default_label ? null : _label_text);
         }
 
         public function set value(value:String):void {

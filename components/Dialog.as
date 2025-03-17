@@ -7,8 +7,8 @@ package net.blaxstar.starlib.components {
 
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.org.osflash.signals.Signal;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.Signal;
+    import org.osflash.signals.natives.NativeSignal;
     import net.blaxstar.starlib.structs.LinkedList;
     import net.blaxstar.starlib.structs.LinkedListNode;
     import flash.utils.Dictionary;
@@ -46,7 +46,7 @@ package net.blaxstar.starlib.components {
         private var _message_string:String;
         private var _draggable:Boolean;
         private var _auto_resize:Boolean;
-        private var _is_nested:Boolean;
+        protected var _is_nested:Boolean;
         private var _on_close_signal:Signal;
         private var _on_mouse_up_signal:NativeSignal;
         private var _on_release_outside:NativeSignal;
@@ -180,10 +180,11 @@ package net.blaxstar.starlib.components {
             dialog.move(this.x + PADDING, this.y + PADDING);
             enabled = false;
             parent.addChild(dialog);
+            dialog.on_close_signal.add(pop_dialog);
             dialog.open();
         }
 
-        public function pop_dialog():Dialog {
+        public function pop_dialog(event:Event=null):Dialog {
             var d:Dialog = _child_dialog_list.remove_at(_child_dialog_list.size - 1) as Dialog;
             d.is_nested = false;
             d.close();
@@ -241,6 +242,11 @@ package net.blaxstar.starlib.components {
                 component_container.enabled = true;
                 parent.setChildIndex(this, parent.numChildren - 1);
             }
+        }
+
+        override public function set enabled(val:Boolean):void {
+          this.component_container.enabled = val;
+          this.option_container.enabled = val;
         }
 
         public function set message_color(color:uint):void {
@@ -329,7 +335,7 @@ package net.blaxstar.starlib.components {
         }
 
         public function set message(val:String):void {
-            _message_string = (val.length > 0) ? val : _message_string;
+            _message_string = (val && val.length > 0) ? val : _message_string;
             commit();
         }
 

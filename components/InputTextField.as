@@ -20,7 +20,7 @@ package net.blaxstar.starlib.components {
     import net.blaxstar.starlib.style.Style;
     import net.blaxstar.starlib.utils.Strings;
 
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.natives.NativeSignal;
 
     /**
      * ...
@@ -290,6 +290,7 @@ package net.blaxstar.starlib.components {
             _is_focused = true;
             if (_is_hinting) {
                 _is_hinting = false;
+                _text_field.textColor = Style.TEXT.value;
                 _textfield_string = "";
                 _text_field.text = "";
             } else {
@@ -358,6 +359,11 @@ package net.blaxstar.starlib.components {
         }
 
         public function get text():String {
+            if (_is_hinting) {
+                _textfield_string = "";
+                return _textfield_string;
+            }
+
             _textfield_string = _text_field.text;
             return _textfield_string;
         }
@@ -365,6 +371,8 @@ package net.blaxstar.starlib.components {
         public function set text(val:String):void {
             if (val != "") {
                 _is_hinting = false;
+            } else {
+                _is_hinting = true;
             }
             _textfield_string = val;
             draw();

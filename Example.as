@@ -30,7 +30,7 @@ package {
     import net.blaxstar.starlib.style.Font;
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.com.lorentz.processing.ProcessExecutor;
+    import com.lorentz.processing.ProcessExecutor;
 
     public class Main extends Sprite {
         public function Main() {

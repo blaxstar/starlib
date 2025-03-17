@@ -2,7 +2,7 @@ package net.blaxstar.starlib.debug.terminal.commands
 {
   import flash.utils.Dictionary;
   import net.blaxstar.starlib.debug.printf;
-  import thirdparty.org.osflash.signals.Signal;
+  import org.osflash.signals.Signal;
   import net.blaxstar.starlib.utils.Strings;
 
   public class ManualCommand extends TerminalCommand {

@@ -3,7 +3,7 @@ package net.blaxstar.starlib.components {
     import flash.text.TextField;
     import flash.display.Shape;
     import flash.text.TextFormat;
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.natives.NativeSignal;
     import flash.text.TextFieldType;
     import flash.text.TextFieldAutoSize;
     import net.blaxstar.starlib.style.Style;

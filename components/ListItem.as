@@ -9,7 +9,7 @@ package net.blaxstar.starlib.components {
 
     import net.blaxstar.starlib.style.Style;
 
-    import thirdparty.org.osflash.signals.natives.NativeSignal;
+    import org.osflash.signals.natives.NativeSignal;
     import flash.display.Graphics;
     import net.blaxstar.starlib.style.RGBA;
     import net.blaxstar.starlib.math.Arithmetic;
